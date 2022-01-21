@@ -1,0 +1,25 @@
+{
+  "name": "mfl-smart-contracts-tests",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "Metaverse Football League",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/core": "^7.16.7",
+    "@babel/preset-env": "^7.16.8",
+    "@onflow/fcl": "^0.0.77",
+    "@onflow/types": "^0.0.6",
+    "babel-jest": "^27.4.6",
+    "flow-js-testing": "^0.2.2",
+    "jest": "^27.4.7"
+  },
+  "overrides": {
+    "flow-cadut": "0.1.14"
+  },
+  "devDependencies": {
+    "jest-extended": "^1.2.0"
+  }
+}
