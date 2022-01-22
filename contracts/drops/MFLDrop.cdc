@@ -21,7 +21,7 @@ pub contract MFLDrop {
     }
 
     pub var nextDropID: UInt64
-    pub var ownerVault: Capability<&AnyResource{FungibleToken.Receiver}>? //TODO check if this pub var is safe on a capability
+    pub var ownerVault: Capability<&AnyResource{FungibleToken.Receiver}>?
     access(self) let drops : @{UInt64: Drop}
 
     pub struct DropData {

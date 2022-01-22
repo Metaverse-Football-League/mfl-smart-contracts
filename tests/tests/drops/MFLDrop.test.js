@@ -36,7 +36,6 @@ describe('MFLDrop', () => {
         const result = await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});
        
         // assert
-        expect(result.status).toBe(4);
         expect(result.events).toHaveLength(1);
         expect(result.events[0]).toEqual(expect.objectContaining({
           type: `A.${testsUtils.sansPrefix(addressMap.MFLDrop)}.MFLDrop.Created`,
@@ -395,7 +394,7 @@ describe('MFLDrop', () => {
       
     })
 
-    describe('getIds', () => {
+    describe('getDropsIDs', () => {
       test('should get ids', async () => {
           // prepare
           await MFLDropTestsUtils.createDropAdmin('AliceAdminAccount', 'AliceAdminAccount');
