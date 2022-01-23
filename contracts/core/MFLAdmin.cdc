@@ -15,7 +15,7 @@ pub contract MFLAdmin {
 
     pub resource AdminProxy: AdminProxyPublic {
 
-        // Here access(contract) ensures that account cannot copy and share the Capability with anyone else. // TODO verify this ?
+        // Here access(contract) ensures that account cannot copy and share the Capability with anyone else. // TODO verify this -> not true because owner can call getClaimCapability and copy it
         access(contract) let claimsCapabilities: {String: Capability}
 
         access(contract) fun setClaimCapability(name: String, capability: Capability) {
@@ -43,15 +43,12 @@ pub contract MFLAdmin {
         // Create a new Admin resource and returns it
         // Only if really needed ! One AdminRoot should be enough for all the logic in MFL
         pub fun createNewAdminRoot(): @AdminRoot {
+            emit AdminRootCreated(by: self.owner?.address)
             return <- create AdminRoot()
         }
 
         pub fun setAdminProxyClaimCapability(name: String, adminProxyRef: &{MFLAdmin.AdminProxyPublic}, newCapability: Capability) {
             adminProxyRef.setClaimCapability(name: name, capability: newCapability)
-        }
-
-        init() {
-            emit AdminRootCreated(by: self.owner?.address)
         }
 	}
 

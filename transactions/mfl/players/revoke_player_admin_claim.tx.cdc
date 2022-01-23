@@ -1,10 +1,11 @@
 import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 
-transaction(privatePath: PrivatePath) {
+transaction(privatePath: Path) {
 
   prepare(acct: AuthAccount) {
-    assert(acct.getCapability<&{MFLPlayer.PlayerAdminClaim}>(privatePath).check(), message: "Capability path does not exist")
-    acct.unlink(privatePath)
+    let privateCapabilityPath = privatePath as? PrivatePath
+    assert(acct.getCapability<&{MFLPlayer.PlayerAdminClaim}>(privateCapabilityPath!).check(), message: "Capability path does not exist")
+    acct.unlink(privateCapabilityPath!)
   }
 
   execute {
