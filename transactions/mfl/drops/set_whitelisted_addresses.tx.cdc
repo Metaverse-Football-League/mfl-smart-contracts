@@ -7,7 +7,7 @@ transaction(id: UInt64, addresses: {Address: UInt32}) {
     let dropAdminProxyRef: &MFLAdmin.AdminProxy
 
     prepare(acct: AuthAccount) {
-        self.dropAdminProxyRef = acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")       
+        self.dropAdminProxyRef = acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
     }
 
     execute {
@@ -15,6 +15,5 @@ transaction(id: UInt64, addresses: {Address: UInt32}) {
         let dropAdminClaimRef = dropAdminClaimCap.borrow<&{MFLDrop.DropAdminClaim}>() ?? panic("Could not borrow DropAdminClaim")
         dropAdminClaimRef.setWhitelistedAddresses(id: id, addresses: addresses)
     }
-    
+
 }
- 
