@@ -2,6 +2,7 @@ import { emulator, getAccountAddress } from 'flow-js-testing';
 import { MFLAdminTestsUtils } from './_utils/MFLAdminTests.utils';
 import { testsUtils } from '../_utils/tests.utils';
 import * as matchers from 'jest-extended';
+import adminClaim from './_transactions/check_admin_claim.tx';
 expect.extend(matchers);
 jest.setTimeout(10000);
 
@@ -66,24 +67,9 @@ describe('MFLAdmin', () => {
         await testsUtils.shallPass({name: 'mfl/players/give_player_admin_claim.tx', args: [bobAccountAddress, privatePath], signers: [aliceAdminAccountAddress]})
 
         //assert
+        // Bob should have a PlayerAdminClaim Capability in his AdminProxy
         await testsUtils.shallPass({
-          code: `
-            import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
-            import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
-            
-            transaction() {
-              let playerAdminProxyRef: &MFLAdmin.AdminProxy
-
-              prepare(acct: AuthAccount) {
-                  self.playerAdminProxyRef = acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
-                }
-                
-                execute {
-                  let playerAdminClaimCap = self.playerAdminProxyRef.getClaimCapability(name: "PlayerAdminClaim") ?? panic("PlayerAdminClaim capability not found")
-                  let playerAdminClaimRef = playerAdminClaimCap.borrow<&{MFLPlayer.PlayerAdminClaim}>() ?? panic("Could not borrow PlayerAdminClaim")
-              }
-            }
-          `,
+          code: adminClaim.CHECK_PLAYER_ADMIN_CLAIM,
           signers: [bobAccountAddress]
         });
       })
@@ -99,24 +85,9 @@ describe('MFLAdmin', () => {
         await testsUtils.shallPass({name: 'mfl/drops/give_drop_admin_claim.tx', args: [bobAccountAddress, privatePath], signers: [aliceAdminAccountAddress]})
 
         //assert
+        // Bob should have a DropAdminClaim Capability in his AdminProxy
         await testsUtils.shallPass({
-          code: `
-            import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
-            import MFLDrop from "../../../contracts/drops/MFLDrop.cdc"
-            
-            transaction() {
-              let dropAdminProxyRef: &MFLAdmin.AdminProxy
-
-              prepare(acct: AuthAccount) {
-                self.dropAdminProxyRef = acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
-              }
-
-              execute {
-                let dropAdminClaimCap = self.dropAdminProxyRef.getClaimCapability(name: "DropAdminClaim") ?? panic("DropAdminClaim capability not found")
-                let dropAdminClaimRef = dropAdminClaimCap.borrow<&{MFLDrop.DropAdminClaim}>() ?? panic("Could not borrow DropAdminClaim")
-              }
-            }
-          `,
+          code: adminClaim.CHECK_DROP_ADMIN_CLAIM,
           signers: [bobAccountAddress],
         });
       })
@@ -132,24 +103,9 @@ describe('MFLAdmin', () => {
         await testsUtils.shallPass({name: 'mfl/packs/give_pack_template_admin_claim.tx', args: [bobAccountAddress, privatePath], signers: [aliceAdminAccountAddress]})
 
         //assert
+        // Bob should have a PackTemplateAdminClaim Capability in his AdminProxy
         await testsUtils.shallPass({
-          code: `
-            import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
-            import MFLPackTemplate from "../../../contracts/core/MFLPackTemplate.cdc"
-            
-            transaction() {
-              let packTemplateAdminProxyRef: &MFLAdmin.AdminProxy
-
-              prepare(acct: AuthAccount) {
-                self.packTemplateAdminProxyRef = acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
-              }
-
-              execute {
-                let packTemplateAdminClaimCap = self.packTemplateAdminProxyRef.getClaimCapability(name: "PackTemplateAdminClaim") ?? panic("PackTemplateAdminClaim capability not found")
-                let packTemplateAdminClaimRef = packTemplateAdminClaimCap.borrow<&{MFLPackTemplate.PackTemplateAdminClaim}>() ?? panic("Could not borrow PackTemplateAdminClaim")
-              }
-            }
-          `,
+          code: adminClaim.CHECK_PACK_TEMPLATE_ADMIN_CLAIM,
           signers: [bobAccountAddress],
         });
       })
@@ -166,24 +122,9 @@ describe('MFLAdmin', () => {
         await testsUtils.shallPass({name: 'mfl/players/revoke_player_admin_claim.tx', args: [privatePath], signers: [aliceAdminAccountAddress]})
 
         //assert
+        // Bob should not have a PlayerAdminClaim Capability in his AdminProxy
         const error = await testsUtils.shallRevert({
-          code: `
-            import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
-            import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
-            
-            transaction() {
-              let playerAdminProxyRef: &MFLAdmin.AdminProxy
-
-              prepare(acct: AuthAccount) {
-                self.playerAdminProxyRef = acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
-              }
-
-              execute {
-                let playerAdminClaimCap = self.playerAdminProxyRef.getClaimCapability(name: "PlayerAdminClaim") ?? panic("PlayerAdminClaim capability not found")
-                let playerAdminClaimRef = playerAdminClaimCap.borrow<&{MFLPlayer.PlayerAdminClaim}>() ?? panic("Could not borrow PlayerAdminClaim")
-              }
-            }
-          `,
+          code: adminClaim.CHECK_PLAYER_ADMIN_CLAIM,
           signers: [bobAccountAddress],
         });
         expect(error).toContain('Could not borrow PlayerAdminClaim');
@@ -201,24 +142,9 @@ describe('MFLAdmin', () => {
         await testsUtils.shallPass({name: 'mfl/drops/revoke_drop_admin_claim.tx', args: [privatePath], signers: [aliceAdminAccountAddress]})
 
         //assert
+        // Bob should not have a DropAdminClaim Capability in his AdminProxy
         const error = await testsUtils.shallRevert({
-          code: `
-            import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
-            import MFLDrop from "../../../contracts/drops/MFLDrop.cdc"
-            
-            transaction() {
-              let dropAdminProxyRef: &MFLAdmin.AdminProxy
-
-              prepare(acct: AuthAccount) {
-                self.dropAdminProxyRef = acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
-              }
-
-              execute {
-                let dropAdminClaimCap = self.dropAdminProxyRef.getClaimCapability(name: "DropAdminClaim") ?? panic("DropAdminClaim capability not found")
-                let dropAdminClaimRef = dropAdminClaimCap.borrow<&{MFLDrop.DropAdminClaim}>() ?? panic("Could not borrow DropAdminClaim")
-              }
-            }
-          `,
+          code: adminClaim.CHECK_DROP_ADMIN_CLAIM,
           signers: [bobAccountAddress],
         });
         expect(error).toContain('Could not borrow DropAdminClaim');
@@ -236,24 +162,9 @@ describe('MFLAdmin', () => {
         await testsUtils.shallPass({name: 'mfl/packs/revoke_pack_template_admin_claim.tx', args: [privatePath], signers: [aliceAdminAccountAddress]})
 
         //assert
+        // Bob should not have a PackTemplateAdminClaim Capability in his AdminProxy
         const error = await testsUtils.shallRevert({
-          code: `
-            import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
-            import MFLPackTemplate from "../../../contracts/packs/MFLPackTemplate.cdc"
-            
-            transaction() {
-              let packTemplateAdminProxyRef: &MFLAdmin.AdminProxy
-
-              prepare(acct: AuthAccount) {
-                self.packTemplateAdminProxyRef = acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
-              }
-
-              execute {
-                let packTemplateAdminClaimCap = self.packTemplateAdminProxyRef.getClaimCapability(name: "PackTemplateAdminClaim") ?? panic("PackTemplateAdminClaim capability not found")
-                let packTemplateAdminClaimRef = packTemplateAdminClaimCap.borrow<&{MFLPackTemplate.PackTemplateAdminClaim}>() ?? panic("Could not borrow PackTemplateAdminClaim")
-              }
-            }
-          `,
+          code: adminClaim.CHECK_PACK_TEMPLATE_ADMIN_CLAIM,
           signers: [bobAccountAddress],
         });
         expect(error).toContain('Could not borrow PackTemplateAdminClaim');
