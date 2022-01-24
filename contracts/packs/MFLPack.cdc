@@ -12,7 +12,6 @@ pub contract MFLPack: NonFungibleToken {
     pub event Deposit(id: UInt64, to: Address?)
     pub event Opened(id: UInt64, packIndex: UInt32, packTemplateID: UInt64, from: Address?)
     pub event Created(ids: [UInt64], from: Address?)
-    // TODO question Yann, for players we have PlayerDestroyed, should be consistent
     pub event Destroyed(id: UInt64)
 
     // Counter for all the Packs ever minted
@@ -55,8 +54,8 @@ pub contract MFLPack: NonFungibleToken {
         }
 
         // Returns the Pack Template Data
-        pub fun getPackTemplate(): MFLPackTemplate.PackTemplateData {
-            return MFLPackTemplate.getPackTemplate(id: self.packTemplateID)!
+        pub fun getPackTemplate(): MFLPackTemplate.PackTemplateData? {
+            return MFLPackTemplate.getPackTemplate(id: self.packTemplateID)
         }
 
         destroy() {
@@ -217,7 +216,7 @@ pub contract MFLPack: NonFungibleToken {
                         id: pack.id,
                         packTemplateMintIndex: pack.packTemplateMintIndex,
                         packTemplateID: pack.packTemplateID,
-                        packTemplateData: pack.getPackTemplate()
+                        packTemplateData: pack.getPackTemplate()!
                     ))
                 }
             }
@@ -236,7 +235,7 @@ pub contract MFLPack: NonFungibleToken {
                     id: pack.id,
                     packTemplateMintIndex: pack.packTemplateMintIndex,
                     packTemplateID: pack.packTemplateID,
-                    packTemplateData: pack.getPackTemplate()
+                    packTemplateData: pack.getPackTemplate()!
                 )
             }
         }
@@ -244,10 +243,11 @@ pub contract MFLPack: NonFungibleToken {
     }
 
     init() {
+        // Set our named paths
         self.CollectionStoragePath=/storage/MFLPackCollection
         self.CollectionPublicPath=/public/MFLPackCollection
 
-        // Initialize the total supply
+        // Initialize contract fields
         self.totalSupply = 0
 
         self.account.save<@MFLPack.Collection>(<- MFLPack.createEmptyCollection(), to: MFLPack.CollectionStoragePath)
