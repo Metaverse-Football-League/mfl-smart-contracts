@@ -1,5 +1,5 @@
 
-const PLAYER_ADMIN_CLAIM = `
+const CHECK_PLAYER_ADMIN_CLAIM = `
     import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
     import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 
@@ -17,7 +17,7 @@ const PLAYER_ADMIN_CLAIM = `
     }
 `
 
-const DROP_ADMIN_CLAIM = `
+const CHECK_DROP_ADMIN_CLAIM = `
     import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
     import MFLDrop from "../../../contracts/drops/MFLDrop.cdc"
 
@@ -34,7 +34,7 @@ const DROP_ADMIN_CLAIM = `
         }
     }
 `
-const PACK_TEMPLATE_ADMIN_CLAIM = `
+const CHECK_PACK_TEMPLATE_ADMIN_CLAIM = `
     import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
     import MFLPackTemplate from "../../../contracts/core/MFLPackTemplate.cdc"
 
@@ -53,7 +53,7 @@ const PACK_TEMPLATE_ADMIN_CLAIM = `
 `
 
 module.exports = {
-    PLAYER_ADMIN_CLAIM,
-    DROP_ADMIN_CLAIM,
-    PACK_TEMPLATE_ADMIN_CLAIM
+    CHECK_PLAYER_ADMIN_CLAIM,
+    CHECK_DROP_ADMIN_CLAIM,
+    CHECK_PACK_TEMPLATE_ADMIN_CLAIM
 }

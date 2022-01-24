@@ -69,7 +69,7 @@ describe('MFLAdmin', () => {
         //assert
         // Bob should have a PlayerAdminClaim Capability in his AdminProxy
         await testsUtils.shallPass({
-          code: adminClaim.PLAYER_ADMIN_CLAIM,
+          code: adminClaim.CHECK_PLAYER_ADMIN_CLAIM,
           signers: [bobAccountAddress]
         });
       })
@@ -87,7 +87,7 @@ describe('MFLAdmin', () => {
         //assert
         // Bob should have a DropAdminClaim Capability in his AdminProxy
         await testsUtils.shallPass({
-          code: adminClaim.DROP_ADMIN_CLAIM,
+          code: adminClaim.CHECK_DROP_ADMIN_CLAIM,
           signers: [bobAccountAddress],
         });
       })
@@ -105,7 +105,7 @@ describe('MFLAdmin', () => {
         //assert
         // Bob should have a PackTemplateAdminClaim Capability in his AdminProxy
         await testsUtils.shallPass({
-          code: adminClaim.PACK_TEMPLATE_ADMIN_CLAIM,
+          code: adminClaim.CHECK_PACK_TEMPLATE_ADMIN_CLAIM,
           signers: [bobAccountAddress],
         });
       })
@@ -124,7 +124,7 @@ describe('MFLAdmin', () => {
         //assert
         // Bob should not have a PlayerAdminClaim Capability in his AdminProxy
         const error = await testsUtils.shallRevert({
-          code: adminClaim.PLAYER_ADMIN_CLAIM,
+          code: adminClaim.CHECK_PLAYER_ADMIN_CLAIM,
           signers: [bobAccountAddress],
         });
         expect(error).toContain('Could not borrow PlayerAdminClaim');
@@ -144,7 +144,7 @@ describe('MFLAdmin', () => {
         //assert
         // Bob should not have a DropAdminClaim Capability in his AdminProxy
         const error = await testsUtils.shallRevert({
-          code: adminClaim.DROP_ADMIN_CLAIM,
+          code: adminClaim.CHECK_DROP_ADMIN_CLAIM,
           signers: [bobAccountAddress],
         });
         expect(error).toContain('Could not borrow DropAdminClaim');
@@ -164,7 +164,7 @@ describe('MFLAdmin', () => {
         //assert
         // Bob should not have a PackTemplateAdminClaim Capability in his AdminProxy
         const error = await testsUtils.shallRevert({
-          code: adminClaim.PACK_TEMPLATE_ADMIN_CLAIM,
+          code: adminClaim.CHECK_PACK_TEMPLATE_ADMIN_CLAIM,
           signers: [bobAccountAddress],
         });
         expect(error).toContain('Could not borrow PackTemplateAdminClaim');
