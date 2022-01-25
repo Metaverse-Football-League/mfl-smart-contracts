@@ -3,6 +3,7 @@ import { MFLAdminTestsUtils } from './_utils/MFLAdminTests.utils';
 import { testsUtils } from '../_utils/tests.utils';
 import * as matchers from 'jest-extended';
 import adminClaim from './_transactions/check_admin_claim.tx';
+
 expect.extend(matchers);
 jest.setTimeout(10000);
 
@@ -20,7 +21,7 @@ describe('MFLAdmin', () => {
 
   describe('AdminRoot', () => {
 
-    describe('createNewAdminRoot', () => {
+    describe('createNewAdminRoot()', () => {
       test('should create an admin root', async () => {
         // prepare
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
@@ -55,7 +56,7 @@ describe('MFLAdmin', () => {
       })
     });
 
-    describe('setAdminProxyClaimCapability', () => {
+    describe('setAdminProxyClaimCapability()', () => {
       test('should set a PlayerAdminClaim capability in an admin proxy', async () => {
         // prepare
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
@@ -66,7 +67,7 @@ describe('MFLAdmin', () => {
         // execute
         await testsUtils.shallPass({name: 'mfl/players/give_player_admin_claim.tx', args: [bobAccountAddress, privatePath], signers: [aliceAdminAccountAddress]})
 
-        //assert
+        // assert
         // Bob should have a PlayerAdminClaim Capability in his AdminProxy
         await testsUtils.shallPass({
           code: adminClaim.CHECK_PLAYER_ADMIN_CLAIM,
@@ -84,7 +85,7 @@ describe('MFLAdmin', () => {
         // execute
         await testsUtils.shallPass({name: 'mfl/drops/give_drop_admin_claim.tx', args: [bobAccountAddress, privatePath], signers: [aliceAdminAccountAddress]})
 
-        //assert
+        // assert
         // Bob should have a DropAdminClaim Capability in his AdminProxy
         await testsUtils.shallPass({
           code: adminClaim.CHECK_DROP_ADMIN_CLAIM,
@@ -102,7 +103,7 @@ describe('MFLAdmin', () => {
         // execute
         await testsUtils.shallPass({name: 'mfl/packs/give_pack_template_admin_claim.tx', args: [bobAccountAddress, privatePath], signers: [aliceAdminAccountAddress]})
 
-        //assert
+        // assert
         // Bob should have a PackTemplateAdminClaim Capability in his AdminProxy
         await testsUtils.shallPass({
           code: adminClaim.CHECK_PACK_TEMPLATE_ADMIN_CLAIM,
@@ -121,7 +122,7 @@ describe('MFLAdmin', () => {
         // execute
         await testsUtils.shallPass({name: 'mfl/players/revoke_player_admin_claim.tx', args: [privatePath], signers: [aliceAdminAccountAddress]})
 
-        //assert
+        // assert
         // Bob should not have a PlayerAdminClaim Capability in his AdminProxy
         const error = await testsUtils.shallRevert({
           code: adminClaim.CHECK_PLAYER_ADMIN_CLAIM,
@@ -141,7 +142,7 @@ describe('MFLAdmin', () => {
         // execute
         await testsUtils.shallPass({name: 'mfl/drops/revoke_drop_admin_claim.tx', args: [privatePath], signers: [aliceAdminAccountAddress]})
 
-        //assert
+        // assert
         // Bob should not have a DropAdminClaim Capability in his AdminProxy
         const error = await testsUtils.shallRevert({
           code: adminClaim.CHECK_DROP_ADMIN_CLAIM,
@@ -161,7 +162,7 @@ describe('MFLAdmin', () => {
         // execute
         await testsUtils.shallPass({name: 'mfl/packs/revoke_pack_template_admin_claim.tx', args: [privatePath], signers: [aliceAdminAccountAddress]})
 
-        //assert
+        // assert
         // Bob should not have a PackTemplateAdminClaim Capability in his AdminProxy
         const error = await testsUtils.shallRevert({
           code: adminClaim.CHECK_PACK_TEMPLATE_ADMIN_CLAIM,
@@ -179,14 +180,14 @@ describe('MFLAdmin', () => {
         // execute
         const error = await testsUtils.shallRevert({name: 'mfl/players/revoke_player_admin_claim.tx', args: [privatePath], signers: [aliceAdminAccountAddress]})
 
-        //assert
+        // assert
         expect(error).toContain('Capability path does not exist');
       })
     })
   });
 
   describe('AdminProxy', () => {
-    describe('createAdminProxy', () => {
+    describe('createAdminProxy()', () => {
       test('should create an admin proxy', async () => {
         // prepare
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
@@ -194,7 +195,7 @@ describe('MFLAdmin', () => {
         // execute
         await testsUtils.shallPass({name: 'mfl/core/create_admin_proxy.tx', signers: [aliceAdminAccountAddress]});
 
-        //assert
+        // assert
         const adminProxyExists = await testsUtils.executeValidScript({
           code: `
             import MFLAdmin from "../../../../contracts/core/MFLAdmin.cdc"
