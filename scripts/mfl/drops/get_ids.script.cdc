@@ -1,7 +1,7 @@
 import MFLDrop from "../../../contracts/drops/MFLDrop.cdc"
 
 /** 
-  This script returns ids array of all drops.
+  This script returns an array of drop ids.
 **/
 
 pub fun main(): [UInt64] {
