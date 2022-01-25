@@ -1,6 +1,11 @@
 import FungibleToken from "../../contracts/_libs/FungibleToken.cdc"
 import FUSD from "../../contracts/_libs/FUSD.cdc"
 
+/** 
+  This tx sends an arbitray amount of FUSD
+  to a receiver address.
+**/
+
 transaction(receiverAddress: Address, amount: UFix64) {
 
     let receiverVaultRef : &FUSD.Vault{FungibleToken.Receiver}

@@ -3,6 +3,13 @@ import FUSD from "../../../contracts/_libs/FUSD.cdc"
 import MFLDrop from "../../../contracts/drops/MFLDrop.cdc"
 import MFLPack from "../../../contracts/packs/MFLPack.cdc"
 
+/** 
+  This tx is the first gateway to buy/mint packs.
+  It creates a pack collection (to be able to store pack NFTs)
+  and provides a vault resource with the right amount of FUSD
+  to be able to mint the number of packs desired.
+**/
+
 transaction(
   dropID: UInt64,
   nbToMint: UInt32,

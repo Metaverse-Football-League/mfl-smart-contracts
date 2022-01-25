@@ -1,6 +1,10 @@
 import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 
+/** 
+  This tx updates a player NFT metadata.
+**/
+
 transaction(
     id: UInt64,
     name: String,

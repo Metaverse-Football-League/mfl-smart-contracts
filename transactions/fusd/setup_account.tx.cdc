@@ -1,6 +1,12 @@
 import FungibleToken from "../../contracts/_libs/FungibleToken.cdc"
 import FUSD from "../../contracts/_libs/FUSD.cdc"
 
+/** 
+  This tx creates a FUSD vault in the storage and exposes
+  public capabilities to be able to receive FUSD and get
+  the actual balance.
+**/
+
 transaction() {
     
     prepare(acct: AuthAccount) {

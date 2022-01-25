@@ -1,6 +1,10 @@
 import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 
+/** 
+  This tx mints a new player NFT given a certain number of parameters.
+**/
+
 transaction(
     id: UInt64,
     season: UInt32,

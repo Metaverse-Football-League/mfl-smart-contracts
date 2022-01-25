@@ -1,3 +1,8 @@
+/** 
+  This tx creates an arbitrary number of proposal keys,
+  with the same public key.
+**/
+
 transaction(numProposalKeys: UInt16) {  
   prepare(account: AuthAccount) {
     let key = account.keys.get(keyIndex: 0)!

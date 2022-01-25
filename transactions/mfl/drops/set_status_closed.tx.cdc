@@ -1,6 +1,10 @@
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 import MFLDrop from "../../../contracts/drops/MFLDrop.cdc"
 
+/** 
+  This tx closes a specific drop.
+**/
+
 transaction(id: UInt64) {
     let dropAdminProxyRef: &MFLAdmin.AdminProxy
 
