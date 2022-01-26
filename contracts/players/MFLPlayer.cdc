@@ -63,14 +63,14 @@ pub contract MFLPlayer: NonFungibleToken {
         }
         
         pub fun resolveView(_ view: Type): AnyStruct? {
-            let playerMetadata = MFLPlayer.getPlayerData(id: self.id)!
+            let playerData = MFLPlayer.getPlayerData(id: self.id)!
             switch view {
                 case Type<MetadataViews.Display>():
                     return MetadataViews.Display(
-                        name: (playerMetadata.metadata["name"] as? String) ?? "",
-                        description:  (playerMetadata.metadata["description"] as? String) ?? "",
+                        name: playerData.metadata["name"] as! String? ?? "",
+                        description:  playerData.metadata["description"] as! String? ?? "",
                         thumbnail: MetadataViews.HTTPFile(
-                            url: (playerMetadata.metadata["thumbnail"] as? String) ?? ""
+                            url: playerData.metadata["thumbnail"] as! String? ?? "",
                         )
                     )
             }
@@ -175,7 +175,6 @@ pub contract MFLPlayer: NonFungibleToken {
 
         // Gets a reference to an NFT in the collection as a Player,
         // exposing all of its fields
-        // This is safe as there are no functions that can be called on the Player (// TODO UPDATE NOW ADMIN CAN ACCESS METHODS UPDATE / ADD . TEST IF IT S SAFE)
         pub fun borrowPlayer(id: UInt64): &MFLPlayer.NFT? {
             if self.ownedNFTs[id] != nil {
                 let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT

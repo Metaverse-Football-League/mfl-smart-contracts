@@ -37,7 +37,7 @@ pub fun main(address: Address, id: UInt64): PlayerNFT {
         .borrow<&{MFLPlayer.CollectionPublic}>()
         ?? panic("Could not borrow a reference to the collection")
 
-    let nft = collection.borrowPlayer(id: id)
+    let nft = collection.borrowPlayer(id: id)!
 
     // Get the basic display information for this NFT
     let view = nft.resolveView(Type<MetadataViews.Display>())!
