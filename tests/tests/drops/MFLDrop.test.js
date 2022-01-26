@@ -4,7 +4,7 @@ import {MFLPackTemplateTestsUtils} from '../packs/_utils/MFLPackTemplateTests.ut
 import {testsUtils} from '../_utils/tests.utils';
 import * as matchers from 'jest-extended';
 expect.extend(matchers);
-jest.setTimeout(10000);
+jest.setTimeout(20000);
 
 describe('MFLDrop', () => {
   let addressMap = null;
@@ -34,7 +34,7 @@ describe('MFLDrop', () => {
 
         // execute
         const result = await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});
-       
+
         // assert
         expect(result.events).toHaveLength(1);
         expect(result.events[0]).toEqual(expect.objectContaining({
@@ -83,11 +83,11 @@ describe('MFLDrop', () => {
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const signers = [aliceAdminAccountAddress];
         await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});  
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});
 
         // execute
         await testsUtils.shallPass({name: 'mfl/drops/set_owner_vault.tx', args: [], signers});
-        
+
         // assert
         const ownerVault = await testsUtils.executeValidScript({
           name: 'mfl/drops/get_owner_vault.script',
@@ -108,11 +108,11 @@ describe('MFLDrop', () => {
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const signers = [aliceAdminAccountAddress];
         await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});  
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});
 
         // execute
-        let result = await testsUtils.shallPass({name: 'mfl/drops/set_status_opened_whitelist.tx', args: [1], signers});  
-       
+        let result = await testsUtils.shallPass({name: 'mfl/drops/set_status_opened_whitelist.tx', args: [1], signers});
+
         // assert
         expect(result.events).toHaveLength(1);
         expect(result.events[0]).toEqual(expect.objectContaining({
@@ -134,11 +134,11 @@ describe('MFLDrop', () => {
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const signers = [aliceAdminAccountAddress];
         await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});  
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});
 
         // execute
-        let result = await testsUtils.shallPass({name: 'mfl/drops/set_status_opened_all.tx', args: [1], signers});  
-       
+        let result = await testsUtils.shallPass({name: 'mfl/drops/set_status_opened_all.tx', args: [1], signers});
+
         // assert
         expect(result.events).toHaveLength(1);
         expect(result.events[0]).toEqual(expect.objectContaining({
@@ -160,11 +160,11 @@ describe('MFLDrop', () => {
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const signers = [aliceAdminAccountAddress];
         await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});  
-        await testsUtils.shallPass({name: 'mfl/drops/set_status_opened_all.tx', args: [1], signers});  
-        
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});
+        await testsUtils.shallPass({name: 'mfl/drops/set_status_opened_all.tx', args: [1], signers});
+
         // execute
-        let result = await testsUtils.shallPass({name: 'mfl/drops/set_status_closed.tx', args: [1], signers});  
+        let result = await testsUtils.shallPass({name: 'mfl/drops/set_status_closed.tx', args: [1], signers});
 
         // assert
         expect(result.events).toHaveLength(1);
@@ -184,7 +184,7 @@ describe('MFLDrop', () => {
 
     describe('setWhitelistedAddresses', () => {
       test('should set whitelistedAddresses', async () => {
-        
+
         // prepare
         await MFLDropTestsUtils.createDropAdmin('AliceAdminAccount', 'AliceAdminAccount');
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
@@ -192,11 +192,11 @@ describe('MFLDrop', () => {
         const signers = [aliceAdminAccountAddress];
         const whitelistedAddresses = {"0x0000000000000001": 1, "0x0000000000000002": 2, "0x0000000000000003": 3};
         await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});  
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});
 
         // execute
-        const result = await testsUtils.shallPass({name: 'mfl/drops/set_whitelisted_addresses.tx', args: [1,  whitelistedAddresses], signers});  
-        
+        const result = await testsUtils.shallPass({name: 'mfl/drops/set_whitelisted_addresses.tx', args: [1,  whitelistedAddresses], signers});
+
         // assert
         expect(result.events).toHaveLength(1);
         expect(result.events[0]).toEqual(expect.objectContaining({
@@ -206,7 +206,7 @@ describe('MFLDrop', () => {
         const dropData = await testsUtils.executeValidScript({
           name: 'mfl/drops/get_drop.script',
           args: [1]
-        }); 
+        });
         expect(dropData.whitelistedAddresses).toEqual(whitelistedAddresses);
       });
 
@@ -218,11 +218,11 @@ describe('MFLDrop', () => {
         const signers = [aliceAdminAccountAddress];
         const whitelistedAddresses = {"0x0000000000000001": 1, "0x0000000000000002": 20, "0x0000000000000003": 3};
         await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});  
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});
 
         // execute
-        const error = await testsUtils.shallRevert({name: 'mfl/drops/set_whitelisted_addresses.tx', args: [1,  whitelistedAddresses], signers});  
-        
+        const error = await testsUtils.shallRevert({name: 'mfl/drops/set_whitelisted_addresses.tx', args: [1,  whitelistedAddresses], signers});
+
         // assert
         expect(error).toContain('Nb must be smaller or equal to maxTokensPerAddress');
       });
@@ -294,7 +294,7 @@ describe('MFLDrop', () => {
   });
 
   describe('Drop', () => {
-    
+
     const argsDrop1 = ["9.99", 1, 10];
     const argsPackTemplate1 = ["Rare", "This is a rare pack template", 10000, "http://img1-url"];
     const argsDrop2 = ["29.00", 2, 3];
@@ -391,7 +391,7 @@ describe('MFLDrop', () => {
         // assert
         expect(dropData).toEqual(null);
       })
-      
+
     })
 
     describe('getDropsIDs', () => {
@@ -405,7 +405,7 @@ describe('MFLDrop', () => {
           await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop1, signers});
           await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate2, signers});
           await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop2, signers});
-  
+
           // execute
           const dropsIds = await testsUtils.executeValidScript({
             name: 'mfl/drops/get_ids.script',
@@ -414,7 +414,7 @@ describe('MFLDrop', () => {
           // assert
           expect(dropsIds.sort((a, b) => a - b)).toEqual([1, 2]);
       })
-      
+
     })
 
     describe('getDropsStatuses', () => {
@@ -428,7 +428,7 @@ describe('MFLDrop', () => {
           await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop1, signers});
           await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate2, signers});
           await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop2, signers});
-  
+
           // execute
           const dropsStatuses = await testsUtils.executeValidScript({
             name: 'mfl/drops/get_drops_statuses.script',
@@ -440,7 +440,7 @@ describe('MFLDrop', () => {
             '2': {rawValue: 0}
           });
       })
-      
+
     })
 
     describe('purchase', () => {
@@ -463,7 +463,7 @@ describe('MFLDrop', () => {
 
         //execute
         await testsUtils.shallPass({name: 'mfl/drops/purchase.tx', args: [1, 1, "5.00"], signers: [bobAccountAddress]});
-        
+
         //assert
         const packIds = await testsUtils.executeValidScript({
           name: 'mfl/packs/get_pack_ids_in_collection.script',
@@ -487,7 +487,7 @@ describe('MFLDrop', () => {
 
         //execute
         await testsUtils.shallPass({name: 'mfl/drops/purchase.tx', args: [1, 5, "25.00"], signers: [bobAccountAddress]});
-        
+
         //assert
         const packIds = await testsUtils.executeValidScript({
           name: 'mfl/packs/get_pack_ids_in_collection.script',
@@ -509,7 +509,7 @@ describe('MFLDrop', () => {
 
         //execute
         const error = await testsUtils.shallRevert({name: 'mfl/drops/purchase.tx', args: [2, 5, "25.00"], signers: [bobAccountAddress]});
-        
+
         //assert
         expect(error).toContain('Drop does not exist');
       })
@@ -653,4 +653,3 @@ describe('MFLDrop', () => {
   });
 
 });
- 

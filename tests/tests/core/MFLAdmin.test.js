@@ -4,7 +4,7 @@ import { testsUtils } from '../_utils/tests.utils';
 import * as matchers from 'jest-extended';
 import adminClaim from './_transactions/check_admin_claim.tx';
 expect.extend(matchers);
-jest.setTimeout(10000);
+jest.setTimeout(20000);
 
 describe('MFLAdmin', () => {
   let addressMap = null;
@@ -27,10 +27,10 @@ describe('MFLAdmin', () => {
         const bobAccountAddress = await getAccountAddress('BobAccount');
         const jackAccountAddress = await getAccountAddress('JackAccount');
         const signers = [aliceAdminAccountAddress, bobAccountAddress];
-        
+
         // execute
         const result = await testsUtils.shallPass({name: 'mfl/core/create_admin_root.tx', signers});
-        
+
         // assert
         // bob must now be able to create another admin root
         await testsUtils.shallPass({name: 'mfl/core/create_admin_root.tx', signers: [bobAccountAddress, jackAccountAddress]});
@@ -46,10 +46,10 @@ describe('MFLAdmin', () => {
         const bobAccountAddress = await getAccountAddress('BobAccount');
         const jackAccountAddress = await getAccountAddress('JackAccount');
         const signers = [bobAccountAddress, jackAccountAddress];
-        
+
         // execute
         const error = await testsUtils.shallRevert({name: 'mfl/core/create_admin_root.tx', signers});
-        
+
         // assert
         expect(error).toContain('Could not borrow AdminRoot ref');
       })
@@ -190,7 +190,7 @@ describe('MFLAdmin', () => {
       test('should create an admin proxy', async () => {
         // prepare
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
-        
+
         // execute
         await testsUtils.shallPass({name: 'mfl/core/create_admin_proxy.tx', signers: [aliceAdminAccountAddress]});
 

@@ -4,7 +4,7 @@ import {testsUtils} from '../_utils/tests.utils';
 import * as matchers from 'jest-extended';
 
 expect.extend(matchers);
-jest.setTimeout(10000);
+jest.setTimeout(20000);
 
 describe('MFLPlayer', () => {
   let addressMap = null;

@@ -3,7 +3,7 @@ import { MFLPackTemplateTestsUtils } from './_utils/MFLPackTemplateTests.utils';
 import { testsUtils } from '../_utils/tests.utils';
 import * as matchers from 'jest-extended';
 expect.extend(matchers);
-jest.setTimeout(10000);
+jest.setTimeout(20000);
 
 describe('MFLPackTemplate', () => {
   let addressMap = null;
@@ -123,7 +123,7 @@ describe('MFLPackTemplate', () => {
 
         //execute
         const packTemplateIds = await testsUtils.executeValidScript({name: 'mfl/packs/get_pack_template_ids.script', args: []});
-        
+
         //assert
         expect(packTemplateIds).toEqual([1, 2]);
       })
@@ -140,7 +140,7 @@ describe('MFLPackTemplate', () => {
 
         //execute
         const packTemplates= await testsUtils.executeValidScript({name: 'mfl/packs/get_pack_templates.script', args: []});
-        
+
         //assert
         expect(packTemplates).toEqual([
           {
@@ -178,7 +178,7 @@ describe('MFLPackTemplate', () => {
 
         //execute
         const packTemplates= await testsUtils.executeValidScript({name: 'mfl/packs/get_pack_template.script', args: [2]});
-        
+
         //assert
         expect(packTemplates).toEqual({
           id: 2,
@@ -201,7 +201,7 @@ describe('MFLPackTemplate', () => {
 
         //execute
         const packTemplates= await testsUtils.executeValidScript({name: 'mfl/packs/get_pack_template.script', args: [2]});
-        
+
         //assert
         expect(packTemplates).toEqual(null)
       })
