@@ -1,4 +1,5 @@
 import NonFungibleToken from "../_libs/NonFungibleToken.cdc"
+import MetadataViews from "../_libs/MetadataViews.cdc"
 import MFLAdmin from "../core/MFLAdmin.cdc"
 
 pub contract MFLPlayer: NonFungibleToken {
@@ -37,7 +38,7 @@ pub contract MFLPlayer: NonFungibleToken {
     }
 
     // The resource that represents the Player NFT
-    pub resource NFT: NonFungibleToken.INFT {
+    pub resource NFT: NonFungibleToken.INFT, MetadataViews.Resolver {
 
         // The unique ID for the Player
         pub let id: UInt64
@@ -53,6 +54,27 @@ pub contract MFLPlayer: NonFungibleToken {
             self.ipfsURI = ipfsURI
 
             emit Minted(id: self.id)
+        }
+
+         pub fun getViews(): [Type] {
+            return [
+                Type<MetadataViews.Display>()
+            ]
+        }
+        
+        pub fun resolveView(_ view: Type): AnyStruct? {
+            let playerMetadata = MFLPlayer.getPlayerData(id: self.id)!
+            switch view {
+                case Type<MetadataViews.Display>():
+                    return MetadataViews.Display(
+                        name: (playerMetadata.metadata["name"] as? String) ?? "",
+                        description:  (playerMetadata.metadata["description"] as? String) ?? "",
+                        thumbnail: MetadataViews.HTTPFile(
+                            url: (playerMetadata.metadata["thumbnail"] as? String) ?? ""
+                        )
+                    )
+            }
+            return nil
         }
 
         pub fun getData(): PlayerData? {
@@ -83,7 +105,7 @@ pub contract MFLPlayer: NonFungibleToken {
     }
 
     // A collection of Player NFTs owned by an account
-    pub resource Collection: CollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic {
+    pub resource Collection: CollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
 
         // Dictionary of NFT conforming tokens
         pub var ownedNFTs: @{UInt64: NonFungibleToken.NFT}
@@ -161,6 +183,12 @@ pub contract MFLPlayer: NonFungibleToken {
             } else {
                 return nil
             }
+        }
+
+        pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
+            let nft = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
+            let playerNFT = nft as! &MFLPlayer.NFT
+            return playerNFT as &AnyResource{MetadataViews.Resolver}
         }
 
         destroy() {
