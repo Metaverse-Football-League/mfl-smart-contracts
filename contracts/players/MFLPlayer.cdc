@@ -19,32 +19,18 @@ pub contract MFLPlayer: NonFungibleToken {
 
     // The total number of Players that have been minted
     pub var totalSupply: UInt64
-    access(self) let playersMetadatas: {UInt64: PlayerMetadata}
+    access(self) let playersDatas: {UInt64: PlayerData}
 
-    // Metadata stored in playersMetadatas. Updatable by an admin
-    pub struct PlayerMetadata {
-        pub let playerID: UInt64
+    // Data stored in playersdatas. Updatable by an admin
+    pub struct PlayerData {
+        pub let id: UInt64
         pub let metadata: {String: AnyStruct}
         pub let season: UInt32
         pub let ipfsURI: String
 
-        init(playerID: UInt64, metadata: {String: AnyStruct}, season: UInt32, ipfsURI: String) {
-            self.playerID = playerID
-            self.metadata = metadata
-            self.season = season
-            self.ipfsURI = ipfsURI
-        }
-    }
-
-    pub struct PlayerData {
-        pub let id: UInt64
-
-        pub let season: UInt32
-        // IPFS CID linking to a json file containing the metadata and a link to the image
-        pub let ipfsURI: String
-
-        init(id: UInt64, season: UInt32, ipfsURI: String) {
+        init(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, ipfsURI: String) {
             self.id = id
+            self.metadata = metadata
             self.season = season
             self.ipfsURI = ipfsURI
         }
@@ -69,8 +55,8 @@ pub contract MFLPlayer: NonFungibleToken {
             emit Minted(id: self.id)
         }
 
-        pub fun getMetadata(): PlayerMetadata? {
-            return MFLPlayer.getPlayerMetadata(playerID: self.id);
+        pub fun getData(): PlayerData? {
+            return MFLPlayer.getPlayerData(id: self.id);
         }
 
         destroy() {
@@ -206,15 +192,15 @@ pub contract MFLPlayer: NonFungibleToken {
         return collection.borrowPlayer(id: itemID)
     }
 
-    // Get metadata for a specific player ID
-    pub fun getPlayerMetadata(playerID: UInt64): PlayerMetadata? {
-        return self.playersMetadatas[playerID];
+    // Get data for a specific player ID
+    pub fun getPlayerData(id: UInt64): PlayerData? {
+        return self.playersDatas[id];
     }
 
     pub resource interface PlayerAdminClaim {
         pub let name: String
         pub fun mintPlayer(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, ipfsURI: String): @MFLPlayer.NFT
-        pub fun updatePlayerMetadata(playerID: UInt64, metadata: {String: AnyStruct})
+        pub fun updatePlayerMetadata(id: UInt64, metadata: {String: AnyStruct})
     }
 
     pub resource PlayerAdmin: PlayerAdminClaim {
@@ -227,7 +213,7 @@ pub contract MFLPlayer: NonFungibleToken {
         // Mint a new Player and returns it
         pub fun mintPlayer(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, ipfsURI: String): @MFLPlayer.NFT {
             pre {
-                MFLPlayer.getPlayerMetadata(playerID: id) == nil: "Player already exists"
+                MFLPlayer.getPlayerData(id: id) == nil: "Player already exists"
             }
 
             let newPlayerNFT <- create MFLPlayer.NFT(
@@ -235,8 +221,8 @@ pub contract MFLPlayer: NonFungibleToken {
                 season: season,
                 ipfsURI: ipfsURI,
             )
-            MFLPlayer.playersMetadatas[newPlayerNFT.id] = MFLPlayer.PlayerMetadata(
-                playerID: newPlayerNFT.id,
+            MFLPlayer.playersDatas[newPlayerNFT.id] = MFLPlayer.PlayerData(
+                id: newPlayerNFT.id,
                 metadata: metadata,
                 season: season,
                 ipfsURI: ipfsURI
@@ -245,17 +231,17 @@ pub contract MFLPlayer: NonFungibleToken {
         }
 
         // Update Player Metadata
-        pub fun updatePlayerMetadata(playerID: UInt64, metadata: {String: AnyStruct}) {
-            let playerMetadata = MFLPlayer.playersMetadatas[playerID] ?? panic("Metadata not found")
-            let updatedPlayerMetadata = MFLPlayer.PlayerMetadata(
-                playerID: playerMetadata.playerID,
+        pub fun updatePlayerMetadata(id: UInt64, metadata: {String: AnyStruct}) {
+            let playerData = MFLPlayer.playersDatas[id] ?? panic("Data not found")
+            let updatedPlayerData = MFLPlayer.PlayerData(
+                id: playerData.id,
                 metadata: metadata,
-                season: playerMetadata.season,
-                ipfsURI: playerMetadata.ipfsURI
+                season: playerData.season,
+                ipfsURI: playerData.ipfsURI
             )
-            MFLPlayer.playersMetadatas[playerID] = updatedPlayerMetadata
+            MFLPlayer.playersDatas[id] = updatedPlayerData
 
-            emit Updated(id: playerID)
+            emit Updated(id: id)
         }
 
         pub fun createPlayerAdmin(): @PlayerAdmin {
@@ -271,7 +257,7 @@ pub contract MFLPlayer: NonFungibleToken {
 
         // Initialize contract fields
         self.totalSupply = 0
-        self.playersMetadatas = {}
+        self.playersDatas = {}
 
         // Put a new Collection in storage
         self.account.save<@Collection>(<- create Collection(), to: self.CollectionStoragePath)

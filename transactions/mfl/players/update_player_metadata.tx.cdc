@@ -58,7 +58,7 @@ transaction(
         metadata.insert(key: "resistance", resistance)
 
         playerAdminClaimRef.updatePlayerMetadata(
-            playerID: id,
+            id: id,
             metadata: metadata,
         )
     }

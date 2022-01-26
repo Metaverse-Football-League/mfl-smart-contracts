@@ -5,6 +5,6 @@ import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
   given a player id.
 **/
 
-pub fun main(playerID: UInt64): MFLPlayer.PlayerMetadata? {
-    return MFLPlayer.getPlayerMetadata(playerID: playerID)
+pub fun main(playerID: UInt64): MFLPlayer.PlayerData? {
+    return MFLPlayer.getPlayerData(id: playerID)
 }

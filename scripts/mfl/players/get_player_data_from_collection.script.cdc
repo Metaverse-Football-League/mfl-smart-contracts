@@ -5,7 +5,7 @@ import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
   given a collection address and a player id.
 **/
 
-pub fun main(address: Address, playerID: UInt64): MFLPlayer.PlayerMetadata? {
+pub fun main(address: Address, playerID: UInt64): MFLPlayer.PlayerData? {
     let playerNFT = MFLPlayer.fetch(from: address, itemID: playerID)
-    return playerNFT != nil ? playerNFT!.getMetadata() : nil
+    return playerNFT != nil ? playerNFT!.getData() : nil
 }

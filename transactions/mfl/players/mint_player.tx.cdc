@@ -69,7 +69,7 @@ transaction(
     }
 
     post {
-        MFLPlayer.getPlayerMetadata(playerID: id) != nil: "Could not find player metadata in post"
+        MFLPlayer.getPlayerData(id: id) != nil: "Could not find player metadata in post"
         self.receiverRef.getIDs().contains(id): "Could not find player in post"
     }
 }
