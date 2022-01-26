@@ -2,9 +2,9 @@ import MetadataViews from "../../../contracts/_libs/MetadataViews.cdc"
 import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 
 /** 
-  This script returns a data representation of a player metadata
+  This script returns a data representation of a player
   given a collection address and a player id,
-  following the Display struct defined in MedataViews contract
+  following the Display View struct defined in the MedataViews contract
 **/
 
 pub struct PlayerNFT {

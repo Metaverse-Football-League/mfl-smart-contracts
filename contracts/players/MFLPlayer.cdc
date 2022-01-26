@@ -37,6 +37,71 @@ pub contract MFLPlayer: NonFungibleToken {
         }
     }
 
+    // Data used by View
+    pub struct PlayerDataViewV1 {
+        pub let id: UInt64
+        pub let season: UInt32
+        pub let ipfsURI: String
+        pub let name: String
+        pub let nationalities: [String]
+        pub let positions: [String]
+        pub let preferredFoot: String
+        pub let ageAtMint: UInt32
+        pub let height: UInt32
+        pub let overall: UInt32
+        pub let pace: UInt32
+        pub let shooting: UInt32
+        pub let passing: UInt32
+        pub let dribbling: UInt32
+        pub let defense: UInt32
+        pub let physical: UInt32
+        pub let goalkeeping: UInt32
+        pub let potential: String
+        pub let resistance: UInt32
+
+        init(
+            id: UInt64,
+            season: UInt32,
+            ipfsURI: String,
+            name: String,
+            nationalities: [String],
+            positions: [String],
+            preferredFoot: String,
+            ageAtMint: UInt32,
+            height: UInt32,
+            overall: UInt32,
+            pace: UInt32,
+            shooting: UInt32,
+            passing: UInt32,
+            dribbling: UInt32,
+            defense: UInt32,
+            physical: UInt32,
+            goalkeeping: UInt32,
+            potential: String,
+            resistance: UInt32,
+        ) {
+            self.id = id
+            self.season = season
+            self.ipfsURI = ipfsURI
+            self.name = name
+            self.nationalities = nationalities
+            self.positions = positions
+            self.preferredFoot = preferredFoot
+            self.ageAtMint = ageAtMint
+            self.height = height
+            self.overall = overall
+            self.pace = pace
+            self.shooting = shooting
+            self.passing = passing
+            self.dribbling = dribbling
+            self.defense = defense
+            self.physical = physical
+            self.goalkeeping = goalkeeping
+            self.potential = potential
+            self.resistance = resistance
+        }
+    }
+
     // The resource that represents the Player NFT
     pub resource NFT: NonFungibleToken.INFT, MetadataViews.Resolver {
 
@@ -58,7 +123,8 @@ pub contract MFLPlayer: NonFungibleToken {
 
          pub fun getViews(): [Type] {
             return [
-                Type<MetadataViews.Display>()
+                Type<MetadataViews.Display>(),
+                Type<MFLPlayer.PlayerDataViewV1>()
             ]
         }
         
@@ -70,8 +136,30 @@ pub contract MFLPlayer: NonFungibleToken {
                         name: playerData.metadata["name"] as! String? ?? "",
                         description:  playerData.metadata["description"] as! String? ?? "",
                         thumbnail: MetadataViews.HTTPFile(
-                            url: playerData.metadata["thumbnail"] as! String? ?? "",
+                            url: playerData.metadata["thumbnail"] as! String? ?? ""
                         )
+                    )
+                case Type<MFLPlayer.PlayerDataViewV1>():
+                    return MFLPlayer.PlayerDataViewV1(
+                        id: playerData.id,
+                        season: playerData.season,
+                        ipfsURI: playerData.ipfsURI,
+                        name: playerData.metadata["name"]! as! String,
+                        nationalities: playerData.metadata["nationalities"]! as! [String],
+                        positions: playerData.metadata["positions"]! as! [String],
+                        preferredFoot: playerData.metadata["preferredFoot"]! as! String,
+                        ageAtMint: playerData.metadata["ageAtMint"]! as! UInt32,
+                        height: playerData.metadata["height"]! as! UInt32,
+                        overall: playerData.metadata["overall"]! as! UInt32,
+                        pace: playerData.metadata["pace"]! as! UInt32,
+                        shooting: playerData.metadata["shooting"]! as! UInt32,
+                        passing: playerData.metadata["passing"]! as! UInt32,
+                        dribbling: playerData.metadata["dribbling"]! as! UInt32,
+                        defense: playerData.metadata["defense"]! as! UInt32,
+                        physical: playerData.metadata["physical"]! as! UInt32,
+                        goalkeeping: playerData.metadata["goalkeeping"]! as! UInt32,
+                        potential: playerData.metadata["potential"]! as! String,
+                        resistance: playerData.metadata["resistance"]! as! UInt32
                     )
             }
             return nil
