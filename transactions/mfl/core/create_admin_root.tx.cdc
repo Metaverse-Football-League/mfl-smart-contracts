@@ -1,5 +1,11 @@
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 
+/** 
+  This multi-sig tx creates an admin root resource and save it in the new admin storage.
+  This new admin root can then set capabilities to an admin proxy (to give admin rights),
+  revoke specific capabilities or create a new admin root.
+**/
+
 transaction() {
 
     prepare(acct: AuthAccount, newAdmin: AuthAccount) {

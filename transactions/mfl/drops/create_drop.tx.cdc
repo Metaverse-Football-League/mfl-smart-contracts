@@ -1,6 +1,13 @@
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 import MFLDrop from "../../../contracts/drops/MFLDrop.cdc"
 
+/** 
+  This tx creates a new drop resource (based on a pack price, a pack template id 
+  and the maximum number of packs an account can have).
+  The drop is closed by default, which means that no account will be able to buy packs.
+  Each drop must be linked to a valid pack template id.
+**/
+
 transaction(
   price: UFix64,
   packTemplateID: UInt64,

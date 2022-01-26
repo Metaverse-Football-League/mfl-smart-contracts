@@ -3,6 +3,10 @@ import FUSD from "../../../contracts/_libs/FUSD.cdc"
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 import MFLDrop from "../../../contracts/drops/MFLDrop.cdc"
 
+/** 
+  This tx set a dictionnary of whitelisted addresses for a specific drop.
+**/
+
 transaction(id: UInt64, addresses: {Address: UInt32}) {
     let dropAdminProxyRef: &MFLAdmin.AdminProxy
 

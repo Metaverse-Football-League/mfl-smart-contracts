@@ -1,6 +1,12 @@
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 
+/** 
+  This tx gives a player admin claim capability to an admin proxy.
+  The admin proxy can now perform admin actions (for example update players metadata).
+  The path capability is private (which can be deleted at any time by the owner of the storage).
+**/
+
 transaction(receiverAddress: Address, privatePath: Path) {
 
   let adminRootRef: &MFLAdmin.AdminRoot

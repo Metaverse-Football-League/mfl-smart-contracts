@@ -1,6 +1,12 @@
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 import MFLDrop from "../../../contracts/drops/MFLDrop.cdc"
 
+/** 
+  This tx gives a drop admin claim capability to an admin proxy.
+  The admin proxy can now perform admin actions (for example set whitelisted addresses for a specific drop).
+  The path capability is private (which can be deleted at any time by the owner of the storage).
+**/
+
 transaction(receiverAddress: Address, privatePath: Path) {
 
     let adminRootRef: &MFLAdmin.AdminRoot

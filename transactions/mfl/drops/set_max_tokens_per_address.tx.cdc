@@ -3,6 +3,11 @@ import FUSD from "../../../contracts/_libs/FUSD.cdc"
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 import MFLDrop from "../../../contracts/drops/MFLDrop.cdc"
 
+/** 
+  This tx set the maximum number of packs an account can have
+  for a specific drop.
+**/
+
 transaction(id: UInt64, maxTokensPerAddress: UInt32) {
     let dropAdminProxyRef: &MFLAdmin.AdminProxy
 

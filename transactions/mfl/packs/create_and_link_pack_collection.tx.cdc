@@ -1,5 +1,10 @@
 import MFLPack from "../../../contracts/packs/MFLPack.cdc"
 
+/** 
+  This tx creates a standard pack NFT collection
+  and exposes a public capability to interact with. 
+**/
+
 transaction() {
 
     prepare(acct: AuthAccount) {

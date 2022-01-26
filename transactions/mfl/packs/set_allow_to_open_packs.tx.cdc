@@ -1,6 +1,10 @@
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 import MFLPackTemplate from "../../../contracts/packs/MFLPackTemplate.cdc"
 
+/** 
+  This tx allows packs to be opened for a specific pack template id. 
+**/
+
 transaction(id: UInt64){
     
     let packTemplateAdminProxyRef: &MFLAdmin.AdminProxy

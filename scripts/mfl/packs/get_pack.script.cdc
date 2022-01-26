@@ -1,5 +1,9 @@
 import MFLPack from "../../../contracts/packs/MFLPack.cdc"
 
+/** 
+  This script returns a data representation of a specific pack
+  given a collection address.
+**/
 
 pub fun main(address: Address, id: UInt64): MFLPack.PackData? {
 
