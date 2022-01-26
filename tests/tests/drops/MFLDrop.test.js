@@ -319,6 +319,7 @@ describe('MFLDrop', () => {
         });
 
         // assert
+        expect(dropsData).toHaveLength(2);
         expect(dropsData).toEqual(expect.arrayContaining([
           {
             id: 1,
@@ -413,6 +414,7 @@ describe('MFLDrop', () => {
           });
 
           // assert
+          expect(dropsIds).toHaveLength(2);
           expect(dropsIds).toEqual(expect.arrayContaining([1, 2]));
       })
 
@@ -494,6 +496,7 @@ describe('MFLDrop', () => {
           name: 'mfl/packs/get_pack_ids_in_collection.script',
           args: [bobAccountAddress]
         });
+        expect(packIds).toHaveLength(5);
         expect(packIds).toEqual(expect.arrayContaining([1, 2, 3, 4, 5]));
       })
 

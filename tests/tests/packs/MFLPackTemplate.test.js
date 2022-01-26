@@ -126,6 +126,7 @@ describe('MFLPackTemplate', () => {
         const packTemplateIds = await testsUtils.executeValidScript({name: 'mfl/packs/get_pack_template_ids.script', args: []});
 
         // assert
+        expect(packTemplateIds).toHaveLength(2);
         expect(packTemplateIds).toEqual(expect.arrayContaining([1, 2]));
       })
     })

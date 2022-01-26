@@ -27,8 +27,8 @@ describe('MFLPlayer', () => {
     });
   });
 
-  describe('playersMetadatas', () => {
-    test('should not be able to get the playersMetadatas', async () => {
+  describe('playersDatas', () => {
+    test('should not be able to get the playersDatas', async () => {
       // prepare
 
       // execute
@@ -36,8 +36,8 @@ describe('MFLPlayer', () => {
         code: `
           import MFLPlayer from "../../../../contracts/players/MFLPlayer.cdc"
   
-          pub fun main(): {UInt64: MFLPlayer.PlayerMetadata} {
-              return MFLPlayer.playersMetadatas
+          pub fun main(): {UInt64: MFLPlayer.PlayerData} {
+              return MFLPlayer.playersDatas
           }
         `,
         addressMap,
@@ -152,7 +152,8 @@ describe('MFLPlayer', () => {
           name: 'mfl/players/get_ids_in_collection.script',
           args: [bobAccountAddress],
         });
-        expect(bobPlayersIds).toEqual([1, 31]);
+        expect(bobPlayersIds).toHaveLength(2);
+        expect(bobPlayersIds).toEqual(expect.arrayContaining([1, 31]));
       });
     });
 
@@ -171,7 +172,8 @@ describe('MFLPlayer', () => {
         });
 
         // assert
-        expect(ids).toEqual([100022, 1, 89]);
+        expect(ids).toHaveLength(3);
+        expect(ids).toEqual(expect.arrayContaining([100022, 1, 89]));
       });
     });
 
@@ -200,8 +202,8 @@ describe('MFLPlayer', () => {
         // assert
         expect(playerFromCollection).toEqual({
           id: 5,
-          season: MFLPlayerTestsUtils.PLAYER_METADATA.season,
-          ipfsURI: MFLPlayerTestsUtils.PLAYER_METADATA.ipfsURI,
+          season: MFLPlayerTestsUtils.PLAYER_DATA.season,
+          ipfsURI: MFLPlayerTestsUtils.PLAYER_DATA.ipfsURI,
           uuid: expect.toBeNumber(),
         });
       });
@@ -222,8 +224,8 @@ describe('MFLPlayer', () => {
         // assert
         expect(playerFromCollection).toEqual({
           id: 5,
-          season: MFLPlayerTestsUtils.PLAYER_METADATA.season,
-          ipfsURI: MFLPlayerTestsUtils.PLAYER_METADATA.ipfsURI,
+          season: MFLPlayerTestsUtils.PLAYER_DATA.season,
+          ipfsURI: MFLPlayerTestsUtils.PLAYER_DATA.ipfsURI,
           uuid: expect.toBeNumber(),
         });
       });
@@ -286,21 +288,21 @@ describe('MFLPlayer', () => {
   });
 
   describe('NFT', () => {
-    describe('getMetadata()', () => {
-      test('should be able to get metadata', async () => {
+    describe('getData()', () => {
+      test('should be able to get data', async () => {
         // prepare
         const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
         await MFLPlayerTestsUtils.createPlayerNFT(2);
 
         // execute
-        const playerMetadataFromCollection = await testsUtils.executeValidScript({
-          name: 'mfl/players/get_player_metadata_from_collection.script',
+        const playerDataFromCollection = await testsUtils.executeValidScript({
+          name: 'mfl/players/get_player_data_from_collection.script',
           args: [aliceAdminAccountAddress, 2],
         });
 
         // assert
-        expect(playerMetadataFromCollection).toEqual({
-          playerID: 2,
+        expect(playerDataFromCollection).toEqual({
+          id: 2,
           ipfsURI: 'ipfs://someURI/1201',
           season: 1,
           metadata: MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY,
@@ -324,11 +326,11 @@ describe('MFLPlayer', () => {
           type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Destroyed`,
           data: {id: 100022},
         });
-        const playerMetadataFromCollection = await testsUtils.executeValidScript({
-          name: 'mfl/players/get_player_metadata_from_collection.script',
+        const playerDataFromCollection = await testsUtils.executeValidScript({
+          name: 'mfl/players/get_player_data_from_collection.script',
           args: [aliceAdminAccountAddress, 100022],
         });
-        expect(playerMetadataFromCollection).toBeNull();
+        expect(playerDataFromCollection).toBeNull();
       });
     });
   });
@@ -383,36 +385,36 @@ describe('MFLPlayer', () => {
     });
   });
 
-  describe('getPlayerMetadata()', () => {
-    test('should get player metadata', async () => {
+  describe('getPlayerData()', () => {
+    test('should get player data', async () => {
       // prepare
       await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
       await MFLPlayerTestsUtils.createPlayerNFT(4);
 
       // execute
-      const playerMetadata = await testsUtils.executeValidScript({
-        name: 'mfl/players/get_player_metadata.script',
+      const playerData = await testsUtils.executeValidScript({
+        name: 'mfl/players/get_player_data.script',
         args: [4],
       });
 
       // assert
-      expect(playerMetadata).toEqual({
-        ...MFLPlayerTestsUtils.PLAYER_METADATA,
-        playerID: 4,
+      expect(playerData).toEqual({
+        ...MFLPlayerTestsUtils.PLAYER_DATA,
+        id: 4,
       });
     });
 
-    test('should return nil when getting player metadata for an unknown player', async () => {
+    test('should return nil when getting player data for an unknown player', async () => {
       // prepare
 
       // execute
-      const playerMetadata = await testsUtils.executeValidScript({
-        name: 'mfl/players/get_player_metadata.script',
+      const playerData = await testsUtils.executeValidScript({
+        name: 'mfl/players/get_player_data.script',
         args: [4],
       });
 
       // assert
-      expect(playerMetadata).toBeNull();
+      expect(playerData).toBeNull();
     });
   });
 
@@ -438,12 +440,12 @@ describe('MFLPlayer', () => {
           type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Deposit`,
           data: {id: playerID, to: aliceAdminAccountAddress},
         }));
-        const playerMetadata = await testsUtils.executeValidScript({
-          name: 'mfl/players/get_player_metadata.script',
+        const playerData = await testsUtils.executeValidScript({
+          name: 'mfl/players/get_player_data.script',
           args: [playerID],
         });
-        expect(playerMetadata).toEqual({
-          playerID,
+        expect(playerData).toEqual({
+          id: playerID,
           metadata: MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY,
           season: 1,
           ipfsURI: 'ipfs://someURI/1201',
@@ -499,12 +501,12 @@ describe('MFLPlayer', () => {
         });
 
         // assert
-        const playerMetadata = await testsUtils.executeValidScript({
-          name: 'mfl/players/get_player_metadata.script',
+        const playerData = await testsUtils.executeValidScript({
+          name: 'mfl/players/get_player_data.script',
           args: [playerID],
         });
-        expect(playerMetadata).toEqual({
-          playerID,
+        expect(playerData).toEqual({
+          id: playerID,
           metadata: updatedMetadata,
           season: 1,
           ipfsURI: 'ipfs://someURI/1201',
@@ -529,7 +531,7 @@ describe('MFLPlayer', () => {
         });
 
         // assert
-        expect(error).toContain('Metadata not found');
+        expect(error).toContain('Data not found');
       });
     });
 

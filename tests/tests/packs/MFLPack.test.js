@@ -187,6 +187,7 @@ describe('MFLPack', () => {
         // Bob shoud have 0 pack
         expect(bobPackIds).toEqual([])
         // Jack should have 2 packs
+        expect(jackPackIds).toHaveLength(2);
         expect(jackPackIds).toEqual(expect.arrayContaining([1, 2]))
       })
 
@@ -268,6 +269,7 @@ describe('MFLPack', () => {
         // Bob shoud have 0 pack
         expect(bobPackIds).toEqual([])
         // Jack should have 4 packs
+        expect(jackPackIds).toHaveLength(4);
         expect(jackPackIds).toEqual(expect.arrayContaining([1, 2, 3, 4]))
       })
     })
@@ -290,6 +292,7 @@ describe('MFLPack', () => {
 
         // assert
         // Bob should have 10 packs
+        expect(bobPackIds).toHaveLength(10);
         expect(bobPackIds).toEqual(expect.arrayContaining([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
       })
     })
