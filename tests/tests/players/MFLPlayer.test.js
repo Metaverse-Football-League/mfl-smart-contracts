@@ -152,6 +152,7 @@ describe('MFLPlayer', () => {
           name: 'mfl/players/get_ids_in_collection.script',
           args: [bobAccountAddress],
         });
+        expect(bobPlayersIds).toHaveLength(2);
         expect(bobPlayersIds).toEqual(expect.arrayContaining([1, 31]));
       });
     });
@@ -171,6 +172,7 @@ describe('MFLPlayer', () => {
         });
 
         // assert
+        expect(ids).toHaveLength(3);
         expect(ids).toEqual(expect.arrayContaining([100022, 1, 89]));
       });
     });

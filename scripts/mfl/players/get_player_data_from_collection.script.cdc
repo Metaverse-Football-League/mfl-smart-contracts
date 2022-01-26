@@ -1,7 +1,7 @@
 import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 
 /** 
-  This script returns a data representation of a player metadata
+  This script returns a data representation of a player
   given a collection address and a player id.
 **/
 
