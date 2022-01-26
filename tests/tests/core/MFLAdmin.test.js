@@ -4,7 +4,7 @@ import { testsUtils } from '../_utils/tests.utils';
 import * as matchers from 'jest-extended';
 import adminClaim from './_transactions/check_admin_claim.tx';
 expect.extend(matchers);
-jest.setTimeout(20000);
+jest.setTimeout(40000);
 
 describe('MFLAdmin', () => {
   let addressMap = null;
