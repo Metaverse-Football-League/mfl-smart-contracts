@@ -1,14 +1,10 @@
-// This script returns the balance of an account's FUSD vault.
-//
-// Parameters:
-// - address: The address of the account holding the FUSD vault.
-//
-// This script will fail if they account does not have an FUSD vault. 
-// To check if an account has a vault or initialize a new vault, 
-// use check_fusd_vault_setup.cdc and setup_fusd_vault.cdc respectively.
+import FungibleToken from "../../contracts/_libs/FungibleToken.cdc"
+import FUSD from "../../contracts/_libs/FUSD.cdc"
 
-import FungibleToken from "../../contracts/lib/FungibleToken.cdc"
-import FUSD from "../../contracts/lib/FUSD.cdc"
+/** 
+  This script returns the balance of an account's FUSD vault.
+  It will fail if the account does not have a FUSD vault.
+**/
 
 pub fun main(address: Address): UFix64 {
     let account = getAccount(address)

@@ -3,6 +3,12 @@ import FUSD from "../../../contracts/_libs/FUSD.cdc"
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 import MFLDrop from "../../../contracts/drops/MFLDrop.cdc"
 
+/** 
+  This tx set the owner vault capability of the MFLDrop contract.
+  When someone buys a pack, the amount (usually FUSD) is sent to 
+  the owner vault.
+**/
+
 transaction() {
     let dropAdminProxyRef: &MFLAdmin.AdminProxy
     let ownerVaultCap: Capability<&FUSD.Vault{FungibleToken.Receiver}>

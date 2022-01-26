@@ -1,5 +1,10 @@
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 
+/** 
+  This tx creates an admin proxy which will allow 
+  to receive capabilities from an admin root to perform admin actions.
+**/
+
 transaction() {
 
     prepare(acct: AuthAccount) {

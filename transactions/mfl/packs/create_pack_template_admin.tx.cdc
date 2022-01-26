@@ -1,5 +1,10 @@
 import MFLPackTemplate from "../../../contracts/packs/MFLPackTemplate.cdc"
 
+/** 
+  This multi-sig tx creates a pack template admin resource and
+  saves it in the new admin storage.
+**/
+
 transaction() {
 
     prepare(adminAcct: AuthAccount, futureAdminAcct: AuthAccount) {

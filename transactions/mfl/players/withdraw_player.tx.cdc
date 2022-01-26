@@ -1,5 +1,10 @@
 import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 
+/** 
+  This tx withdraws a specific player NFT and deposits it
+  in another collection.
+**/
+
 transaction(receiverAddr: Address, id: UInt64) {
 
     let receiverRef: &{MFLPlayer.CollectionPublic}

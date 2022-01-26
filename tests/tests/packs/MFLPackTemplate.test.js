@@ -2,6 +2,7 @@ import { emulator, getAccountAddress } from 'flow-js-testing';
 import { MFLPackTemplateTestsUtils } from './_utils/MFLPackTemplateTests.utils';
 import { testsUtils } from '../_utils/tests.utils';
 import * as matchers from 'jest-extended';
+
 expect.extend(matchers);
 jest.setTimeout(40000);
 
@@ -20,7 +21,7 @@ describe('MFLPackTemplate', () => {
   describe('PackTemplateAdmin', () => {
     const args = ['Common', 'This is a common pack template', 25000, 'http://img1-url'];
 
-    describe('createPackTemplate', () => {
+    describe('createPackTemplate()', () => {
       test('should create a pack template', async () => {
         // prepare
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
@@ -52,7 +53,7 @@ describe('MFLPackTemplate', () => {
       });
     });
 
-    describe('allowToOpenPacks', () => {
+    describe('allowToOpenPacks()', () => {
       test('should update isOpenable to true', async () => {
         // prepare
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
@@ -74,7 +75,7 @@ describe('MFLPackTemplate', () => {
       });
     });
 
-    describe('createPackTemplateAdmin', () => {
+    describe('createPackTemplateAdmin()', () => {
       test('should create a packTemplate admin', async () => {
         // prepare
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
@@ -112,7 +113,7 @@ describe('MFLPackTemplate', () => {
     const args1 = ['Common', 'This is a common pack template', 25000, 'http://img1-url'];
     const args2 = ['Rare', 'This is a rare pack template', 11050, 'http://img2-url'];
 
-    describe('getPackTemplateIDs', () => {
+    describe('getPackTemplateIDs()', () => {
       test('should get ids', async () => {
         // prepare
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
@@ -121,15 +122,15 @@ describe('MFLPackTemplate', () => {
         await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: args1, signers});
         await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: args2, signers});
 
-        //execute
+        // execute
         const packTemplateIds = await testsUtils.executeValidScript({name: 'mfl/packs/get_pack_template_ids.script', args: []});
 
-        //assert
-        expect(packTemplateIds).toEqual([1, 2]);
+        // assert
+        expect(packTemplateIds).toEqual(expect.arrayContaining([1, 2]));
       })
     })
 
-    describe('getPackTemplates', () => {
+    describe('getPackTemplates()', () => {
       test('should get all packTemplates data', async () => {
         // prepare
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
@@ -138,10 +139,10 @@ describe('MFLPackTemplate', () => {
         await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: args1, signers});
         await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: args2, signers});
 
-        //execute
+        // execute
         const packTemplates= await testsUtils.executeValidScript({name: 'mfl/packs/get_pack_templates.script', args: []});
 
-        //assert
+        // assert
         expect(packTemplates).toEqual([
           {
             id: 1,
@@ -167,7 +168,7 @@ describe('MFLPackTemplate', () => {
       })
     })
 
-    describe('getPackTemplate', () => {
+    describe('getPackTemplate()', () => {
       test('should get a specific packTemplate data', async () => {
         // prepare
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
@@ -176,10 +177,10 @@ describe('MFLPackTemplate', () => {
         await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: args1, signers});
         await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: args2, signers});
 
-        //execute
+        // execute
         const packTemplates= await testsUtils.executeValidScript({name: 'mfl/packs/get_pack_template.script', args: [2]});
 
-        //assert
+        // assert
         expect(packTemplates).toEqual({
           id: 2,
           name: 'Rare',
@@ -192,22 +193,20 @@ describe('MFLPackTemplate', () => {
         });
       })
 
-      test('should return null if packTemplate id does not exist', async () => {
+      test('should return nil if packTemplate id does not exist', async () => {
         // prepare
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const signers = [aliceAdminAccountAddress];
         await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: args1, signers});
 
-        //execute
+        // execute
         const packTemplates= await testsUtils.executeValidScript({name: 'mfl/packs/get_pack_template.script', args: [2]});
 
-        //assert
+        // assert
         expect(packTemplates).toEqual(null)
       })
 
     })
-
-
   })
 });

@@ -3,6 +3,7 @@ import {MFLDropTestsUtils} from './_utils/MFLDropTests.utils';
 import {MFLPackTemplateTestsUtils} from '../packs/_utils/MFLPackTemplateTests.utils';
 import {testsUtils} from '../_utils/tests.utils';
 import * as matchers from 'jest-extended';
+
 expect.extend(matchers);
 jest.setTimeout(40000);
 
@@ -23,7 +24,7 @@ describe('MFLDrop', () => {
     const argsDrop = ["9.99", 1, 10];
     const argsPackTemplate = ["Rare", "This is a rare pack template", 10000, "http://img1-url"];
 
-    describe('createDrop', () => {
+    describe('createDrop()', () => {
       test('should create a drop', async () => {
         // prepare
         await MFLDropTestsUtils.createDropAdmin('AliceAdminAccount', 'AliceAdminAccount');
@@ -75,7 +76,7 @@ describe('MFLDrop', () => {
 
     });
 
-    describe('setOwnerVault', () => {
+    describe('setOwnerVault()', () => {
       test('should set the ownerVault', async () => {
         // prepare
         await MFLDropTestsUtils.createDropAdmin('AliceAdminAccount', 'AliceAdminAccount');
@@ -99,7 +100,7 @@ describe('MFLDrop', () => {
 
     });
 
-    describe('setStatus', () => {
+    describe('setStatus()', () => {
       test('should update drop status to opened_whitelist', async () => {
 
         // prepare
@@ -182,7 +183,7 @@ describe('MFLDrop', () => {
 
     });
 
-    describe('setWhitelistedAddresses', () => {
+    describe('setWhitelistedAddresses()', () => {
       test('should set whitelistedAddresses', async () => {
 
         // prepare
@@ -228,7 +229,7 @@ describe('MFLDrop', () => {
       });
     });
 
-    describe('setMaxTokensPerAddress', () => {
+    describe('setMaxTokensPerAddress()', () => {
       test('should set max tokens per address', async () => {
         // prepare
         await MFLDropTestsUtils.createDropAdmin('AliceAdminAccount', 'AliceAdminAccount');
@@ -251,7 +252,7 @@ describe('MFLDrop', () => {
       });
     });
 
-    describe('createDropAdmin', () => {
+    describe('createDropAdmin()', () => {
       test('should create a drop admin', async () => {
         // prepare
         await MFLDropTestsUtils.createDropAdmin('AliceAdminAccount', 'AliceAdminAccount');
@@ -300,7 +301,7 @@ describe('MFLDrop', () => {
     const argsDrop2 = ["29.00", 2, 3];
     const argsPackTemplate2 = ["Legendary", "This is a legendary pack template", 99, "http://img2-url"];
 
-    describe('getDrops', () => {
+    describe('getDrops()', () => {
       test('should get all drops data', async () => {
         // prepare
         await MFLDropTestsUtils.createDropAdmin('AliceAdminAccount', 'AliceAdminAccount');
@@ -318,7 +319,7 @@ describe('MFLDrop', () => {
         });
 
         // assert
-        expect(dropsData.sort((a, b) => a.id < b.id ? -1: 1)).toEqual([
+        expect(dropsData).toEqual(expect.arrayContaining([
           {
             id: 1,
             price: '9.99000000',
@@ -337,11 +338,11 @@ describe('MFLDrop', () => {
             minters: {},
             whitelistedAddresses: {}
           }
-        ]);
+        ]));
       })
     })
 
-    describe('getDrop', () => {
+    describe('getDrop()', () => {
       test('should get a specific drop data', async () => {
         // prepare
         await MFLDropTestsUtils.createDropAdmin('AliceAdminAccount', 'AliceAdminAccount');
@@ -373,7 +374,7 @@ describe('MFLDrop', () => {
         );
       })
 
-      test('should return null if drop id does not exist', async () => {
+      test('should return nil if drop id does not exist', async () => {
         // prepare
         await MFLDropTestsUtils.createDropAdmin('AliceAdminAccount', 'AliceAdminAccount');
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
@@ -394,7 +395,7 @@ describe('MFLDrop', () => {
 
     })
 
-    describe('getDropsIDs', () => {
+    describe('getDropsIDs()', () => {
       test('should get ids', async () => {
           // prepare
           await MFLDropTestsUtils.createDropAdmin('AliceAdminAccount', 'AliceAdminAccount');
@@ -412,12 +413,12 @@ describe('MFLDrop', () => {
           });
 
           // assert
-          expect(dropsIds.sort((a, b) => a - b)).toEqual([1, 2]);
+          expect(dropsIds).toEqual(expect.arrayContaining([1, 2]));
       })
 
     })
 
-    describe('getDropsStatuses', () => {
+    describe('getDropsStatuses()', () => {
       test('should get all drops statuses', async () => {
           // prepare
           await MFLDropTestsUtils.createDropAdmin('AliceAdminAccount', 'AliceAdminAccount');
@@ -443,7 +444,7 @@ describe('MFLDrop', () => {
 
     })
 
-    describe('purchase', () => {
+    describe('purchase()', () => {
 
       const argsDrop = ["5.00", 1, 10];
       const argsPackTemplate = ["Rare", "This is a rare pack template", 10000, "http://img1-url"];
@@ -461,10 +462,10 @@ describe('MFLDrop', () => {
         await testsUtils.shallPass({name: 'fusd/setup_account.tx', args: [], signers: [bobAccountAddress] });
         await testsUtils.shallPass({name: 'fusd/send_fusd.tx', args: [bobAccountAddress, "100.00"], signers: [aliceAdminAccountAddress]});
 
-        //execute
+        // execute
         await testsUtils.shallPass({name: 'mfl/drops/purchase.tx', args: [1, 1, "5.00"], signers: [bobAccountAddress]});
 
-        //assert
+        // assert
         const packIds = await testsUtils.executeValidScript({
           name: 'mfl/packs/get_pack_ids_in_collection.script',
           args: [bobAccountAddress]
@@ -485,15 +486,15 @@ describe('MFLDrop', () => {
         await testsUtils.shallPass({name: 'fusd/setup_account.tx', args: [], signers: [bobAccountAddress] });
         await testsUtils.shallPass({name: 'fusd/send_fusd.tx', args: [bobAccountAddress, "100.00"], signers: [aliceAdminAccountAddress]});
 
-        //execute
+        // execute
         await testsUtils.shallPass({name: 'mfl/drops/purchase.tx', args: [1, 5, "25.00"], signers: [bobAccountAddress]});
 
-        //assert
+        // assert
         const packIds = await testsUtils.executeValidScript({
           name: 'mfl/packs/get_pack_ids_in_collection.script',
           args: [bobAccountAddress]
         });
-        expect(packIds.sort((a,b) => a - b )).toEqual([1, 2, 3, 4, 5]);
+        expect(packIds).toEqual(expect.arrayContaining([1, 2, 3, 4, 5]));
       })
 
       test('should panic if drop id does not exist', async () => {
@@ -507,10 +508,10 @@ describe('MFLDrop', () => {
         await testsUtils.shallPass({name: 'fusd/setup_account.tx', args: [], signers: [bobAccountAddress] });
         await testsUtils.shallPass({name: 'fusd/send_fusd.tx', args: [bobAccountAddress, "100.00"], signers: [aliceAdminAccountAddress]});
 
-        //execute
+        // execute
         const error = await testsUtils.shallRevert({name: 'mfl/drops/purchase.tx', args: [2, 5, "25.00"], signers: [bobAccountAddress]});
 
-        //assert
+        // assert
         expect(error).toContain('Drop does not exist');
       })
 
@@ -525,10 +526,10 @@ describe('MFLDrop', () => {
         await testsUtils.shallPass({name: 'fusd/setup_account.tx', args: [], signers: [bobAccountAddress] });
         await testsUtils.shallPass({name: 'fusd/send_fusd.tx', args: [bobAccountAddress, "100.00"], signers: [aliceAdminAccountAddress]});
 
-        //execute
+        // execute
         const error = await testsUtils.shallRevert({name: 'mfl/drops/purchase.tx', args: [1, 5, "25.00"], signers: [bobAccountAddress]});
 
-        //assert
+        // assert
         expect(error).toContain('Drop is closed');
       })
 
@@ -544,10 +545,10 @@ describe('MFLDrop', () => {
         await testsUtils.shallPass({name: 'fusd/setup_account.tx', args: [], signers: [bobAccountAddress] });
         await testsUtils.shallPass({name: 'fusd/send_fusd.tx', args: [bobAccountAddress, "100.00"], signers: [aliceAdminAccountAddress]});
 
-        //execute
+        // execute
         const error = await testsUtils.shallRevert({name: 'mfl/drops/purchase.tx', args: [1, 0, "25.00"], signers: [bobAccountAddress]});
 
-        //assert
+        // assert
         expect(error).toContain('Nb to mint must be greater than 0');
       })
 
@@ -563,10 +564,10 @@ describe('MFLDrop', () => {
         await testsUtils.shallPass({name: 'fusd/setup_account.tx', args: [], signers: [bobAccountAddress] });
         await testsUtils.shallPass({name: 'fusd/send_fusd.tx', args: [bobAccountAddress, "100.00"], signers: [aliceAdminAccountAddress]});
 
-        //execute
+        // execute
         const error = await testsUtils.shallRevert({name: 'mfl/drops/purchase.tx', args: [1, 11, "55.0"], signers: [bobAccountAddress]});
 
-        //assert
+        // assert
         expect(error).toContain('Max tokens per address exceeded');
       })
 
@@ -582,10 +583,10 @@ describe('MFLDrop', () => {
         await testsUtils.shallPass({name: 'fusd/setup_account.tx', args: [], signers: [bobAccountAddress] });
         await testsUtils.shallPass({name: 'fusd/send_fusd.tx', args: [bobAccountAddress, "100.00"], signers: [aliceAdminAccountAddress]});
 
-        //execute
+        // execute
         const error = await testsUtils.shallRevert({name: 'mfl/drops/purchase.tx', args: [1, 5, "25.0"], signers: [bobAccountAddress]});
 
-        //assert
+        // assert
         expect(error).toContain('Not whitelisted');
       })
 
@@ -604,10 +605,10 @@ describe('MFLDrop', () => {
         await testsUtils.shallPass({name: 'fusd/setup_account.tx', args: [], signers: [bobAccountAddress] });
         await testsUtils.shallPass({name: 'fusd/send_fusd.tx', args: [bobAccountAddress, "100.00"], signers: [aliceAdminAccountAddress]});
 
-        //execute
+        // execute
         const error = await testsUtils.shallRevert({name: 'mfl/drops/purchase.tx', args: [1, 5, "25.0"], signers: [bobAccountAddress]});
 
-        //assert
+        // assert
         expect(error).toContain('Max tokens exceeded for whitelist');
       })
 
@@ -623,10 +624,10 @@ describe('MFLDrop', () => {
         await testsUtils.shallPass({name: 'fusd/setup_account.tx', args: [], signers: [bobAccountAddress] });
         await testsUtils.shallPass({name: 'fusd/send_fusd.tx', args: [bobAccountAddress, "100.00"], signers: [aliceAdminAccountAddress]});
 
-        //execute
+        // execute
         const error = await testsUtils.shallRevert({name: 'mfl/drops/purchase.tx', args: [1, 5, "24.00"], signers: [bobAccountAddress]});
 
-        //assert
+        // assert
         expect(error).toContain('Not enough balance');
       })
 
@@ -642,10 +643,10 @@ describe('MFLDrop', () => {
         await testsUtils.shallPass({name: 'fusd/setup_account.tx', args: [], signers: [bobAccountAddress] });
         await testsUtils.shallPass({name: 'fusd/send_fusd.tx', args: [bobAccountAddress, "100.00"], signers: [aliceAdminAccountAddress]});
 
-        //execute
+        // execute
         const error = await testsUtils.shallRevert({name: 'mfl/drops/purchase.tx', args: [1, 5, "25.00"], signers: [bobAccountAddress]});
 
-        //assert
+        // assert
         expect(error).toContain('Could not borrow reference to owner vault');
       })
 

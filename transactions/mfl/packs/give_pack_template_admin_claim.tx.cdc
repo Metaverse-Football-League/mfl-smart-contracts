@@ -1,6 +1,12 @@
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 import MFLPackTemplate from "../../../contracts/packs/MFLPackTemplate.cdc"
 
+/** 
+  This tx gives a pack template admin claim capability to an admin proxy.
+  The admin proxy can now perform admin actions (for example allows the opening of packs).
+  The path capability is private (which can be deleted at any time by the owner of the storage).
+**/
+
 transaction(receiverAddress: Address, privatePath: Path) {
 
     let adminRootRef: &MFLAdmin.AdminRoot

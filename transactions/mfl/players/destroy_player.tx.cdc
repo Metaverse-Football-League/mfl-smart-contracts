@@ -1,6 +1,10 @@
 import NonFungibleToken from "../../../contracts/_libs/NonFungibleToken.cdc"
 import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 
+/** 
+  This tx destroys a specific player NFT.
+**/
+
 transaction(playerID: UInt64) {
 
     let playerNFT: @NonFungibleToken.NFT
