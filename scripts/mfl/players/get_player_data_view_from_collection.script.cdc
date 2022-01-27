@@ -1,5 +1,6 @@
 import MetadataViews from "../../../contracts/_libs/MetadataViews.cdc"
 import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
+import MFLViews from "../../../contracts/views/MFLViews.cdc"
 
 /** 
   This script returns a data representation of a player
@@ -88,9 +89,9 @@ pub fun main(address: Address, id: UInt64): PlayerDataV1 {
     let nft = collection.borrowPlayer(id: id)!
 
     // Get the basic display information for this NFT
-    let view = nft.resolveView(Type<MFLPlayer.PlayerDataViewV1>())!
+    let view = nft.resolveView(Type<MFLViews.PlayerDataViewV1>())!
 
-    let playerData = view as! MFLPlayer.PlayerDataViewV1
+    let playerData = view as! MFLViews.PlayerDataViewV1
     
     let owner: Address = nft.owner!.address
     let nftType = nft.getType()

@@ -55,7 +55,8 @@
 	  "MFLPlayer": "./contracts/players/MFLPlayer.cdc",
 	  "MFLDrop": "./contracts/drops/MFLDrop.cdc",
 	  "MFLPack": "./contracts/packs/MFLPack.cdc",
-	  "MFLPackTemplate": "./contracts/packs/MFLPackTemplate.cdc"
+	  "MFLPackTemplate": "./contracts/packs/MFLPackTemplate.cdc",
+	  "MFLViews": "./contracts/views/MFLViews.cdc"
 	},
 	"networks": {
 	  "emulator": "127.0.0.1:3569",
@@ -78,7 +79,8 @@
 		  "MFLPlayer",
 		  "MFLDrop",
 		  "MFLPackTemplate",
-		  "MFLPack"
+		  "MFLPack",
+		  "MFLViews"
 		]
 	  }
 	}
