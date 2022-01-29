@@ -1,5 +1,5 @@
 /** 
-  This tx creates an arbitrary number of proposal keys,
+  This tx creates an arbitrary number of keys,
   with the same public key.
 **/
 
