@@ -70,7 +70,7 @@ pub contract MFLPlayer: NonFungibleToken {
                 case Type<MetadataViews.Display>():
                     return MetadataViews.Display(
                         name: playerData.metadata["name"] as! String? ?? "",
-                        description:  playerData.metadata["description"] as! String? ?? "",
+                        description: "MFL Player #".concat(playerData.id.toString()),
                         thumbnail: MetadataViews.IPFSFile(cid: "", path: "") //TODO ipfs logic
                     )
                 case Type<MFLViews.PlayerDataViewV1>():

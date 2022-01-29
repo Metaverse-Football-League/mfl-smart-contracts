@@ -67,6 +67,9 @@
 	  "emulator-account": {
 		"address": "f8d6e0586b0a20c7",
 		"key": "84f82df6790f07b281adb5bbc848bd6298a2de67f94bdfac7a400d5a1b893de5"
+	  },
+	  "testnet-account": {
+		"fromFile": "./flow.testnet.json"
 	  }
 	},
 	"deployments": {
@@ -75,6 +78,16 @@
 		  "FUSD",
 		  "NonFungibleToken",
 		  "MetadataViews",
+		  "MFLAdmin",
+		  "MFLPlayer",
+		  "MFLDrop",
+		  "MFLPackTemplate",
+		  "MFLPack",
+		  "MFLViews"
+		]
+	  },
+	  "testnet": {
+		"testnet-account": [
 		  "MFLAdmin",
 		  "MFLPlayer",
 		  "MFLDrop",

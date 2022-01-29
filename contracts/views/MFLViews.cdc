@@ -1,4 +1,3 @@
-//TODO naming -> MFLViews or MFLView ?
 pub contract MFLViews {
 
     // Events
