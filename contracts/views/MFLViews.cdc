@@ -1,3 +1,5 @@
+import MFLPackTemplate from "../packs/MFLPackTemplate.cdc"
+
 pub contract MFLViews {
 
     // Events
@@ -45,6 +47,32 @@ pub contract MFLViews {
             self.goalkeeping = metadata["goalkeeping"] as! UInt32? ?? 0 as UInt32
             self.potential = metadata["potential"] as! String? ?? ""
             self.resistance = metadata["resistance"] as! UInt32? ?? 0 as UInt32
+        }
+    }
+
+    pub struct PackDataViewV1 {
+        pub let id: UInt64
+        pub let packTemplateMintIndex: UInt32
+        pub let packTemplateID: UInt64
+        pub let packTemplateName: String
+        pub let packTemplateDescription: String?
+        pub let packTemplateMaxSupply: UInt32
+        pub let packTemplateCurrentSupply: UInt32
+        pub let packTemplateStartingIndex: UInt32
+        pub let packTemplateIsOpenable: Bool
+        pub let packTemplateImageUrl: String
+
+        init(id: UInt64, packTemplateMintIndex: UInt32, packTemplate: MFLPackTemplate.PackTemplateData) {
+            self.id = id
+            self.packTemplateMintIndex = packTemplateMintIndex
+            self.packTemplateID = packTemplate.id
+            self.packTemplateName = packTemplate.name
+            self.packTemplateDescription = packTemplate.description
+            self.packTemplateMaxSupply = packTemplate.maxSupply
+            self.packTemplateCurrentSupply = packTemplate.currentSupply
+            self.packTemplateStartingIndex = packTemplate.startingIndex
+            self.packTemplateIsOpenable = packTemplate.isOpenable
+            self.packTemplateImageUrl = packTemplate.imageUrl
         }
     }
 

@@ -1,4 +1,6 @@
 import NonFungibleToken from "../_libs/NonFungibleToken.cdc"
+import MetadataViews from "../_libs/MetadataViews.cdc"
+import MFLViews from "../views/MFLViews.cdc"
 import MFLPackTemplate from "../packs/MFLPackTemplate.cdc"
 
 pub contract MFLPack: NonFungibleToken {
@@ -37,7 +39,7 @@ pub contract MFLPack: NonFungibleToken {
         }
     }
 
-    pub resource NFT: NonFungibleToken.INFT {
+    pub resource NFT: NonFungibleToken.INFT, MetadataViews.Resolver {
 
         // Unique ID across all packs
         pub let id: UInt64
@@ -56,6 +58,32 @@ pub contract MFLPack: NonFungibleToken {
         // Returns the Pack Template Data
         pub fun getPackTemplate(): MFLPackTemplate.PackTemplateData? {
             return MFLPackTemplate.getPackTemplate(id: self.packTemplateID)
+        }
+
+        pub fun getViews(): [Type] {
+            return [
+                Type<MetadataViews.Display>(),
+                Type<MFLViews.PackDataViewV1>()
+            ]
+        }
+
+        pub fun resolveView(_ view: Type): AnyStruct? {
+            let packTemplateData = self.getPackTemplate()!
+            switch view {
+                case Type<MetadataViews.Display>():
+                    return MetadataViews.Display(
+                        name: packTemplateData.name,
+                        description: "MFL Pack #".concat(self.id.toString()),
+                        thumbnail: MetadataViews.HTTPFile(url: packTemplateData.imageUrl)
+                    )
+                case Type<MFLViews.PackDataViewV1>():
+                    return MFLViews.PackDataViewV1(
+                       id: self.id,
+                       packTemplateMintIndex: self.packTemplateMintIndex,
+                       packTemplate: packTemplateData
+                    )
+            }
+            return nil
         }
 
         destroy() {
@@ -79,7 +107,7 @@ pub contract MFLPack: NonFungibleToken {
     }
 
     // Main Collection to manage all the Packs NFT
-    pub resource Collection: CollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic {
+    pub resource Collection: CollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
         // dictionary of NFT conforming tokens
         // NFT is a resource type with an `UInt64` ID field
         pub var ownedNFTs: @{UInt64: NonFungibleToken.NFT}
@@ -158,6 +186,12 @@ pub contract MFLPack: NonFungibleToken {
             } else {
                 return nil
             }
+        }
+
+        pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
+            let nft = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
+            let packNFT = nft as! &MFLPack.NFT
+            return packNFT as &AnyResource{MetadataViews.Resolver}
         }
 
         pub fun openPack(id: UInt64) {
