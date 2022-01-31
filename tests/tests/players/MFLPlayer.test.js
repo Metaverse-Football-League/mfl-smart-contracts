@@ -256,14 +256,18 @@ describe('MFLPlayer', () => {
 
         // assert
         expect(result.events).toHaveLength(2);
-        expect(result.events[0]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Destroyed`,
-          data: {id: 1},
-        }));
-        expect(result.events[1]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Destroyed`,
-          data: {id: 23},
-        }));
+        expect(result.events).toPartiallyContain(
+          {
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Destroyed`,
+            data: {id: 1},
+          }
+        );
+        expect(result.events).toPartiallyContain(
+          {
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Destroyed`,
+            data: {id: 23},
+          }
+        );
       });
     });
   });
