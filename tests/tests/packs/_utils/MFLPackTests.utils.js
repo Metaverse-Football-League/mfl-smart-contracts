@@ -11,9 +11,11 @@ export const MFLPackTestsUtils = {
 
     const addressMap = {};
     await testsUtils.deployContract('NonFungibleToken', serviceAddress, '_libs/NonFungibleToken', addressMap);
+    await testsUtils.deployContract('MetadataViews', serviceAddress, '_libs/MetadataViews', addressMap);
     await testsUtils.deployContract('FUSD', to, '_libs/FUSD', addressMap);
     await testsUtils.deployContract('MFLAdmin', to, 'core/MFLAdmin', addressMap);
     await testsUtils.deployContract('MFLPackTemplate', to, 'packs/MFLPackTemplate', addressMap);
+    await testsUtils.deployContract('MFLViews', to, 'views/MFLViews', addressMap);
     await testsUtils.deployContract('MFLPack', to, 'packs/MFLPack', addressMap);
     await testsUtils.deployContract('MFLDrop', to, 'drops/MFLDrop', addressMap);
     return addressMap;

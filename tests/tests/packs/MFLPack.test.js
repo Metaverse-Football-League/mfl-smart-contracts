@@ -98,7 +98,8 @@ describe('MFLPack', () => {
       const packs = await testsUtils.executeValidScript({name: 'mfl/packs/get_packs.script', args: [bobAccountAddress]});
 
       // assert
-      expect(packs).toEqual([
+      expect(packs).toHaveLength(3)
+      expect(packs).toEqual(expect.arrayContaining([
         {
           id: 1,
           packTemplateMintIndex: 0,
@@ -144,8 +145,7 @@ describe('MFLPack', () => {
             imageUrl: 'http://img1-url'
           }
         }
-      ])
-
+      ]))
     })
   })
 
