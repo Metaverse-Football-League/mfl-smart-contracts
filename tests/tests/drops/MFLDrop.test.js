@@ -21,7 +21,7 @@ describe('MFLDrop', () => {
 
   describe('DropAdmin', () => {
 
-    const argsDrop = ["9.99", 1, 10];
+    const argsDrop = ["Drop name", "9.99", 1, 10];
     const argsPackTemplate = ["Rare", "This is a rare pack template", 10000, "http://img1-url"];
 
     describe('createDrop()', () => {
@@ -48,6 +48,7 @@ describe('MFLDrop', () => {
         });
         expect(dropData).toEqual({
           id: 1,
+          name: "Drop name",
           price: "9.99000000",
           status: 0,
           packTemplateID: 1,
@@ -296,9 +297,9 @@ describe('MFLDrop', () => {
 
   describe('Drop', () => {
 
-    const argsDrop1 = ["9.99", 1, 10];
+    const argsDrop1 = ["Drop 1 name", "9.99", 1, 10];
     const argsPackTemplate1 = ["Rare", "This is a rare pack template", 10000, "http://img1-url"];
-    const argsDrop2 = ["29.00", 2, 3];
+    const argsDrop2 = ["Drop 2 name", "29.00", 2, 3];
     const argsPackTemplate2 = ["Legendary", "This is a legendary pack template", 99, "http://img2-url"];
 
     describe('getDrops()', () => {
@@ -323,6 +324,7 @@ describe('MFLDrop', () => {
         expect(dropsData).toEqual(expect.arrayContaining([
           {
             id: 1,
+            name: "Drop 1 name",
             price: '9.99000000',
             status: 0,
             packTemplateID: 1,
@@ -332,6 +334,7 @@ describe('MFLDrop', () => {
           },
           {
             id: 2,
+            name: "Drop 2 name",
             price: '29.00000000',
             status: 0,
             packTemplateID: 2,
@@ -365,6 +368,7 @@ describe('MFLDrop', () => {
         expect(dropData).toEqual(
           {
             id: 2,
+            name: "Drop 2 name",
             price: '29.00000000',
             status: 0,
             packTemplateID: 2,
@@ -448,7 +452,7 @@ describe('MFLDrop', () => {
 
     describe('purchase()', () => {
 
-      const argsDrop = ["5.00", 1, 10];
+      const argsDrop = ["Drop name", "5.00", 1, 10];
       const argsPackTemplate = ["Rare", "This is a rare pack template", 10000, "http://img1-url"];
 
       test('should create one pack in collection', async () => {

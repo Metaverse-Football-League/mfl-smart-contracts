@@ -12,8 +12,8 @@ jest.setTimeout(10000);
 
 describe('MFLPack', () => {
   let addressMap = null;
-  // argsDrop: [price, packTemplateId, maxTokensPerAddress]
-  const argsDrop = ['19,99', 1, 20];
+  // argsDrop: [drop name, price, packTemplateId, maxTokensPerAddress]
+  const argsDrop = ['Drop name', '19,99', 1, 20];
   // argsPackTemplate: [title, description, maxSupply, imageUrl]
   const argsPackTemplate = ['Common', 'This is a common pack', 8500, 'http://img1-url'];
 

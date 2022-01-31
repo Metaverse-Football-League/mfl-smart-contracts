@@ -27,6 +27,7 @@ pub contract MFLDrop {
     pub struct DropData {
 
         pub let id: UInt64
+        pub let name: String
         pub let price: UFix64
         pub let status: UInt8
         pub let packTemplateID: UInt64
@@ -36,6 +37,7 @@ pub contract MFLDrop {
 
         init(
             id: UInt64,
+            name: String,
             price: UFix64,
             status: UInt8,
             packTemplateID: UInt64,
@@ -44,6 +46,7 @@ pub contract MFLDrop {
             whitelistedAddresses: {Address: UInt32}
         ) {
             self.id = id
+            self.name = name
             self.price = price
             self.status = status
             self.packTemplateID = packTemplateID
@@ -56,6 +59,7 @@ pub contract MFLDrop {
     pub resource Drop {
 
         access(contract) let id: UInt64
+        access(contract) let name: String
         access(contract) let price: UFix64
         access(contract) var status: Status
         access(contract) let packTemplateID: UInt64
@@ -69,9 +73,10 @@ pub contract MFLDrop {
         // Whitelisted addresses with the corresponding number of tokens they are allowed to mint
         access(contract) let whitelistedAddresses: {Address: UInt32}
 
-        init(price: UFix64, packTemplateID: UInt64, maxTokensPerAddress: UInt32) {
+        init(name: String, price: UFix64, packTemplateID: UInt64, maxTokensPerAddress: UInt32) {
             self.id = MFLDrop.nextDropID
             MFLDrop.nextDropID = MFLDrop.nextDropID + (1 as UInt64)
+            self.name = name
             self.price = price
             self.status = Status.closed
             self.packTemplateID = packTemplateID
@@ -127,6 +132,7 @@ pub contract MFLDrop {
         if let drop = self.getDropRef(id: id) {
             return DropData(
                 id: drop.id,
+                name: drop.name,
                 price: drop.price,
                 status: drop.status.rawValue,
                 packTemplateID: drop.packTemplateID,
@@ -144,6 +150,7 @@ pub contract MFLDrop {
             if let drop = self.getDropRef(id: id) {
                 dropsData.append(DropData(
                     id: drop.id,
+                    name: drop.name,
                     price: drop.price,
                     status: drop.status.rawValue,
                     packTemplateID: drop.packTemplateID,
@@ -194,7 +201,7 @@ pub contract MFLDrop {
 
     pub resource interface DropAdminClaim {
         pub let name: String
-        pub fun createDrop(price: UFix64, packTemplateID: UInt64, maxTokensPerAddress: UInt32)
+        pub fun createDrop(name: String, price: UFix64, packTemplateID: UInt64, maxTokensPerAddress: UInt32)
         pub fun setOwnerVault(vault: Capability<&AnyResource{FungibleToken.Receiver}>)
         pub fun setStatus(id: UInt64, status: Status)
         pub fun setWhitelistedAddresses(id: UInt64, addresses: {Address: UInt32})
@@ -208,12 +215,13 @@ pub contract MFLDrop {
             self.name = "DropAdminClaim"
         }
 
-        pub fun createDrop(price: UFix64, packTemplateID: UInt64, maxTokensPerAddress: UInt32) {
+        pub fun createDrop(name: String, price: UFix64, packTemplateID: UInt64, maxTokensPerAddress: UInt32) {
             pre {
                 MFLPackTemplate.getPackTemplatesIDs().contains(packTemplateID) : "Pack template id does not exist"
             }
 
             let newDrop <- create Drop(
+                name: name,
                 price: price,
                 packTemplateID: packTemplateID,
                 maxTokensPerAddress: maxTokensPerAddress,

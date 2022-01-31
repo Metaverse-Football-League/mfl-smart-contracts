@@ -28,7 +28,7 @@ export const MFLPackTestsUtils = {
     await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers: [receiverAcctAddress]});
     await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers: [receiverAcctAddress]});
     await testsUtils.shallPass({name: 'mfl/drops/set_owner_vault.tx', args: [], signers: [receiverAcctAddress]});
-    await testsUtils.shallPass({name: 'mfl/drops/set_status_opened_all.tx', args: [argsDrop[1]], signers: [receiverAcctAddress]});
+    await testsUtils.shallPass({name: 'mfl/drops/set_status_opened_all.tx', args: [argsDrop[2]], signers: [receiverAcctAddress]});
   },
 
   async setupAndTopupFusdAccount(senderAcctAddress, receiverAcctAddress, amount) {
