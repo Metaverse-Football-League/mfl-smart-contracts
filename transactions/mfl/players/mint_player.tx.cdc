@@ -8,7 +8,7 @@ import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 transaction(
     id: UInt64,
     season: UInt32,
-    ipfsURI: String,
+    folderCID: String,
     name: String,
     nationalities: [String],
     positions: [String],
@@ -63,7 +63,7 @@ transaction(
             id: id,
             metadata: metadata,
             season: season,
-            ipfsURI: ipfsURI,
+            folderCID: folderCID,
         )
         self.receiverRef.deposit(token: <- playerNFT)
     }

@@ -203,7 +203,7 @@ describe('MFLPlayer', () => {
         expect(playerFromCollection).toEqual({
           id: 5,
           season: MFLPlayerTestsUtils.PLAYER_DATA.season,
-          ipfsURI: MFLPlayerTestsUtils.PLAYER_DATA.ipfsURI,
+          folderCID: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
           uuid: expect.toBeNumber(),
         });
       });
@@ -225,7 +225,7 @@ describe('MFLPlayer', () => {
         expect(playerFromCollection).toEqual({
           id: 5,
           season: MFLPlayerTestsUtils.PLAYER_DATA.season,
-          ipfsURI: MFLPlayerTestsUtils.PLAYER_DATA.ipfsURI,
+          folderCID: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
           uuid: expect.toBeNumber(),
         });
       });
@@ -303,7 +303,7 @@ describe('MFLPlayer', () => {
         // assert
         expect(playerDataFromCollection).toEqual({
           id: 2,
-          ipfsURI: 'ipfs://someURI/1201',
+          folderCID: 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
           season: 1,
           metadata: MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY,
         });
@@ -352,7 +352,7 @@ describe('MFLPlayer', () => {
         uuid: expect.toBeNumber(),
         id: 54,
         season: 1,
-        ipfsURI: 'ipfs://someURI/1201',
+        folderCID: 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
       });
     });
 
@@ -427,7 +427,7 @@ describe('MFLPlayer', () => {
         // execute
         const signers = [aliceAdminAccountAddress];
         const playerID = 1201;
-        const args = [playerID, 1, 'ipfs://someURI/1201', ...Object.values(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY)];
+        const args = [playerID, 1, 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm', ...Object.values(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY)];
         const result = await testsUtils.shallPass({name: 'mfl/players/mint_player.tx', args, signers});
 
         // assert
@@ -448,7 +448,7 @@ describe('MFLPlayer', () => {
           id: playerID,
           metadata: MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY,
           season: 1,
-          ipfsURI: 'ipfs://someURI/1201',
+          folderCID: 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
         });
         const totalSupply = await testsUtils.executeValidScript({
           name: 'mfl/players/get_players_total_supply.script',
@@ -461,7 +461,7 @@ describe('MFLPlayer', () => {
         expect(playerFromCollection).toEqual({
           id: playerID,
           season: 1,
-          ipfsURI: 'ipfs://someURI/1201',
+          folderCID: 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
           uuid: expect.toBeNumber(),
         });
       });
@@ -473,7 +473,7 @@ describe('MFLPlayer', () => {
         // execute
         const signers = [aliceAdminAccountAddress];
         const playerID = 1201;
-        const args = [playerID, 1, 'ipfs://someURI/1201', ...Object.values(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY)];
+        const args = [playerID, 1, 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm', ...Object.values(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY)];
         await testsUtils.shallPass({name: 'mfl/players/mint_player.tx', args, signers});
         const error = await testsUtils.shallRevert({name: 'mfl/players/mint_player.tx', args, signers});
 
@@ -509,7 +509,7 @@ describe('MFLPlayer', () => {
           id: playerID,
           metadata: updatedMetadata,
           season: 1,
-          ipfsURI: 'ipfs://someURI/1201',
+          folderCID: 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
         });
         expect(result.events).toHaveLength(1);
         expect(result.events[0]).toEqual(expect.objectContaining({

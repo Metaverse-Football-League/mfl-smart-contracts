@@ -8,7 +8,7 @@ pub contract MFLViews {
     pub struct PlayerDataViewV1 {
         pub let id: UInt64
         pub let season: UInt32
-        pub let ipfsURI: String
+        pub let folderCID: String
         pub let name: String
         pub let nationalities: [String]
         pub let positions: [String]
@@ -27,10 +27,10 @@ pub contract MFLViews {
         pub let resistance: UInt32
 
         //TODO maybe we can return nil if key does not exist ?
-        init(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, ipfsURI: String) {
+        init(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, folderCID: String) {
             self.id = id
             self.season = season
-            self.ipfsURI = ipfsURI
+            self.folderCID = folderCID
             self.name = metadata["name"] as! String? ?? ""
             self.nationalities = metadata["nationalities"] as! [String]? ?? []
             self.positions = metadata["positions"] as! [String]? ?? []
