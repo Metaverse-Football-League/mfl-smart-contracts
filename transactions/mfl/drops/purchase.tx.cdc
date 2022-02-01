@@ -1,4 +1,6 @@
 import FungibleToken from "../../../contracts/_libs/FungibleToken.cdc"
+import NonFungibleToken from "../../../contracts/_libs/NonFungibleToken.cdc"
+import MetadataViews from "../../../contracts/_libs/MetadataViews.cdc"
 import FUSD from "../../../contracts/_libs/FUSD.cdc"
 import MFLDrop from "../../../contracts/drops/MFLDrop.cdc"
 import MFLPack from "../../../contracts/packs/MFLPack.cdc"
@@ -17,14 +19,14 @@ transaction(
 ) {
     let senderVault: &FUSD.Vault{FungibleToken.Provider}
     let address: Address
-    let recipientCollectionCap: Capability<&{MFLPack.CollectionPublic}>
+    let recipientCollectionCap: Capability<&{NonFungibleToken.CollectionPublic}>
 
     prepare(acct: AuthAccount) {
       self.senderVault = acct.borrow<&FUSD.Vault{FungibleToken.Provider}>(from: /storage/fusdVault) ?? panic("Could not borrow fusd vault")
       self.address = acct.address
       fun hasPackCollection(address: Address): Bool {
         return getAccount(address)
-        .getCapability<&{MFLPack.CollectionPublic}>(MFLPack.CollectionPublicPath)
+        .getCapability<&MFLPack.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(MFLPack.CollectionPublicPath)
         .check()
       }
 
@@ -34,9 +36,9 @@ transaction(
           acct.save(<- MFLPack.createEmptyCollection(), to: MFLPack.CollectionStoragePath)
         }
         acct.unlink(MFLPack.CollectionPublicPath)
-        acct.link<&{MFLPack.CollectionPublic}>(MFLPack.CollectionPublicPath, target: MFLPack.CollectionStoragePath)
+        acct.link<&MFLPack.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(MFLPack.CollectionPublicPath, target: MFLPack.CollectionStoragePath)
       }
-      self.recipientCollectionCap = acct.getCapability<&{MFLPack.CollectionPublic}>(MFLPack.CollectionPublicPath)
+      self.recipientCollectionCap = acct.getCapability<&MFLPack.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(MFLPack.CollectionPublicPath)
     }
 
     execute {

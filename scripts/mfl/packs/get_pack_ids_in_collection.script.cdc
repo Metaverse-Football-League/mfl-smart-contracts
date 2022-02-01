@@ -1,3 +1,4 @@
+import MetadataViews from "../../../contracts/_libs/MetadataViews.cdc"
 import MFLPack from "../../../contracts/packs/MFLPack.cdc"
 
 /** 
@@ -6,7 +7,7 @@ import MFLPack from "../../../contracts/packs/MFLPack.cdc"
 **/
 
 pub fun main(address: Address): [UInt64] {
-    let packCollectionRef = getAccount(address).getCapability<&{MFLPack.CollectionPublic}>(MFLPack.CollectionPublicPath).borrow()
+    let packCollectionRef = getAccount(address).getCapability<&{MetadataViews.ResolverCollection}>(MFLPack.CollectionPublicPath).borrow()
         ?? panic("Could not borrow the collection reference")
     return packCollectionRef.getIDs()
 }

@@ -4,7 +4,7 @@ import MFLPack from "../../../contracts/packs/MFLPack.cdc"
 /** 
   This script returns a data representation of a pack
   given a collection address and a player id,
-  following the Display View struct defined in the MedataViews contract
+  following the Display View struct defined in the MedataViews contract.
 **/
 
 pub struct PackNFT {
@@ -30,14 +30,13 @@ pub struct PackNFT {
 }
 
 pub fun main(address: Address, id: UInt64): PackNFT {
-    let account = getAccount(address)
 
-    let collection = account
+    let collection = getAccount(address)
         .getCapability(MFLPack.CollectionPublicPath)
-        .borrow<&{MFLPack.CollectionPublic}>()
+        .borrow<&{MetadataViews.ResolverCollection}>()
         ?? panic("Could not borrow a reference to the collection")
 
-    let nft = collection.borrowPack(id: id)!
+    let nft = collection.borrowViewResolver(id: id)
 
     // Get the basic display information for this NFT
     let view = nft.resolveView(Type<MetadataViews.Display>())!
