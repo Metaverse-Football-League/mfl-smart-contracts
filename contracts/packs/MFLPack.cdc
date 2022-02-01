@@ -19,26 +19,6 @@ pub contract MFLPack: NonFungibleToken {
     // Counter for all the Packs ever minted
     pub var totalSupply: UInt64
 
-    // This struct is used to send a data representation of a Pack
-    pub struct PackData {
-        pub let id: UInt64
-        pub let packTemplateMintIndex: UInt32
-        pub let packTemplateID: UInt64
-        pub let packTemplateData: MFLPackTemplate.PackTemplateData
-
-        init(
-            id: UInt64,
-            packTemplateMintIndex: UInt32,
-            packTemplateID: UInt64,
-            packTemplateData: MFLPackTemplate.PackTemplateData
-        ) {
-            self.id = id
-            self.packTemplateMintIndex = packTemplateMintIndex
-            self.packTemplateID = packTemplateID
-            self.packTemplateData = packTemplateData
-        }
-    }
-
     pub resource NFT: NonFungibleToken.INFT, MetadataViews.Resolver {
 
         // Unique ID across all packs
