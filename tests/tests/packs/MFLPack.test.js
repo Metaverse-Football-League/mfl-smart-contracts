@@ -408,14 +408,16 @@ describe('MFLPack', () => {
           {
             id: 1,
             packTemplateMintIndex: 0,
-            packTemplateID: 1,
-            packTemplateName: 'Common',
-            packTemplateDescription: 'This is a common pack',
-            packTemplateMaxSupply: 8500,
-            packTemplateCurrentSupply: 1,
-            packTemplateStartingIndex: 255,
-            packTemplateIsOpenable: false,
-            packTemplateImageUrl: 'http://img1-url'
+            packTemplate: {
+              id: 1,
+              name: 'Common',
+              description: 'This is a common pack',
+              maxSupply: 8500,
+              currentSupply: 1,
+              startingIndex: 255,
+              isOpenable: false,
+              imageUrl: 'http://img1-url'
+            }
           }
         );
       });
@@ -440,38 +442,44 @@ describe('MFLPack', () => {
           {
             id: 1,
             packTemplateMintIndex: 0,
-            packTemplateID: 1,
-            packTemplateName: 'Common',
-            packTemplateDescription: 'This is a common pack',
-            packTemplateMaxSupply: 8500,
-            packTemplateCurrentSupply: 3,
-            packTemplateStartingIndex: 255,
-            packTemplateIsOpenable: false,
-            packTemplateImageUrl: 'http://img1-url'
-          },
-          {
-            id: 3,
-            packTemplateMintIndex: 2,
-            packTemplateID: 1,
-            packTemplateName: 'Common',
-            packTemplateDescription: 'This is a common pack',
-            packTemplateMaxSupply: 8500,
-            packTemplateCurrentSupply: 3,
-            packTemplateStartingIndex: 255,
-            packTemplateIsOpenable: false,
-            packTemplateImageUrl: 'http://img1-url'
+            packTemplate: {
+              id: 1,
+              name: 'Common',
+              description: 'This is a common pack',
+              maxSupply: 8500,
+              currentSupply: 3,
+              startingIndex: 255,
+              isOpenable: false,
+              imageUrl: 'http://img1-url'
+            }
           },
           {
             id: 2,
             packTemplateMintIndex: 1,
-            packTemplateID: 1,
-            packTemplateName: 'Common',
-            packTemplateDescription: 'This is a common pack',
-            packTemplateMaxSupply: 8500,
-            packTemplateCurrentSupply: 3,
-            packTemplateStartingIndex: 255,
-            packTemplateIsOpenable: false,
-            packTemplateImageUrl: 'http://img1-url'
+            packTemplate: {
+              id: 1,
+              name: 'Common',
+              description: 'This is a common pack',
+              maxSupply: 8500,
+              currentSupply: 3,
+              startingIndex: 255,
+              isOpenable: false,
+              imageUrl: 'http://img1-url'
+            }
+          },
+          {
+            id: 3,
+            packTemplateMintIndex: 2,
+            packTemplate: {
+              id: 1,
+              name: 'Common',
+              description: 'This is a common pack',
+              maxSupply: 8500,
+              currentSupply: 3,
+              startingIndex: 255,
+              isOpenable: false,
+              imageUrl: 'http://img1-url'
+            }
           }
         ]));
       });

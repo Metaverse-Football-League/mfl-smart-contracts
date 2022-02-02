@@ -365,7 +365,7 @@ describe('MFLPlayer', () => {
           id: 100022,
           season: 1,
           folderCID: 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
-          ...MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY,
+          metadata: MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY,
         });
       });
 
@@ -387,13 +387,13 @@ describe('MFLPlayer', () => {
             id: 100022,
             season: 1,
             folderCID: 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
-            ...MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY,
+            metadata: MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY,
           },
           {
             id: 100023,
             season: 1,
             folderCID: 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
-            ...MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY,
+            metadata: MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY,
           },
         ])); 
       });
