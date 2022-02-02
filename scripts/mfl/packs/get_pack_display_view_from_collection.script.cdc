@@ -4,7 +4,7 @@ import MFLPack from "../../../contracts/packs/MFLPack.cdc"
 /** 
   This script returns a data representation of a pack
   given a collection address and a player id,
-  following the Display View struct defined in the MedataViews contract.
+  following the Display view defined in the MedataViews contract.
 **/
 
 pub struct PackNFT {

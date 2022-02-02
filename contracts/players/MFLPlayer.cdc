@@ -84,35 +84,13 @@ pub contract MFLPlayer: NonFungibleToken {
             return nil
         }
 
-        pub fun getData(): PlayerData? {
-            return MFLPlayer.getPlayerData(id: self.id);
-        }
-
         destroy() {
             emit Destroyed(id: self.id)
         }
     }
 
-    // This is the interface that users can cast their Players Collection as
-    // to allow others to deposit Players into their Collection. It also allows for reading
-    // the details of Players in the Collection.
-    pub resource interface CollectionPublic {
-        pub fun deposit(token: @NonFungibleToken.NFT)
-        pub fun batchDeposit(tokens: @NonFungibleToken.Collection)
-        pub fun getIDs(): [UInt64]
-        pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
-        pub fun borrowPlayer(id: UInt64): &MFLPlayer.NFT? {
-            // If the result isn't nil, the id of the returned reference
-            // should be the same as the argument to the function
-            post {
-                (result == nil) || (result?.id == id):
-                    "Cannot borrow Player reference: The ID of the returned reference is incorrect"
-            }
-        }
-    }
-
     // A collection of Player NFTs owned by an account
-    pub resource Collection: CollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
+    pub resource Collection: NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
 
         // Dictionary of NFT conforming tokens
         pub var ownedNFTs: @{UInt64: NonFungibleToken.NFT}
@@ -153,23 +131,6 @@ pub contract MFLPlayer: NonFungibleToken {
             destroy oldToken
         }
 
-        // batchDeposit takes a Collection object as an argument
-        // and deposits each contained NFT into this Collection
-        pub fun batchDeposit(tokens: @NonFungibleToken.Collection) {
-
-            // Get an array of the IDs to be deposited
-            let keys = tokens.getIDs()
-
-            // Iterate through the keys in the collection and deposit each one
-            for key in keys {
-                self.deposit(token: <-tokens.withdraw(withdrawID: key))
-            }
-
-            // Destroy the empty Collection
-            destroy tokens
-        }
-
-
         // Returns an array of the IDs that are in the collection
         pub fun getIDs(): [UInt64] {
             return self.ownedNFTs.keys
@@ -179,18 +140,7 @@ pub contract MFLPlayer: NonFungibleToken {
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT {
             return &self.ownedNFTs[id] as &NonFungibleToken.NFT
         }
-
-        // Gets a reference to an NFT in the collection as a Player,
-        // exposing all of its fields
-        pub fun borrowPlayer(id: UInt64): &MFLPlayer.NFT? {
-            if self.ownedNFTs[id] != nil {
-                let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
-                return ref as! &MFLPlayer.NFT
-            } else {
-                return nil
-            }
-        }
-
+        
         pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
             let nft = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
             let playerNFT = nft as! &MFLPlayer.NFT
@@ -209,21 +159,6 @@ pub contract MFLPlayer: NonFungibleToken {
     // Public function that anyone can call to create a new empty collection
     pub fun createEmptyCollection(): @Collection {
         return <- create Collection()
-    }
-
-
-    // Get a reference to a Player from an account's Collection, if available.
-    // If an account does not have a MFLPlayer.Collection, panic.
-    // If it has a Collection but does not contain the itemID, return nil.
-    // If it has a Collection and that collection contains the itemID, return a reference to that.
-    pub fun fetch(from: Address, itemID: UInt64): &MFLPlayer.NFT? {
-        let collection = getAccount(from)
-            .getCapability<&{MFLPlayer.CollectionPublic}>(MFLPlayer.CollectionPublicPath)
-            .borrow()
-            ?? panic("Couldn't get collection")
-        // We trust MFLPlayer.Collection.borrowPlayer to get the correct itemID
-        // (it checks it before returning it).
-        return collection.borrowPlayer(id: itemID)
     }
 
     // Get data for a specific player ID
@@ -296,7 +231,7 @@ pub contract MFLPlayer: NonFungibleToken {
         // Put a new Collection in storage
         self.account.save<@Collection>(<- create Collection(), to: self.CollectionStoragePath)
         // Create a public capability for the Collection
-        self.account.link<&{CollectionPublic}>(self.CollectionPublicPath, target: self.CollectionStoragePath)
+        self.account.link<&MFLPlayer.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(self.CollectionPublicPath, target: self.CollectionStoragePath)
 
         self.account.save(<- create PlayerAdmin() , to: self.PlayerAdminStoragePath)
 

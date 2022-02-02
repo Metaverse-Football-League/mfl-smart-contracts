@@ -473,7 +473,7 @@ describe('MFLDrop', () => {
 
         // assert
         const packIds = await testsUtils.executeValidScript({
-          name: 'mfl/packs/get_pack_ids_in_collection.script',
+          name: 'mfl/packs/get_ids_in_collection.script',
           args: [bobAccountAddress]
         });
         expect(packIds).toEqual([1]);
@@ -497,7 +497,7 @@ describe('MFLDrop', () => {
 
         // assert
         const packIds = await testsUtils.executeValidScript({
-          name: 'mfl/packs/get_pack_ids_in_collection.script',
+          name: 'mfl/packs/get_ids_in_collection.script',
           args: [bobAccountAddress]
         });
         expect(packIds).toHaveLength(5);

@@ -1,5 +1,4 @@
 export const BORROW_VIEW_RESOLVER = `
-    import NonFungibleToken from "../../../../contracts/_libs/NonFungibleToken.cdc"
     import MetadataViews from "../../../contracts/_libs/MetadataViews.cdc"
     import MFLPack from "../../../../contracts/packs/MFLPack.cdc"
     

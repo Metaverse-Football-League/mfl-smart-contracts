@@ -16,14 +16,14 @@ pub fun main(address: Address): [MFLViews.PackDataViewV1] {
 
     let ids = collection.getIDs()
 
-    let packs: [MFLViews.PackDataViewV1] = []
+    let packsDatas: [MFLViews.PackDataViewV1] = []
 
     for id in ids {
       let nft = collection.borrowViewResolver(id: id)
       let view = nft.resolveView(Type<MFLViews.PackDataViewV1>())!
       let packData = view as! MFLViews.PackDataViewV1
-      packs.append(packData)
+      packsDatas.append(packData)
     }
 
-    return packs
+    return packsDatas
 }

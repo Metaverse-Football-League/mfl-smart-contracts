@@ -1,3 +1,4 @@
+import NonFungibleToken from "../../../contracts/_libs/NonFungibleToken.cdc"
 import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 
 /** 
@@ -7,11 +8,11 @@ import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 
 transaction(receiverAddr: Address, id: UInt64) {
 
-    let receiverRef: &{MFLPlayer.CollectionPublic}
+    let receiverRef: &{NonFungibleToken.CollectionPublic}
     let senderRef: &MFLPlayer.Collection
 
     prepare(acct: AuthAccount) {
-        self.receiverRef = getAccount(receiverAddr).getCapability<&{MFLPlayer.CollectionPublic}>(MFLPlayer.CollectionPublicPath).borrow() ??  panic("Could not borrow receiver collection reference")
+        self.receiverRef = getAccount(receiverAddr).getCapability<&{NonFungibleToken.CollectionPublic}>(MFLPlayer.CollectionPublicPath).borrow() ??  panic("Could not borrow receiver collection reference")
         self.senderRef = acct.borrow<&MFLPlayer.Collection>(from: MFLPlayer.CollectionStoragePath) ?? panic("Could not borrow sender collection reference")
     }
 

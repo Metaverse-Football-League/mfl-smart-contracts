@@ -4,7 +4,7 @@ import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 /** 
   This script returns a data representation of a player
   given a collection address and a player id,
-  following the Display View struct defined in the MedataViews contract
+  following the Display View defined in the MedataViews contract.
 **/
 
 pub struct PlayerNFT {
@@ -30,14 +30,13 @@ pub struct PlayerNFT {
 }
 
 pub fun main(address: Address, id: UInt64): PlayerNFT {
-    let account = getAccount(address)
 
-    let collection = account
+    let collection = getAccount(address)
         .getCapability(MFLPlayer.CollectionPublicPath)
-        .borrow<&{MFLPlayer.CollectionPublic}>()
+        .borrow<&{MetadataViews.ResolverCollection}>()
         ?? panic("Could not borrow a reference to the collection")
 
-    let nft = collection.borrowPlayer(id: id)!
+    let nft = collection.borrowViewResolver(id: id)!
 
     // Get the basic display information for this NFT
     let view = nft.resolveView(Type<MetadataViews.Display>())!

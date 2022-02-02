@@ -1,5 +1,5 @@
 import MetadataViews from "../../../contracts/_libs/MetadataViews.cdc"
-import MFLPack from "../../../contracts/packs/MFLPack.cdc"
+import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 
 /** 
   This script returns an array of view types.
@@ -8,7 +8,7 @@ import MFLPack from "../../../contracts/packs/MFLPack.cdc"
 pub fun main(address: Address, id: UInt64): [Type] {
 
     let collection = getAccount(address)
-        .getCapability(MFLPack.CollectionPublicPath)
+        .getCapability(MFLPlayer.CollectionPublicPath)
         .borrow<&{MetadataViews.ResolverCollection}>()
         ?? panic("Could not borrow a reference to the collection")
 

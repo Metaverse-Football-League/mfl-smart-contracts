@@ -63,11 +63,11 @@ describe('MFLPack', () => {
           data: {id: 1, to: jackAccountAddress}
         }));
         const bobPackIds = await testsUtils.executeValidScript({
-          name: 'mfl/packs/get_pack_ids_in_collection.script',
+          name: 'mfl/packs/get_ids_in_collection.script',
           args: [bobAccountAddress],
         });
         const jackPackIds = await testsUtils.executeValidScript({
-          name: 'mfl/packs/get_pack_ids_in_collection.script',
+          name: 'mfl/packs/get_ids_in_collection.script',
           args: [jackAccountAddress],
         });
         // Bob shoud have 0 pack
@@ -145,11 +145,11 @@ describe('MFLPack', () => {
           data: {id: 1, to: jackAccountAddress}
         }));
         const bobPackIds = await testsUtils.executeValidScript({
-          name: 'mfl/packs/get_pack_ids_in_collection.script',
+          name: 'mfl/packs/get_ids_in_collection.script',
           args: [bobAccountAddress],
         });
         const jackPackIds = await testsUtils.executeValidScript({
-          name: 'mfl/packs/get_pack_ids_in_collection.script',
+          name: 'mfl/packs/get_ids_in_collection.script',
           args: [jackAccountAddress],
         });
         // Bob shoud have 0 pack
@@ -172,7 +172,7 @@ describe('MFLPack', () => {
 
         // execute
         const bobPackIds = await testsUtils.executeValidScript({
-          name: 'mfl/packs/get_pack_ids_in_collection.script',
+          name: 'mfl/packs/get_ids_in_collection.script',
           args: [bobAccountAddress],
         });
 
@@ -272,7 +272,7 @@ describe('MFLPack', () => {
           data: {id: 2},
         }));
         const error = await testsUtils.executeFailingScript({
-          name: 'mfl/packs/get_pack_ids_in_collection.script',
+          name: 'mfl/packs/get_ids_in_collection.script',
           args: [bobAccountAddress],
         });
         // Bob should no longer have a collection
@@ -294,7 +294,7 @@ describe('MFLPack', () => {
         // assert
         // Bob should have a collection
         await testsUtils.executeValidScript({
-          name: 'mfl/packs/get_pack_ids_in_collection.script',
+          name: 'mfl/packs/get_ids_in_collection.script',
           args: [bobAccountAddress],
         });
       })
@@ -361,7 +361,7 @@ describe('MFLPack', () => {
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
         await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
-        await MFLPackTestsUtils.purchase(bobAccountAddress, argsPurchase);
+        const argsPurchase = [1, 2, '39.98'];
         await MFLPackTestsUtils.purchase(bobAccountAddress, argsPurchase);
 
         // execute
@@ -385,6 +385,93 @@ describe('MFLPack', () => {
             thumbnail: 'http://img1-url',
             owner: bobAccountAddress,
             type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.NFT`,
+          }
+        ]));
+      });
+
+      test('should resolve PackData view for a specific pack', async () => {
+        // prepare
+        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplate, argsDrop);
+        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
+        const bobAccountAddress = await getAccountAddress('BobAccount');
+        await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
+        await MFLPackTestsUtils.purchase(bobAccountAddress, argsPurchase);
+
+        // execute
+        const packDataView = await testsUtils.executeValidScript({
+          name: 'mfl/packs/get_pack_data_view_from_collection.script',
+          args: [bobAccountAddress, 1],
+        });
+
+        // assert
+        expect(packDataView).toEqual(
+          {
+            id: 1,
+            packTemplateMintIndex: 0,
+            packTemplateID: 1,
+            packTemplateName: 'Common',
+            packTemplateDescription: 'This is a common pack',
+            packTemplateMaxSupply: 8500,
+            packTemplateCurrentSupply: 1,
+            packTemplateStartingIndex: 255,
+            packTemplateIsOpenable: false,
+            packTemplateImageUrl: 'http://img1-url'
+          }
+        );
+      });
+
+      test('should resolve PackData view for all packs', async () => {
+        // prepare
+        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplate, argsDrop);
+        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
+        const bobAccountAddress = await getAccountAddress('BobAccount');
+        await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
+        const argsPurchase = [1, 3, '59.97'];
+        await MFLPackTestsUtils.purchase(bobAccountAddress, argsPurchase);
+
+        // execute
+        const packsDataView = await testsUtils.executeValidScript({
+          name: 'mfl/packs/get_packs_data_view_from_collection.script',
+          args: [bobAccountAddress],
+        });
+
+        // assert
+        expect(packsDataView).toEqual(expect.arrayContaining([
+          {
+            id: 1,
+            packTemplateMintIndex: 0,
+            packTemplateID: 1,
+            packTemplateName: 'Common',
+            packTemplateDescription: 'This is a common pack',
+            packTemplateMaxSupply: 8500,
+            packTemplateCurrentSupply: 3,
+            packTemplateStartingIndex: 255,
+            packTemplateIsOpenable: false,
+            packTemplateImageUrl: 'http://img1-url'
+          },
+          {
+            id: 3,
+            packTemplateMintIndex: 2,
+            packTemplateID: 1,
+            packTemplateName: 'Common',
+            packTemplateDescription: 'This is a common pack',
+            packTemplateMaxSupply: 8500,
+            packTemplateCurrentSupply: 3,
+            packTemplateStartingIndex: 255,
+            packTemplateIsOpenable: false,
+            packTemplateImageUrl: 'http://img1-url'
+          },
+          {
+            id: 2,
+            packTemplateMintIndex: 1,
+            packTemplateID: 1,
+            packTemplateName: 'Common',
+            packTemplateDescription: 'This is a common pack',
+            packTemplateMaxSupply: 8500,
+            packTemplateCurrentSupply: 3,
+            packTemplateStartingIndex: 255,
+            packTemplateIsOpenable: false,
+            packTemplateImageUrl: 'http://img1-url'
           }
         ]));
       });
@@ -412,7 +499,7 @@ describe('MFLPack', () => {
           data: {id: 1},
         });
         const bobPackIds = await testsUtils.executeValidScript({
-          name: 'mfl/packs/get_pack_ids_in_collection.script',
+          name: 'mfl/packs/get_ids_in_collection.script',
           args: [bobAccountAddress],
         });
         // Bob should have 0 pack

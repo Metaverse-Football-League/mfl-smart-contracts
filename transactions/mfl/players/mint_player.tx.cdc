@@ -1,3 +1,4 @@
+import NonFungibleToken from "../../../contracts/_libs/NonFungibleToken.cdc"
 import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 
@@ -27,11 +28,11 @@ transaction(
     resistance: UInt32,
 ) {
     let playerAdminProxyRef: &MFLAdmin.AdminProxy
-    let receiverRef: &{MFLPlayer.CollectionPublic}
+    let receiverRef: &{NonFungibleToken.CollectionPublic}
 
     prepare(acct: AuthAccount) {
         self.playerAdminProxyRef = acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
-        let playerCollectionCap = getAccount(acct.address).getCapability<&{MFLPlayer.CollectionPublic}>(MFLPlayer.CollectionPublicPath)
+        let playerCollectionCap = getAccount(acct.address).getCapability<&{NonFungibleToken.CollectionPublic}>(MFLPlayer.CollectionPublicPath)
         self.receiverRef = playerCollectionCap.borrow() ?? panic("Could not borrow receiver reference")
     }
 

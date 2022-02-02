@@ -1,6 +1,7 @@
 import {emulator, getAccountAddress} from 'flow-js-testing';
 import {MFLPlayerTestsUtils} from './_utils/MFLPlayerTests.utils';
 import {testsUtils} from '../_utils/tests.utils';
+import { BORROW_VIEW_RESOLVER } from './_scripts/borrow_view_resolver.script';
 import * as matchers from 'jest-extended';
 
 expect.extend(matchers);
@@ -90,7 +91,7 @@ describe('MFLPlayer', () => {
       });
     });
 
-    describe('batchWithdraw() / batchDeposit()', () => {
+    describe('batchWithdraw()', () => {
       test('should batch withdraw NFTs from a collection and batch deposit them in another collection', async () => {
         // prepare
         const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
@@ -190,34 +191,12 @@ describe('MFLPlayer', () => {
             import MFLPlayer from "../../../../contracts/players/MFLPlayer.cdc"
 
             pub fun main(address: Address, playerID: UInt64): &NonFungibleToken.NFT {
-                let playerCollectionRef = getAccount(address).getCapability<&{MFLPlayer.CollectionPublic}>(MFLPlayer.CollectionPublicPath).borrow()
+                let playerCollectionRef = getAccount(address).getCapability<&{NonFungibleToken.CollectionPublic}>(MFLPlayer.CollectionPublicPath).borrow()
                     ?? panic("Could not borrow the collection reference")
                 let nftRef = playerCollectionRef.borrowNFT(id: playerID)
                 return nftRef
             }
           `,
-          args: [aliceAdminAccountAddress, 5],
-        });
-
-        // assert
-        expect(playerFromCollection).toEqual({
-          id: 5,
-          season: MFLPlayerTestsUtils.PLAYER_DATA.season,
-          folderCID: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
-          uuid: expect.toBeNumber(),
-        });
-      });
-    });
-
-    describe('borrowPlayer()', () => {
-      test('should borrow a player in the collection', async () => {
-        // prepare
-        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
-        await MFLPlayerTestsUtils.createPlayerNFT(5);
-
-        // execute
-        const playerFromCollection = await testsUtils.executeValidScript({
-          name: 'mfl/players/get_player_from_collection.script',
           args: [aliceAdminAccountAddress, 5],
         });
 
@@ -285,32 +264,138 @@ describe('MFLPlayer', () => {
 
       // assert
       await testsUtils.executeValidScript({
-        name: 'mfl/players/get_player_from_collection.script',
-        args: [bobAccountAddress, 1],
+        name: 'mfl/players/get_ids_in_collection.script',
+        args: [bobAccountAddress],
       });
     });
   });
 
   describe('NFT', () => {
-    describe('getData()', () => {
-      test('should be able to get data', async () => {
+
+    describe('getViews()', () => {
+      test('should get views types', async () => {
         // prepare
         const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
-        await MFLPlayerTestsUtils.createPlayerNFT(2);
+        await MFLPlayerTestsUtils.createPlayerNFT(100022);
 
         // execute
-        const playerDataFromCollection = await testsUtils.executeValidScript({
-          name: 'mfl/players/get_player_data_from_collection.script',
-          args: [aliceAdminAccountAddress, 2],
+        const viewsTypes = await testsUtils.executeValidScript({
+          name: 'mfl/players/get_player_views_from_collection.script',
+          args: [aliceAdminAccountAddress, 100022],
         });
 
         // assert
-        expect(playerDataFromCollection).toEqual({
-          id: 2,
-          folderCID: 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
-          season: 1,
-          metadata: MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY,
+        expect(viewsTypes).toEqual(expect.arrayContaining([
+          `A.${testsUtils.sansPrefix(addressMap.MetadataViews)}.MetadataViews.Display`,
+          `A.${testsUtils.sansPrefix(addressMap.MFLViews)}.MFLViews.PlayerDataViewV1`,
+        ]));
+      });
+    });
+
+    describe('resolveView()', () => {
+      test('should resolve Display view for a specific player', async () => {
+        // prepare
+        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+        await MFLPlayerTestsUtils.createPlayerNFT(100022);
+
+        // execute
+        const playerDisplayView = await testsUtils.executeValidScript({
+          name: 'mfl/players/get_player_display_view_from_collection.script',
+          args: [aliceAdminAccountAddress, 100022],
         });
+
+        // assert
+        expect(playerDisplayView).toEqual(
+          {
+            name: 'some name',
+            description: 'MFL Player #100022',
+            thumbnail: 'ipfs://QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm/100022.svg',
+            owner: aliceAdminAccountAddress,
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.NFT`,
+          }
+        );
+      });
+
+      test('should resolve Display view for all players', async () => {
+        // prepare
+        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+        await MFLPlayerTestsUtils.createPlayerNFT(100022);
+        await MFLPlayerTestsUtils.createPlayerNFT(100023);
+
+        // execute
+        const playersDisplayView = await testsUtils.executeValidScript({
+          name: 'mfl/players/get_players_display_view_from_collection.script',
+          args: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        expect(playersDisplayView).toEqual(expect.arrayContaining(
+          [
+            {
+              name: 'some name',
+              description: 'MFL Player #100022',
+              thumbnail: 'ipfs://QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm/100022.svg',
+              owner: aliceAdminAccountAddress,
+              type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.NFT`
+            },
+            {
+              name: 'some name',
+              description: 'MFL Player #100023',
+              thumbnail: 'ipfs://QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm/100023.svg',
+              owner: aliceAdminAccountAddress,
+              type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.NFT`
+            }
+          ])
+        );
+      });
+
+      test('should resolve PlayerData view for a specific player', async () => {
+        // prepare
+        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+        await MFLPlayerTestsUtils.createPlayerNFT(100022);
+
+        // execute
+        const playerDataView = await testsUtils.executeValidScript({
+          name: 'mfl/players/get_player_data_view_from_collection.script',
+          args: [aliceAdminAccountAddress, 100022],
+        });
+
+        // assert
+        expect(playerDataView).toEqual({
+          id: 100022,
+          season: 1,
+          folderCID: 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
+          ...MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY,
+        });
+      });
+
+      test('should resolve PlayerData view for all players', async () => {
+        // prepare
+        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+        await MFLPlayerTestsUtils.createPlayerNFT(100022);
+        await MFLPlayerTestsUtils.createPlayerNFT(100023);
+
+        // execute
+        const playersDataView = await testsUtils.executeValidScript({
+          name: 'mfl/players/get_players_data_view_from_collection.script',
+          args: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        expect(playersDataView).toEqual(expect.arrayContaining([
+          {
+            id: 100022,
+            season: 1,
+            folderCID: 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
+            ...MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY,
+          },
+          {
+            id: 100023,
+            season: 1,
+            folderCID: 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
+            ...MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY,
+          },
+        ])); 
       });
     });
 
@@ -330,62 +415,12 @@ describe('MFLPlayer', () => {
           type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Destroyed`,
           data: {id: 100022},
         });
-        const playerDataFromCollection = await testsUtils.executeValidScript({
-          name: 'mfl/players/get_player_data_from_collection.script',
+        const error = await testsUtils.executeFailingScript({
+          name: 'mfl/players/get_player_data_view_from_collection.script',
           args: [aliceAdminAccountAddress, 100022],
         });
-        expect(playerDataFromCollection).toBeNull();
+        expect(error.message).toContain("dereference failed")
       });
-    });
-  });
-
-  describe('fetch()', () => {
-    test('should fetch a player reference from an account', async () => {
-      // prepare
-      const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
-      await MFLPlayerTestsUtils.createPlayerNFT(54);
-
-      // execute
-      const player = await testsUtils.executeValidScript({
-        name: 'mfl/players/fetch_player.script',
-        args: [aliceAdminAccountAddress, 54],
-      });
-
-      // assert
-      expect(player).toEqual({
-        uuid: expect.toBeNumber(),
-        id: 54,
-        season: 1,
-        folderCID: 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
-      });
-    });
-
-    test('should return nil when fetching a player reference not in the account\'s collection', async () => {
-      // prepare
-      const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
-
-      // execute
-      const player = await testsUtils.executeValidScript({
-        name: 'mfl/players/fetch_player.script',
-        args: [aliceAdminAccountAddress, 54],
-      });
-
-      // assert
-      expect(player).toBeNull();
-    });
-
-    test('should panic when fetching a player reference from an account without the correct capability', async () => {
-      // prepare
-      const bobAccountAddress = await getAccountAddress('BobAccount');
-
-      // execute
-      const error = await testsUtils.executeFailingScript({
-        name: 'mfl/players/fetch_player.script',
-        args: [bobAccountAddress, 54],
-      });
-
-      // assert
-      expect(error.message).toContain('Couldn\'t get collection');
     });
   });
 
@@ -459,7 +494,7 @@ describe('MFLPlayer', () => {
         });
         expect(totalSupply).toBe(1);
         const playerFromCollection = await testsUtils.executeValidScript({
-          name: 'mfl/players/get_player_from_collection.script',
+          code: BORROW_VIEW_RESOLVER,
           args: [aliceAdminAccountAddress, playerID],
         });
         expect(playerFromCollection).toEqual({
