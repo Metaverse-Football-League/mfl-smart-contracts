@@ -24,14 +24,14 @@ transaction(
     prepare(acct: AuthAccount) {
       self.senderVault = acct.borrow<&FUSD.Vault{FungibleToken.Provider}>(from: /storage/fusdVault) ?? panic("Could not borrow fusd vault")
       self.address = acct.address
-      fun hasPackCollection(address: Address): Bool {
-        return getAccount(address)
+      fun hasPackCollection(): Bool {
+        return acct
         .getCapability<&MFLPack.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(MFLPack.CollectionPublicPath)
         .check()
       }
 
         
-      if !hasPackCollection(address: self.address) {
+      if !hasPackCollection() {
         if acct.borrow<&MFLPack.Collection>(from: MFLPack.CollectionStoragePath) == nil {
           acct.save(<- MFLPack.createEmptyCollection(), to: MFLPack.CollectionStoragePath)
         }
