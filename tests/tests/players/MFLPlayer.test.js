@@ -182,7 +182,8 @@ describe('MFLPlayer', () => {
       test('should borrow a NFT in the collection', async () => {
         // prepare
         const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
-        await MFLPlayerTestsUtils.createPlayerNFT(5);
+        const playerID = 5;
+        await MFLPlayerTestsUtils.createPlayerNFT(playerID);
 
         // execute
         const playerFromCollection = await testsUtils.executeValidScript({
@@ -197,14 +198,17 @@ describe('MFLPlayer', () => {
                 return nftRef
             }
           `,
-          args: [aliceAdminAccountAddress, 5],
+          args: [aliceAdminAccountAddress, playerID],
         });
 
         // assert
         expect(playerFromCollection).toEqual({
-          id: 5,
+          id: playerID,
           season: MFLPlayerTestsUtils.PLAYER_DATA.season,
-          folderCID: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
+          image: {
+            cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
+            path: `${playerID}.svg`
+          },
           uuid: expect.toBeNumber(),
         });
       });
@@ -352,19 +356,23 @@ describe('MFLPlayer', () => {
       test('should resolve PlayerData view for a specific player', async () => {
         // prepare
         const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
-        await MFLPlayerTestsUtils.createPlayerNFT(100022);
+        const playerID = 100022;
+        await MFLPlayerTestsUtils.createPlayerNFT(playerID);
 
         // execute
         const playerDataView = await testsUtils.executeValidScript({
           name: 'mfl/players/get_player_data_view_from_collection.script',
-          args: [aliceAdminAccountAddress, 100022],
+          args: [aliceAdminAccountAddress, playerID],
         });
 
         // assert
         expect(playerDataView).toEqual({
-          id: 100022,
+          id: playerID,
           season: 1,
-          folderCID: 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
+          thumbnail: {
+            cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
+            path: `${playerID}.svg`
+          },
           metadata: MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY,
         });
       });
@@ -372,8 +380,10 @@ describe('MFLPlayer', () => {
       test('should resolve PlayerData view for all players', async () => {
         // prepare
         const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
-        await MFLPlayerTestsUtils.createPlayerNFT(100022);
-        await MFLPlayerTestsUtils.createPlayerNFT(100023);
+        const playerID1 = 100022;
+        const playerID2 = 100023;
+        await MFLPlayerTestsUtils.createPlayerNFT(playerID1);
+        await MFLPlayerTestsUtils.createPlayerNFT(playerID2);
 
         // execute
         const playersDataView = await testsUtils.executeValidScript({
@@ -384,15 +394,21 @@ describe('MFLPlayer', () => {
         // assert
         expect(playersDataView).toEqual(expect.arrayContaining([
           {
-            id: 100022,
+            id: playerID1,
             season: 1,
-            folderCID: 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
+            thumbnail: {
+              cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
+              path: `${playerID1}.svg`
+            },
             metadata: MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY,
           },
           {
-            id: 100023,
+            id: playerID2,
             season: 1,
-            folderCID: 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
+            thumbnail: {
+              cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
+              path: `${playerID2}.svg`
+            },
             metadata: MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY,
           },
         ])); 
@@ -428,18 +444,24 @@ describe('MFLPlayer', () => {
     test('should get player data', async () => {
       // prepare
       await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
-      await MFLPlayerTestsUtils.createPlayerNFT(4);
+      const playerID = 4;
+      await MFLPlayerTestsUtils.createPlayerNFT(playerID);
 
       // execute
       const playerData = await testsUtils.executeValidScript({
         name: 'mfl/players/get_player_data.script',
-        args: [4],
+        args: [playerID],
       });
 
       // assert
       expect(playerData).toEqual({
-        ...MFLPlayerTestsUtils.PLAYER_DATA,
-        id: 4,
+        id: playerID,
+        metadata: MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY,
+        season: 1,
+        image: {
+          cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
+          path: `${playerID}.svg`
+        },
       });
     });
 
@@ -487,7 +509,10 @@ describe('MFLPlayer', () => {
           id: playerID,
           metadata: MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY,
           season: 1,
-          folderCID: 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
+          image: {
+            cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
+            path: `${playerID}.svg`
+          },
         });
         const totalSupply = await testsUtils.executeValidScript({
           name: 'mfl/players/get_players_total_supply.script',
@@ -500,7 +525,10 @@ describe('MFLPlayer', () => {
         expect(playerFromCollection).toEqual({
           id: playerID,
           season: 1,
-          folderCID: 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
+          image: {
+            cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
+            path: `${playerID}.svg`
+          },
           uuid: expect.toBeNumber(),
         });
       });
@@ -548,7 +576,10 @@ describe('MFLPlayer', () => {
           id: playerID,
           metadata: updatedMetadata,
           season: 1,
-          folderCID: 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
+          image: {
+            cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
+            path: `${playerID}.svg`
+          },
         });
         expect(result.events).toHaveLength(1);
         expect(result.events[0]).toEqual(expect.objectContaining({

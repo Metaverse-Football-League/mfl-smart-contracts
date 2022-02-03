@@ -71,8 +71,7 @@ pub contract MFLPlayer: NonFungibleToken {
                     return MetadataViews.Display(
                         name: playerData.metadata["name"] as! String? ?? "",
                         description: "MFL Player #".concat(playerData.id.toString()),
-                        // thumbnail: MetadataViews.IPFSFile(cid: self.folderCID, path: playerData.id.toString().concat(".svg")) //TODO update ipfs format data
-                        thumbnail: playerData.image //TODO update ipfs format data
+                        thumbnail: playerData.image
                     )
                 case Type<MFLViews.PlayerDataViewV1>():
                     return MFLViews.PlayerDataViewV1(
