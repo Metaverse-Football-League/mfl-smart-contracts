@@ -1,4 +1,5 @@
 import NonFungibleToken from "../../../contracts/_libs/NonFungibleToken.cdc"
+import MetadataViews from "../../../contracts/_libs/MetadataViews.cdc"
 import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 
@@ -60,11 +61,12 @@ transaction(
         metadata.insert(key: "potential", potential)
         metadata.insert(key: "resistance", resistance)
 
+        let image = MetadataViews.IPFSFile(cid: folderCID, path: id.toString().concat(".svg"))
         let playerNFT <- playerAdminClaimRef.mintPlayer(
             id: id,
             metadata: metadata,
             season: season,
-            folderCID: folderCID,
+            image: image,
         )
         self.receiverRef.deposit(token: <- playerNFT)
     }

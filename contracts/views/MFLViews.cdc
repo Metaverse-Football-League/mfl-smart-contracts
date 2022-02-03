@@ -1,3 +1,4 @@
+import MetadataViews from "../_libs/MetadataViews.cdc"
 import MFLPackTemplate from "../packs/MFLPackTemplate.cdc"
 
 pub contract MFLViews {
@@ -57,15 +58,15 @@ pub contract MFLViews {
 
     pub struct PlayerDataViewV1 {
         pub let id: UInt64
-        pub let season: UInt32
-        pub let folderCID: String
         pub let metadata: PlayerMetadataViewV1
+        pub let season: UInt32
+        pub let thumbnail: {MetadataViews.File}
 
-        init(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, folderCID: String) {
+        init(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, thumbnail: {MetadataViews.File}) {
             self.id = id
             self.metadata = PlayerMetadataViewV1(metadata: metadata)
             self.season = season
-            self.folderCID = folderCID
+            self.thumbnail = thumbnail
         }
     }
 
