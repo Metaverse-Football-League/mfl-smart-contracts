@@ -15,7 +15,6 @@ pub contract MFLAdmin {
 
     pub resource AdminProxy: AdminProxyPublic {
 
-        // Here access(contract) ensures that account cannot copy and share the Capability with anyone else. // TODO verify this -> not true because owner can call getClaimCapability and copy it
         access(contract) let claimsCapabilities: {String: Capability}
 
         access(contract) fun setClaimCapability(name: String, capability: Capability) {

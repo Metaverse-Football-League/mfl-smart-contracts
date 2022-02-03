@@ -28,13 +28,13 @@ pub contract MFLPlayer: NonFungibleToken {
         pub let id: UInt64
         pub let metadata: {String: AnyStruct}
         pub let season: UInt32
-        pub let folderCID: String
+        pub let image: {MetadataViews.File}
 
-        init(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, folderCID: String) {
+        init(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, image: {MetadataViews.File}) {
             self.id = id
             self.metadata = metadata
             self.season = season
-            self.folderCID = folderCID
+            self.image = image
         }
     }
 
@@ -44,15 +44,15 @@ pub contract MFLPlayer: NonFungibleToken {
         // The unique ID for the Player
         pub let id: UInt64
         pub let season: UInt32
-        pub let folderCID: String
+        pub let image: {MetadataViews.File}
 
-        init(id: UInt64, season: UInt32, folderCID: String) {
+        init(id: UInt64, season: UInt32, image: {MetadataViews.File}) {
             self.id = id
             // Increment the totalSupply so that id it isn't used again
             MFLPlayer.totalSupply = MFLPlayer.totalSupply + (1 as UInt64)
 
             self.season = season
-            self.folderCID = folderCID
+            self.image = image
 
             emit Minted(id: self.id)
         }
@@ -71,14 +71,14 @@ pub contract MFLPlayer: NonFungibleToken {
                     return MetadataViews.Display(
                         name: playerData.metadata["name"] as! String? ?? "",
                         description: "MFL Player #".concat(playerData.id.toString()),
-                        thumbnail: MetadataViews.IPFSFile(cid: self.folderCID, path: playerData.id.toString().concat(".svg")) //TODO update ipfs format data
+                        thumbnail: playerData.image
                     )
                 case Type<MFLViews.PlayerDataViewV1>():
                     return MFLViews.PlayerDataViewV1(
                        id: playerData.id,
                        metadata: playerData.metadata,
                        season: playerData.season,
-                       folderCID: playerData.folderCID //TODO add ipfs thumbnail ?
+                       thumbnail: playerData.image
                     )
             }
             return nil
@@ -168,7 +168,7 @@ pub contract MFLPlayer: NonFungibleToken {
 
     pub resource interface PlayerAdminClaim {
         pub let name: String
-        pub fun mintPlayer(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, folderCID: String): @MFLPlayer.NFT
+        pub fun mintPlayer(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, image: {MetadataViews.File}): @MFLPlayer.NFT
         pub fun updatePlayerMetadata(id: UInt64, metadata: {String: AnyStruct})
     }
 
@@ -180,7 +180,7 @@ pub contract MFLPlayer: NonFungibleToken {
         }
 
         // Mint a new Player and returns it
-        pub fun mintPlayer(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, folderCID: String): @MFLPlayer.NFT {
+        pub fun mintPlayer(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, image: {MetadataViews.File}): @MFLPlayer.NFT {
             pre {
                 MFLPlayer.getPlayerData(id: id) == nil: "Player already exists"
             }
@@ -188,13 +188,13 @@ pub contract MFLPlayer: NonFungibleToken {
             let newPlayerNFT <- create MFLPlayer.NFT(
                 id: id,
                 season: season,
-                folderCID: folderCID,
+                image: image
             )
             MFLPlayer.playersDatas[newPlayerNFT.id] = MFLPlayer.PlayerData(
                 id: newPlayerNFT.id,
                 metadata: metadata,
                 season: season,
-                folderCID: folderCID
+                image: image
             );
             return <- newPlayerNFT
         }
@@ -206,7 +206,7 @@ pub contract MFLPlayer: NonFungibleToken {
                 id: playerData.id,
                 metadata: metadata,
                 season: playerData.season,
-                folderCID: playerData.folderCID
+                image: playerData.image
             )
             MFLPlayer.playersDatas[id] = updatedPlayerData
 

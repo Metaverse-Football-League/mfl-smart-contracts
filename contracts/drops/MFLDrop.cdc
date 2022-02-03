@@ -100,8 +100,6 @@ pub contract MFLDrop {
             }
 
             let tokens <- MFLPack.mint(packTemplateID: self.packTemplateID, nbToMint: nbToMint, address: address)
-            // let castSenderVault <- senderVault as! @FUSD.Vault
-            // TODO Test if flow are sent instead of FUSD
             let ownerVaultRef = MFLDrop.ownerVault?.borrow() ?? panic("Could not borrow reference to owner vault")
             ownerVaultRef!.deposit(from: <- senderVault)
             self.minters[address] = (self.minters[address] ?? (0 as UInt32)) + nbToMint
