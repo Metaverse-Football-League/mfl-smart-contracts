@@ -8,7 +8,7 @@ import { BORROW_NFT } from './_scripts/borrow_nft.script';
 import { BORROW_VIEW_RESOLVER } from './_scripts/borrow_view_resolver.script';
 
 expect.extend(matchers);
-jest.setTimeout(10000);
+jest.setTimeout(40000);
 
 describe('MFLPack', () => {
   let addressMap = null;
@@ -25,7 +25,7 @@ describe('MFLPack', () => {
   afterEach(async () => {
     await emulator.stop();
   });
-  
+
   describe('totalSupply', () => {
     test('should be able to get the totalSupply', async () => {
       const totalSupply = await testsUtils.executeValidScript({
@@ -302,7 +302,7 @@ describe('MFLPack', () => {
   })
 
   describe('NFT', () => {
-    
+
     const argsPurchase = [1, 1, '19.99'];
 
     describe('getViews()', () => {
