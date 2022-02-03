@@ -1,4 +1,6 @@
 import NonFungibleToken from "../_libs/NonFungibleToken.cdc"
+import MetadataViews from "../_libs/MetadataViews.cdc"
+import MFLViews from "../views/MFLViews.cdc"
 import MFLAdmin from "../core/MFLAdmin.cdc"
 
 pub contract MFLPlayer: NonFungibleToken {
@@ -26,37 +28,60 @@ pub contract MFLPlayer: NonFungibleToken {
         pub let id: UInt64
         pub let metadata: {String: AnyStruct}
         pub let season: UInt32
-        pub let ipfsURI: String
+        pub let folderCID: String
 
-        init(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, ipfsURI: String) {
+        init(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, folderCID: String) {
             self.id = id
             self.metadata = metadata
             self.season = season
-            self.ipfsURI = ipfsURI
+            self.folderCID = folderCID
         }
     }
 
     // The resource that represents the Player NFT
-    pub resource NFT: NonFungibleToken.INFT {
+    pub resource NFT: NonFungibleToken.INFT, MetadataViews.Resolver {
 
         // The unique ID for the Player
         pub let id: UInt64
         pub let season: UInt32
-        pub let ipfsURI: String
+        pub let folderCID: String
 
-        init(id: UInt64, season: UInt32, ipfsURI: String) {
+        init(id: UInt64, season: UInt32, folderCID: String) {
             self.id = id
             // Increment the totalSupply so that id it isn't used again
             MFLPlayer.totalSupply = MFLPlayer.totalSupply + (1 as UInt64)
 
             self.season = season
-            self.ipfsURI = ipfsURI
+            self.folderCID = folderCID
 
             emit Minted(id: self.id)
         }
 
-        pub fun getData(): PlayerData? {
-            return MFLPlayer.getPlayerData(id: self.id);
+         pub fun getViews(): [Type] {
+            return [
+                Type<MetadataViews.Display>(),
+                Type<MFLViews.PlayerDataViewV1>()
+            ]
+        }
+        
+        pub fun resolveView(_ view: Type): AnyStruct? {
+            let playerData = MFLPlayer.getPlayerData(id: self.id)!
+            switch view {
+                case Type<MetadataViews.Display>():
+                    return MetadataViews.Display(
+                        name: playerData.metadata["name"] as! String? ?? "",
+                        description: "MFL Player #".concat(playerData.id.toString()),
+                        thumbnail: MetadataViews.IPFSFile(cid: self.folderCID, path: playerData.id.toString().concat(".svg")) //TODO update ipfs format data
+                    )
+                case Type<MFLViews.PlayerDataViewV1>():
+                    return MFLViews.PlayerDataViewV1(
+                       id: playerData.id,
+                       metadata: playerData.metadata,
+                       season: playerData.season,
+                       folderCID: playerData.folderCID //TODO add ipfs thumbnail ?
+                    )
+            }
+            return nil
         }
 
         destroy() {
@@ -64,26 +89,8 @@ pub contract MFLPlayer: NonFungibleToken {
         }
     }
 
-    // This is the interface that users can cast their Players Collection as
-    // to allow others to deposit Players into their Collection. It also allows for reading
-    // the details of Players in the Collection.
-    pub resource interface CollectionPublic {
-        pub fun deposit(token: @NonFungibleToken.NFT)
-        pub fun batchDeposit(tokens: @NonFungibleToken.Collection)
-        pub fun getIDs(): [UInt64]
-        pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
-        pub fun borrowPlayer(id: UInt64): &MFLPlayer.NFT? {
-            // If the result isn't nil, the id of the returned reference
-            // should be the same as the argument to the function
-            post {
-                (result == nil) || (result?.id == id):
-                    "Cannot borrow Player reference: The ID of the returned reference is incorrect"
-            }
-        }
-    }
-
     // A collection of Player NFTs owned by an account
-    pub resource Collection: CollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic {
+    pub resource Collection: NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
 
         // Dictionary of NFT conforming tokens
         pub var ownedNFTs: @{UInt64: NonFungibleToken.NFT}
@@ -124,23 +131,6 @@ pub contract MFLPlayer: NonFungibleToken {
             destroy oldToken
         }
 
-        // batchDeposit takes a Collection object as an argument
-        // and deposits each contained NFT into this Collection
-        pub fun batchDeposit(tokens: @NonFungibleToken.Collection) {
-
-            // Get an array of the IDs to be deposited
-            let keys = tokens.getIDs()
-
-            // Iterate through the keys in the collection and deposit each one
-            for key in keys {
-                self.deposit(token: <-tokens.withdraw(withdrawID: key))
-            }
-
-            // Destroy the empty Collection
-            destroy tokens
-        }
-
-
         // Returns an array of the IDs that are in the collection
         pub fun getIDs(): [UInt64] {
             return self.ownedNFTs.keys
@@ -150,17 +140,11 @@ pub contract MFLPlayer: NonFungibleToken {
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT {
             return &self.ownedNFTs[id] as &NonFungibleToken.NFT
         }
-
-        // Gets a reference to an NFT in the collection as a Player,
-        // exposing all of its fields
-        // This is safe as there are no functions that can be called on the Player (// TODO UPDATE NOW ADMIN CAN ACCESS METHODS UPDATE / ADD . TEST IF IT S SAFE)
-        pub fun borrowPlayer(id: UInt64): &MFLPlayer.NFT? {
-            if self.ownedNFTs[id] != nil {
-                let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
-                return ref as! &MFLPlayer.NFT
-            } else {
-                return nil
-            }
+        
+        pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
+            let nft = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
+            let playerNFT = nft as! &MFLPlayer.NFT
+            return playerNFT as &AnyResource{MetadataViews.Resolver}
         }
 
         destroy() {
@@ -177,21 +161,6 @@ pub contract MFLPlayer: NonFungibleToken {
         return <- create Collection()
     }
 
-
-    // Get a reference to a Player from an account's Collection, if available.
-    // If an account does not have a MFLPlayer.Collection, panic.
-    // If it has a Collection but does not contain the itemID, return nil.
-    // If it has a Collection and that collection contains the itemID, return a reference to that.
-    pub fun fetch(from: Address, itemID: UInt64): &MFLPlayer.NFT? {
-        let collection = getAccount(from)
-            .getCapability<&{MFLPlayer.CollectionPublic}>(MFLPlayer.CollectionPublicPath)
-            .borrow()
-            ?? panic("Couldn't get collection")
-        // We trust MFLPlayer.Collection.borrowPlayer to get the correct itemID
-        // (it checks it before returning it).
-        return collection.borrowPlayer(id: itemID)
-    }
-
     // Get data for a specific player ID
     pub fun getPlayerData(id: UInt64): PlayerData? {
         return self.playersDatas[id];
@@ -199,7 +168,7 @@ pub contract MFLPlayer: NonFungibleToken {
 
     pub resource interface PlayerAdminClaim {
         pub let name: String
-        pub fun mintPlayer(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, ipfsURI: String): @MFLPlayer.NFT
+        pub fun mintPlayer(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, folderCID: String): @MFLPlayer.NFT
         pub fun updatePlayerMetadata(id: UInt64, metadata: {String: AnyStruct})
     }
 
@@ -211,7 +180,7 @@ pub contract MFLPlayer: NonFungibleToken {
         }
 
         // Mint a new Player and returns it
-        pub fun mintPlayer(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, ipfsURI: String): @MFLPlayer.NFT {
+        pub fun mintPlayer(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, folderCID: String): @MFLPlayer.NFT {
             pre {
                 MFLPlayer.getPlayerData(id: id) == nil: "Player already exists"
             }
@@ -219,13 +188,13 @@ pub contract MFLPlayer: NonFungibleToken {
             let newPlayerNFT <- create MFLPlayer.NFT(
                 id: id,
                 season: season,
-                ipfsURI: ipfsURI,
+                folderCID: folderCID,
             )
             MFLPlayer.playersDatas[newPlayerNFT.id] = MFLPlayer.PlayerData(
                 id: newPlayerNFT.id,
                 metadata: metadata,
                 season: season,
-                ipfsURI: ipfsURI
+                folderCID: folderCID
             );
             return <- newPlayerNFT
         }
@@ -237,7 +206,7 @@ pub contract MFLPlayer: NonFungibleToken {
                 id: playerData.id,
                 metadata: metadata,
                 season: playerData.season,
-                ipfsURI: playerData.ipfsURI
+                folderCID: playerData.folderCID
             )
             MFLPlayer.playersDatas[id] = updatedPlayerData
 
@@ -262,7 +231,7 @@ pub contract MFLPlayer: NonFungibleToken {
         // Put a new Collection in storage
         self.account.save<@Collection>(<- create Collection(), to: self.CollectionStoragePath)
         // Create a public capability for the Collection
-        self.account.link<&{CollectionPublic}>(self.CollectionPublicPath, target: self.CollectionStoragePath)
+        self.account.link<&MFLPlayer.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(self.CollectionPublicPath, target: self.CollectionStoragePath)
 
         self.account.save(<- create PlayerAdmin() , to: self.PlayerAdminStoragePath)
 

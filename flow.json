@@ -28,6 +28,13 @@
 		  "mainnet": "1d7e57aa55817448"
 		}
 	  },
+	  "MetadataViews": {
+		"source": "./contracts/_libs/MetadataViews.cdc",
+		"aliases": {
+		  "testnet": "631e88ae7f1d7c20",
+		  "mainnet": "1d7e57aa55817448"
+		}
+	  },
 	  "FlowStorageFees": {
 		"source": "./contracts/_libs/FlowStorageFees.cdc",
 		"aliases": {
@@ -48,7 +55,8 @@
 	  "MFLPlayer": "./contracts/players/MFLPlayer.cdc",
 	  "MFLDrop": "./contracts/drops/MFLDrop.cdc",
 	  "MFLPack": "./contracts/packs/MFLPack.cdc",
-	  "MFLPackTemplate": "./contracts/packs/MFLPackTemplate.cdc"
+	  "MFLPackTemplate": "./contracts/packs/MFLPackTemplate.cdc",
+	  "MFLViews": "./contracts/views/MFLViews.cdc"
 	},
 	"networks": {
 	  "emulator": "127.0.0.1:3569",
@@ -59,18 +67,33 @@
 	  "emulator-account": {
 		"address": "f8d6e0586b0a20c7",
 		"key": "84f82df6790f07b281adb5bbc848bd6298a2de67f94bdfac7a400d5a1b893de5"
+	  },
+	  "testnet-account": {
+		"fromFile": "./flow.testnet.json"
 	  }
 	},
 	"deployments": {
 	  "emulator": {
 		"emulator-account": [
-		  "NonFungibleToken",
 		  "FUSD",
+		  "NonFungibleToken",
+		  "MetadataViews",
 		  "MFLAdmin",
 		  "MFLPlayer",
 		  "MFLDrop",
 		  "MFLPackTemplate",
-		  "MFLPack"
+		  "MFLPack",
+		  "MFLViews"
+		]
+	  },
+	  "testnet": {
+		"testnet-account": [
+		  "MFLAdmin",
+		  "MFLPlayer",
+		  "MFLDrop",
+		  "MFLPackTemplate",
+		  "MFLPack",
+		  "MFLViews"
 		]
 	  }
 	}

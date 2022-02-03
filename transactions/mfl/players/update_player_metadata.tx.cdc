@@ -25,12 +25,9 @@ transaction(
     resistance: UInt32,
 ) {
     let playerAdminProxyRef: &MFLAdmin.AdminProxy
-    let receiverRef: &{MFLPlayer.CollectionPublic}
 
     prepare(acct: AuthAccount) {
         self.playerAdminProxyRef = acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
-        let playerCollectionCap = getAccount(acct.address).getCapability<&{MFLPlayer.CollectionPublic}>(MFLPlayer.CollectionPublicPath)
-        self.receiverRef = playerCollectionCap.borrow() ?? panic("Could not borrow receiver reference")
     }
 
     execute {

@@ -28,8 +28,11 @@ export const MFLPlayerTestsUtils = {
 
     const addressMap = {};
     await testsUtils.deployContract('NonFungibleToken', serviceAddress, '_libs/NonFungibleToken', addressMap);
+    await testsUtils.deployContract('MetadataViews', serviceAddress, '_libs/MetadataViews', addressMap);
     await testsUtils.deployContract('FUSD', serviceAddress, '_libs/FUSD', addressMap);
     await testsUtils.deployContract('MFLAdmin', to, 'core/MFLAdmin', addressMap);
+    await testsUtils.deployContract('MFLPackTemplate', to, 'packs/MFLPackTemplate', addressMap);
+    await testsUtils.deployContract('MFLViews', to, 'views/MFLViews', addressMap);
     await testsUtils.deployContract('MFLPlayer', to, 'players/MFLPlayer', addressMap);
     return addressMap;
   },
@@ -53,7 +56,7 @@ export const MFLPlayerTestsUtils = {
     const adminAccountAddress = await getAccountAddress(playerAdminAccountName);
     const signers = [adminAccountAddress];
     const args = [
-      id, MFLPlayerTestsUtils.PLAYER_DATA.season, MFLPlayerTestsUtils.PLAYER_DATA.ipfsURI,
+      id, MFLPlayerTestsUtils.PLAYER_DATA.season, MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
       ...Object.values(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY),
     ];
     return await testsUtils.shallPass({name: 'mfl/players/mint_player.tx', args, signers});
@@ -64,7 +67,7 @@ export const MFLPlayerTestsUtils = {
   PLAYER_DATA: {
     id: 1,
     season: 1,
-    ipfsURI: 'ipfs://someURI/1201',
+    folderCID: 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
     metadata: PLAYER_METADATA_DICTIONARY,
   },
 };

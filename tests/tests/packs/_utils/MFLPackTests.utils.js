@@ -11,9 +11,11 @@ export const MFLPackTestsUtils = {
 
     const addressMap = {};
     await testsUtils.deployContract('NonFungibleToken', serviceAddress, '_libs/NonFungibleToken', addressMap);
+    await testsUtils.deployContract('MetadataViews', serviceAddress, '_libs/MetadataViews', addressMap);
     await testsUtils.deployContract('FUSD', to, '_libs/FUSD', addressMap);
     await testsUtils.deployContract('MFLAdmin', to, 'core/MFLAdmin', addressMap);
     await testsUtils.deployContract('MFLPackTemplate', to, 'packs/MFLPackTemplate', addressMap);
+    await testsUtils.deployContract('MFLViews', to, 'views/MFLViews', addressMap);
     await testsUtils.deployContract('MFLPack', to, 'packs/MFLPack', addressMap);
     await testsUtils.deployContract('MFLDrop', to, 'drops/MFLDrop', addressMap);
     return addressMap;
@@ -26,7 +28,7 @@ export const MFLPackTestsUtils = {
     await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers: [receiverAcctAddress]});
     await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers: [receiverAcctAddress]});
     await testsUtils.shallPass({name: 'mfl/drops/set_owner_vault.tx', args: [], signers: [receiverAcctAddress]});
-    await testsUtils.shallPass({name: 'mfl/drops/set_status_opened_all.tx', args: [argsDrop[1]], signers: [receiverAcctAddress]});
+    await testsUtils.shallPass({name: 'mfl/drops/set_status_opened_all.tx', args: [argsDrop[2]], signers: [receiverAcctAddress]});
   },
 
   async setupAndTopupFusdAccount(senderAcctAddress, receiverAcctAddress, amount) {

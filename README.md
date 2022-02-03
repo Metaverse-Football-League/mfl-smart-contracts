@@ -55,6 +55,10 @@ Contract handling drops. A drop allows users to buy packs. Each drop contain the
 
 Contract to access admin claims given by specific resources created for each contracts
 
+### MFLViews
+
+Contract that defines different structures representing different data. This contract is designed to meet the expectations of the new Flow metadata standard which is based on a view logic. Each view represents a different type of metadata.
+
 ## Tests
 
 Tests are written with jest and the Flow js testing library. Our goal is to have the best test coverage possible. We try to test every lines / statements written in our smart contracts.

@@ -9,6 +9,7 @@ import MFLDrop from "../../../contracts/drops/MFLDrop.cdc"
 **/
 
 transaction(
+  name: String,
   price: UFix64,
   packTemplateID: UInt64,
   maxTokensPerAddress: UInt32
@@ -22,7 +23,7 @@ transaction(
     execute {
         let dropAdminClaimCap = self.dropAdminProxyRef.getClaimCapability(name: "DropAdminClaim") ?? panic("DropAdminClaim capability not found")
         let dropAdminClaimRef = dropAdminClaimCap.borrow<&{MFLDrop.DropAdminClaim}>() ?? panic("Could not borrow DropAdminClaim")
-        dropAdminClaimRef.createDrop(price: price, packTemplateID: packTemplateID, maxTokensPerAddress: maxTokensPerAddress)
+        dropAdminClaimRef.createDrop(name: name, price: price, packTemplateID: packTemplateID, maxTokensPerAddress: maxTokensPerAddress)
     }
     
 }

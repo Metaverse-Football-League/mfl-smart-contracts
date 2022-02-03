@@ -1,3 +1,5 @@
+import NonFungibleToken from "../../../contracts/_libs/NonFungibleToken.cdc"
+import MetadataViews from "../../../contracts/_libs/MetadataViews.cdc"
 import MFLPack from "../../../contracts/packs/MFLPack.cdc"
 
 /** 
@@ -9,7 +11,7 @@ transaction() {
 
     prepare(acct: AuthAccount) {
         acct.save(<- MFLPack.createEmptyCollection(), to: MFLPack.CollectionStoragePath)
-        acct.link<&{MFLPack.CollectionPublic}>(MFLPack.CollectionPublicPath, target: MFLPack.CollectionStoragePath)
+        acct.link<&MFLPack.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(MFLPack.CollectionPublicPath, target: MFLPack.CollectionStoragePath)
     }
 
     execute {
