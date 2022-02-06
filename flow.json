@@ -68,7 +68,14 @@
 		"address": "f8d6e0586b0a20c7",
 		"key": "84f82df6790f07b281adb5bbc848bd6298a2de67f94bdfac7a400d5a1b893de5"
 	  },
-	  "testnet-account": {
+	  "admin-alice-account": {
+		"address": "01cf0e2f2f715450",
+		"key": "7066849395db7a15113f5f0606acbedc503462c25c3fdf90216f1f860a3b8a85"
+	  },
+	  "testnet-deploy-account": {
+		"fromFile": "./flow.testnet.json"
+	  },
+	  "testnet-drop-player-collection-account": {
 		"fromFile": "./flow.testnet.json"
 	  }
 	},
@@ -87,7 +94,7 @@
 		]
 	  },
 	  "testnet": {
-		"testnet-account": [
+		"testnet-deploy-account": [
 		  "MFLAdmin",
 		  "MFLPlayer",
 		  "MFLDrop",

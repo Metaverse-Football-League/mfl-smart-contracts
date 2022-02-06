@@ -220,8 +220,8 @@ pub contract MFLPlayer: NonFungibleToken {
 
     init() {
         // Set our named paths
-        self.CollectionStoragePath = /storage/MFLCollection
-        self.CollectionPublicPath = /public/MFLCollection
+        self.CollectionStoragePath = /storage/MFLPlayerCollection
+        self.CollectionPublicPath = /public/MFLPlayerCollection
         self.PlayerAdminStoragePath = /storage/MFLPlayerAdmin
 
         // Initialize contract fields
