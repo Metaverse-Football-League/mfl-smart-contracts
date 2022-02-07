@@ -30,17 +30,17 @@ nbToMint      | Number of packs to be purchased
 senderVault   | The owner vault containing the amount that was defined in the tx
 recipientCap  | Public capability to the owner Pack Collection
 
-This public function is in charge of checking if the drop exists. If so, `getDropRef` is first called to get a reference to this specific drop and then `mint` is called.
+This public function is in charge of checking if the drop exists. If so, `getDropRef` is first called to get a reference to this drop and then the `mint` function is called on it.
 
-  
 **2. MFLDrop mint function :**
 
-Parameters: Same as (1) but without dropID param.
+Parameters: Same as (1) but without dropID parameter.
 
 The purpose of this function to make a certain number of checks to validate upstream the minting of packs.
 Here is the exhaustive list of verifications. We check that:
 - the address is the same as the address of the recipientCap
 - the drop is not closed
+- the nbToMint is GT 0
 - the maximum of packs per address is not exceeded
 - if the drop status is opened_whitelist:
   - the address is whitelisted
@@ -53,8 +53,7 @@ Then we deposit into the ownerVault the senderVault. We update the minters dicti
 Finally we deposit the content of the Pack Collection using recipientCap.
 
 **3. MFLPack mint function**
-- MFL PackTemplate getPackTemplateMintIndex function is called (4)
-- Pack mint process explained and return new Collection of Packs.
+
 Parameters:
 
 Name            | Description
@@ -63,10 +62,11 @@ packTemplateID  | Id of the packTemplate
 address         | Owner address
 nbToMint        | Number of packs to be purchased
 
-The purpose on this function is first to call MFLPackTemplate `getPackTemplateMintIndex` to get the packTemplateMintIndex used for our randomness logic (more info in startingIndex.md file).
-This value will be part of a Pack NFT, as well as the packTemplate id.
+The purpose on this function is first to call MFLPackTemplate `getPackTemplateMintIndex` (4) to get the packTemplateMintIndex used for our randomness logic (more info in startingIndex.md file).
+This value will be part of a pack NFT, as well as the packTemplate id.
 
-Then we create a Pack Collection which contains nbToMint packs and returns it.
+Then we create an empty Pack Collection. We mint the nbToMint packs and deposit them in it.
+
 
 **4. MFL PackTemplate getPackTemplateMintIndex function**
 
