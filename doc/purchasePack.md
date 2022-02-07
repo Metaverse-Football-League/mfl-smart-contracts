@@ -78,4 +78,4 @@ This randomness logic is fully explained in startingIndex.md file.
 
 ## Sequence diagram
 
-![Alt](./purchasePackSchema.pdf)
+![Alt](./purchasePackDiagram.png)
