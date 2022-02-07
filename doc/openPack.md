@@ -43,3 +43,7 @@ To capture the contract event defined previously, we use https://graffle.io/. In
 We rely on AWS and its queue system (SQS) to handle these events as they happen.
 
 We will use the startingIndex of the packTemplate (more info in startingIndex.md file) to distribute the content of the packs in a fair and random way.
+
+## Sequence diagram
+
+![Alt](./openPackDiagram.png)

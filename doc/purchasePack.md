@@ -75,7 +75,6 @@ Parameters: Same as (3).
 This function checks if the packTemplate supply is enough (given nbToMint). If yes, the packTemplateMintIndex is computed (with `increaseStartingIndex` function) and returned.
 This randomness logic is fully explained in startingIndex.md file.
 
-
 ## Sequence diagram
 
 ![Alt](./purchasePackDiagram.png)
