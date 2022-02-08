@@ -1,11 +1,11 @@
-import { emulator, getAccountAddress } from 'flow-js-testing';
-import { MFLPackTestsUtils } from './_utils/MFLPackTests.utils';
-import { testsUtils } from '../_utils/tests.utils';
+import {emulator, getAccountAddress} from 'flow-js-testing';
+import {MFLPackTestsUtils} from './_utils/MFLPackTests.utils';
+import {testsUtils} from '../_utils/tests.utils';
 import * as matchers from 'jest-extended';
-import { WITHDRAW_PACK } from './_transactions/withdaw_pack.tx';
-import { BATCH_WITHDRAW_PACK } from './_transactions/batch_withdaw_pack.tx';
-import { BORROW_NFT } from './_scripts/borrow_nft.script';
-import { BORROW_VIEW_RESOLVER } from './_scripts/borrow_view_resolver.script';
+import {WITHDRAW_PACK} from './_transactions/withdaw_pack.tx';
+import {BATCH_WITHDRAW_PACK} from './_transactions/batch_withdaw_pack.tx';
+import {BORROW_NFT} from './_scripts/borrow_nft.script';
+import {BORROW_VIEW_RESOLVER} from './_scripts/borrow_view_resolver.script';
 
 expect.extend(matchers);
 jest.setTimeout(40000);
@@ -50,17 +50,21 @@ describe('MFLPack', () => {
         await MFLPackTestsUtils.purchase(jackAccountAddress, argsPurchase);
 
         // execute
-        const result = await testsUtils.shallPass({code: WITHDRAW_PACK, args: [jackAccountAddress, 1], signers: [bobAccountAddress]});
+        const result = await testsUtils.shallPass({
+          code: WITHDRAW_PACK,
+          args: [jackAccountAddress, 1],
+          signers: [bobAccountAddress],
+        });
 
         // assert
         expect(result.events).toHaveLength(2);
         expect(result.events[0]).toEqual(expect.objectContaining({
           type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Withdraw`,
-          data: {id: 1, from: bobAccountAddress}
+          data: {id: 1, from: bobAccountAddress},
         }));
         expect(result.events[1]).toEqual(expect.objectContaining({
           type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Deposit`,
-          data: {id: 1, to: jackAccountAddress}
+          data: {id: 1, to: jackAccountAddress},
         }));
         const bobPackIds = await testsUtils.executeValidScript({
           name: 'mfl/packs/get_ids_in_collection.script',
@@ -70,12 +74,12 @@ describe('MFLPack', () => {
           name: 'mfl/packs/get_ids_in_collection.script',
           args: [jackAccountAddress],
         });
-        // Bob shoud have 0 pack
-        expect(bobPackIds).toEqual([])
+        // Bob should have 0 pack
+        expect(bobPackIds).toEqual([]);
         // Jack should have 2 packs
         expect(jackPackIds).toHaveLength(2);
-        expect(jackPackIds).toEqual(expect.arrayContaining([1, 2]))
-      })
+        expect(jackPackIds).toEqual(expect.arrayContaining([1, 2]));
+      });
 
       test('should panic when trying to withdraw a NFT which is not in the collection', async () => {
         // prepare
@@ -87,12 +91,16 @@ describe('MFLPack', () => {
         await MFLPackTestsUtils.purchase(bobAccountAddress, argsPurchase);
 
         // execute
-        const error = await testsUtils.shallRevert({code: WITHDRAW_PACK, args: [bobAccountAddress, 42], signers: [bobAccountAddress]});
+        const error = await testsUtils.shallRevert({
+          code: WITHDRAW_PACK,
+          args: [bobAccountAddress, 42],
+          signers: [bobAccountAddress],
+        });
 
         // assert
-        expect(error).toContain("missing NFT")
-      })
-    })
+        expect(error).toContain('missing NFT');
+      });
+    });
 
     describe('batchWithdraw()', () => {
       test('should withdraw a NFT from a collection and deposit it in another collection', async () => {
@@ -108,41 +116,45 @@ describe('MFLPack', () => {
         await MFLPackTestsUtils.purchase(jackAccountAddress, argsPurchase);
 
         // execute
-        const result = await testsUtils.shallPass({code: BATCH_WITHDRAW_PACK, args: [jackAccountAddress, [1, 2]], signers: [bobAccountAddress]});
+        const result = await testsUtils.shallPass({
+          code: BATCH_WITHDRAW_PACK,
+          args: [jackAccountAddress, [1, 2]],
+          signers: [bobAccountAddress],
+        });
 
         // assert
         expect(result.events).toHaveLength(8);
         expect(result.events[0]).toEqual(expect.objectContaining({
           type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Withdraw`,
-          data: {id: 1, from: bobAccountAddress}
+          data: {id: 1, from: bobAccountAddress},
         }));
         expect(result.events[1]).toEqual(expect.objectContaining({
           type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Deposit`,
-          data: {id: 1, to: null}
+          data: {id: 1, to: null},
         }));
         expect(result.events[2]).toEqual(expect.objectContaining({
           type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Withdraw`,
-          data: {id: 2, from: bobAccountAddress}
+          data: {id: 2, from: bobAccountAddress},
         }));
         expect(result.events[3]).toEqual(expect.objectContaining({
           type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Deposit`,
-          data: {id: 2, to: null}
+          data: {id: 2, to: null},
         }));
         expect(result.events[4]).toEqual(expect.objectContaining({
           type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Withdraw`,
-          data: {id: 2, from: null}
+          data: {id: 2, from: null},
         }));
         expect(result.events[5]).toEqual(expect.objectContaining({
           type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Deposit`,
-          data: {id: 2, to: jackAccountAddress}
+          data: {id: 2, to: jackAccountAddress},
         }));
         expect(result.events[6]).toEqual(expect.objectContaining({
           type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Withdraw`,
-          data: {id: 1, from: null}
+          data: {id: 1, from: null},
         }));
         expect(result.events[7]).toEqual(expect.objectContaining({
           type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Deposit`,
-          data: {id: 1, to: jackAccountAddress}
+          data: {id: 1, to: jackAccountAddress},
         }));
         const bobPackIds = await testsUtils.executeValidScript({
           name: 'mfl/packs/get_ids_in_collection.script',
@@ -153,12 +165,12 @@ describe('MFLPack', () => {
           args: [jackAccountAddress],
         });
         // Bob shoud have 0 pack
-        expect(bobPackIds).toEqual([])
+        expect(bobPackIds).toEqual([]);
         // Jack should have 4 packs
         expect(jackPackIds).toHaveLength(4);
-        expect(jackPackIds).toEqual(expect.arrayContaining([1, 2, 3, 4]))
-      })
-    })
+        expect(jackPackIds).toEqual(expect.arrayContaining([1, 2, 3, 4]));
+      });
+    });
 
     describe('getIDs()', () => {
       test('should get the IDs in the collection', async () => {
@@ -179,9 +191,9 @@ describe('MFLPack', () => {
         // assert
         // Bob should have 10 packs
         expect(bobPackIds).toHaveLength(10);
-        expect(bobPackIds).toEqual(expect.arrayContaining([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
-      })
-    })
+        expect(bobPackIds).toEqual(expect.arrayContaining([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));
+      });
+    });
 
     describe('borrowNFT()', () => {
       test('should borrow a NFT in the collection', async () => {
@@ -204,10 +216,10 @@ describe('MFLPack', () => {
           uuid: expect.toBeNumber(),
           id: 1,
           packTemplateMintIndex: 0,
-          packTemplateID: 1
-        })
-      })
-    })
+          packTemplateID: 1,
+        });
+      });
+    });
 
     describe('borrowViewResolver()', () => {
       test('should return a reference to a NFT as a MetadataViews.Resolver interface', async () => {
@@ -230,8 +242,79 @@ describe('MFLPack', () => {
           uuid: expect.toBeNumber(),
           id: 1,
           packTemplateMintIndex: 0,
-          packTemplateID: 1
+          packTemplateID: 1,
         });
+      });
+    });
+
+    describe('openPack()', () => {
+      test('should burn a pack when opening it', async () => {
+        // prepare
+        await MFLPackTestsUtils.initPackTemplateAndDrop(
+          'AliceAdminAccount', 'AliceAdminAccount', ['Common', 'This is a common pack', 2, 'http://img1-url'], argsDrop,
+        );
+        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
+        await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, aliceAdminAccountAddress, '100.00');
+        const argsPurchase = [1, 2, '39.98'];
+        await MFLPackTestsUtils.purchase(aliceAdminAccountAddress, argsPurchase);
+        await testsUtils.shallPass({
+          name: 'mfl/packs/set_allow_to_open_packs.tx',
+          args: [1],
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // execute
+        const result = await testsUtils.shallPass({
+          name: 'mfl/packs/open_pack.tx',
+          args: [2],
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        const packIds = await testsUtils.executeValidScript({
+          name: 'mfl/packs/get_ids_in_collection.script',
+          args: [aliceAdminAccountAddress],
+        });
+        expect(packIds).toEqual([1]);
+        expect(result.events).toHaveLength(3);
+        expect(result.events[0]).toEqual(expect.objectContaining({
+          type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Withdraw`,
+          data: {id: 2, from: aliceAdminAccountAddress},
+        }));
+        expect(result.events[1]).toEqual(expect.objectContaining({
+          type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Opened`,
+          data: {
+            id: 2,
+            packIndex: 0,
+            packTemplateID: 1,
+            from: aliceAdminAccountAddress,
+          },
+        }));
+        expect(result.events[2]).toEqual(expect.objectContaining({
+          type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Destroyed`,
+          data: {id: 2},
+        }));
+      });
+
+      test('should panic when opening a pack while the pack template is not openable', async () => {
+        // prepare
+        await MFLPackTestsUtils.initPackTemplateAndDrop(
+          'AliceAdminAccount', 'AliceAdminAccount', argsPackTemplate, argsDrop,
+        );
+        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
+        await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, aliceAdminAccountAddress, '100.00');
+        const argsPurchase = [1, 2, '39.98'];
+        await MFLPackTestsUtils.purchase(aliceAdminAccountAddress, argsPurchase);
+
+        // execute
+        const error = await testsUtils.shallRevert({
+          name: 'mfl/packs/open_pack.tx',
+          args: [2],
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        expect(error).toContain('PackTemplate is not openable');
       });
     });
 
@@ -276,9 +359,9 @@ describe('MFLPack', () => {
           args: [bobAccountAddress],
         });
         // Bob should no longer have a collection
-        expect(error.message).toContain("Could not borrow the collection reference")
-      })
-    })
+        expect(error.message).toContain('Could not borrow the collection reference');
+      });
+    });
 
     describe('createEmptyCollection()', () => {
       test('should create an empty collection', async () => {
@@ -297,9 +380,9 @@ describe('MFLPack', () => {
           name: 'mfl/packs/get_ids_in_collection.script',
           args: [bobAccountAddress],
         });
-      })
-    })
-  })
+      });
+    });
+  });
 
   describe('NFT', () => {
 
@@ -351,7 +434,7 @@ describe('MFLPack', () => {
             thumbnail: 'http://img1-url',
             owner: bobAccountAddress,
             type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.NFT`,
-          }
+          },
         );
       });
 
@@ -385,7 +468,7 @@ describe('MFLPack', () => {
             thumbnail: 'http://img1-url',
             owner: bobAccountAddress,
             type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.NFT`,
-          }
+          },
         ]));
       });
 
@@ -416,9 +499,9 @@ describe('MFLPack', () => {
               currentSupply: 1,
               startingIndex: 255,
               isOpenable: false,
-              imageUrl: 'http://img1-url'
-            }
-          }
+              imageUrl: 'http://img1-url',
+            },
+          },
         );
       });
 
@@ -450,8 +533,8 @@ describe('MFLPack', () => {
               currentSupply: 3,
               startingIndex: 255,
               isOpenable: false,
-              imageUrl: 'http://img1-url'
-            }
+              imageUrl: 'http://img1-url',
+            },
           },
           {
             id: 2,
@@ -464,8 +547,8 @@ describe('MFLPack', () => {
               currentSupply: 3,
               startingIndex: 255,
               isOpenable: false,
-              imageUrl: 'http://img1-url'
-            }
+              imageUrl: 'http://img1-url',
+            },
           },
           {
             id: 3,
@@ -478,9 +561,9 @@ describe('MFLPack', () => {
               currentSupply: 3,
               startingIndex: 255,
               isOpenable: false,
-              imageUrl: 'http://img1-url'
-            }
-          }
+              imageUrl: 'http://img1-url',
+            },
+          },
         ]));
       });
     });
@@ -498,7 +581,7 @@ describe('MFLPack', () => {
         const result = await testsUtils.shallPass({
           name: 'mfl/packs/destroy_pack.tx',
           args: [1],
-          signers: [bobAccountAddress]
+          signers: [bobAccountAddress],
         });
 
         // assert
@@ -511,7 +594,7 @@ describe('MFLPack', () => {
           args: [bobAccountAddress],
         });
         // Bob should have 0 pack
-        expect(bobPackIds).toEqual([])
+        expect(bobPackIds).toEqual([]);
       });
     });
   });
