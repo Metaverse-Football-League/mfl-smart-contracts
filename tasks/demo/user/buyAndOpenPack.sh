@@ -3,7 +3,10 @@
 # This script buys packs and open them
 
 configPath="../../.."
+signerAdminRoot=emulator-account
 signerBob=bob-account
+bobAddress=0x179b6b1cb6755e31
+amountFUSD="100.00"
 
 cd $configPath
 
@@ -19,10 +22,15 @@ if [ -z $price ]; then
 fi
 amount=$(echo "$price * $nbrPacks" | bc)
 echo "Amount: " $amount
-echo "---------------------------------------------"
+echo "-------------------------------------------------------"
 
-# Create Bob's Pack Collection to be able to store packs
-flow transactions send ./transactions/mfl/packs/create_and_link_pack_collection.tx.cdc --signer $signerBob
+# Setup Bob's FUSD vault and send him amountFUSD
+flow transactions send ./transactions/fusd/setup_account.tx.cdc --signer $signerBob
+sleep 2
+flow transactions send ./transactions/fusd/send_fusd.tx.cdc $bobAddress $amountFUSD --signer $signerAdminRoot
+sleep 2
+
+echo "Bob received $amountFUSD FUSD from service account"
 
 # Send the tx with the previous values to purchase packs
 flow transactions send ./transactions/mfl/drops/purchase.tx.cdc $dropID $nbrPacks $amount --signer $signerBob

@@ -16,6 +16,7 @@ cd $configPath
 # PackTemplate creation
 
 read -p $'Do you want default values for the PackTemplate? (Enter: yes)\n' -n1 packTemplateDefaultValues
+echo ""
 sleep 0.5
 
 if [ -z $packTemplateDefaultValues ]; then
@@ -35,11 +36,12 @@ echo "Pack template name: $packTemplateName"
 echo "Description: $description"
 echo "Max supply: $maxSupply"
 echo "Image url: $imageUrl"
-echo "---------------------------------------------"
+echo "-----------------------------------------------------------"
 
 # Drop creation
 
 read -p $'Do you want default values for the drop? (Enter: yes)\n' -n1 dropDefaultValues
+echo ""
 sleep 0.5
 
 if [ -z $dropDefaultValues ]; then
@@ -54,12 +56,22 @@ else
     read -p "what is the maxTokensPerAddress? : " maxTokensPerAddress
 fi
 
+dropStatus=0
+until [ "$dropStatus" == 1 ] || [ "$dropStatus" == 2 ] || [ "$dropStatus" == 3 ] 
+do
+    read -p $'What is the status of the drop?: 1=closed 2=opened_whitelist 3=opened_all\n' -n1 dropStatus;
+    echo ""
+done
+
+#TODO enter whitelist addresses ?
+
 echo "------------------- INFOS DROP -------------------"
 echo "Drop name: $dropName"
 echo "Price: $price"
 echo "Pack template id: $packTemplateID"
 echo "Max tokens per address: $maxTokensPerAddress"
-echo "---------------------------------------------"
+echo "Drop status: $dropStatus"
+echo "--------------------------------------------------"
 
 # Create an admin proxy for Alice to be able to receive claims capability
 flow transactions send ./transactions/mfl/core/create_admin_proxy.tx.cdc --signer $signerAdminAlice
@@ -82,6 +94,14 @@ sleep 2
 
 # Alice can now create the drop
 flow transactions send ./transactions/mfl/drops/create_drop.tx.cdc $dropName $price $packTemplateID $maxTokensPerAddress --signer $signerAdminAlice
+
+if [ "$dropStatus" == 2 ]; then
+    # Open the drop to whitelisted addresses only
+    flow transactions send ./transactions/mfl/drops/set_status_opened_whitelist.tx.cdc $dropID --signer $signerAdminAlice
+elif [ "$dropStatus" == 3 ]; then
+    # Open the drop to all
+    flow transactions send ./transactions/mfl/drops/set_status_opened_all.tx.cdc $dropID --signer $signerAdminAlice
+fi
 
 # Scripts to execute if we want to check drops infos :
 # flow scripts execute ./scripts/mfl/drops/get_drops.script.cdc
