@@ -138,7 +138,7 @@ pub contract MFLPack: NonFungibleToken {
 
             emit Opened(
                 id: pack.id,
-                packIndex: packTemplate.startingIndex + pack.packTemplateMintIndex,
+                packIndex: (packTemplate.startingIndex + pack.packTemplateMintIndex) % packTemplate.maxSupply,
                 packTemplateID: pack.packTemplateID,
                 from: self.owner!.address,
             )

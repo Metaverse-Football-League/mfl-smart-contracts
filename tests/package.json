@@ -14,7 +14,8 @@
     "@onflow/types": "^0.0.6",
     "babel-jest": "^27.4.6",
     "flow-js-testing": "^0.2.2",
-    "jest": "^27.4.7"
+    "jest": "^27.4.7",
+    "lodash": "^4.17.21"
   },
   "overrides": {
     "flow-cadut": "0.1.14"

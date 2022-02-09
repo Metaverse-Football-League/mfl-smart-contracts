@@ -1,7 +1,9 @@
-import { emulator, getAccountAddress } from 'flow-js-testing';
-import { MFLPackTemplateTestsUtils } from './_utils/MFLPackTemplateTests.utils';
-import { testsUtils } from '../_utils/tests.utils';
+import {emulator, getAccountAddress} from 'flow-js-testing';
+import {MFLPackTemplateTestsUtils} from './_utils/MFLPackTemplateTests.utils';
+import {testsUtils} from '../_utils/tests.utils';
 import * as matchers from 'jest-extended';
+import {MFLPackTestsUtils} from './_utils/MFLPackTests.utils';
+import _ from 'lodash';
 
 expect.extend(matchers);
 jest.setTimeout(40000);
@@ -35,11 +37,14 @@ describe('MFLPackTemplate', () => {
         expect(result.events).toHaveLength(1);
         expect(result.events[0]).toEqual(expect.objectContaining({
           type: `A.${testsUtils.sansPrefix(
-            addressMap.MFLPackTemplate
+            addressMap.MFLPackTemplate,
           )}.MFLPackTemplate.Created`,
-          data: { id: 1 },
+          data: {id: 1},
         }));
-        const packTemplateData = await testsUtils.executeValidScript({name: 'mfl/packs/get_pack_template.script', args: [1]});
+        const packTemplateData = await testsUtils.executeValidScript({
+          name: 'mfl/packs/get_pack_template.script',
+          args: [1],
+        });
         expect(packTemplateData).toEqual({
           id: 1,
           name: 'Common',
@@ -68,9 +73,12 @@ describe('MFLPackTemplate', () => {
         expect(result.events).toHaveLength(1);
         expect(result.events[0]).toEqual(expect.objectContaining({
           type: `A.${testsUtils.sansPrefix(addressMap.MFLPackTemplate)}.MFLPackTemplate.AllowToOpenPacks`,
-          data: {id: 1}
+          data: {id: 1},
         }));
-        const packTemplate = await testsUtils.executeValidScript({name: 'mfl/packs/get_pack_template.script', args: [1]});
+        const packTemplate = await testsUtils.executeValidScript({
+          name: 'mfl/packs/get_pack_template.script',
+          args: [1],
+        });
         expect(packTemplate.isOpenable).toBe(true);
       });
     });
@@ -89,7 +97,10 @@ describe('MFLPackTemplate', () => {
 
         // assert
         // bob must now be able to create another pack template admin
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template_admin.tx', signers: [bobAccountAddress, jackAccountAddress]});
+        await testsUtils.shallPass({
+          name: 'mfl/packs/create_pack_template_admin.tx',
+          signers: [bobAccountAddress, jackAccountAddress],
+        });
       });
 
       test('should panic when trying to create a packTemplate admin with a non admin account', async () => {
@@ -123,13 +134,16 @@ describe('MFLPackTemplate', () => {
         await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: args2, signers});
 
         // execute
-        const packTemplateIds = await testsUtils.executeValidScript({name: 'mfl/packs/get_pack_template_ids.script', args: []});
+        const packTemplateIds = await testsUtils.executeValidScript({
+          name: 'mfl/packs/get_pack_template_ids.script',
+          args: [],
+        });
 
         // assert
         expect(packTemplateIds).toHaveLength(2);
         expect(packTemplateIds).toEqual(expect.arrayContaining([1, 2]));
-      })
-    })
+      });
+    });
 
     describe('getPackTemplates()', () => {
       test('should get all packTemplates data', async () => {
@@ -141,7 +155,10 @@ describe('MFLPackTemplate', () => {
         await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: args2, signers});
 
         // execute
-        const packTemplates= await testsUtils.executeValidScript({name: 'mfl/packs/get_pack_templates.script', args: []});
+        const packTemplates = await testsUtils.executeValidScript({
+          name: 'mfl/packs/get_pack_templates.script',
+          args: [],
+        });
 
         // assert
         expect(packTemplates).toEqual([
@@ -153,7 +170,7 @@ describe('MFLPackTemplate', () => {
             currentSupply: 0,
             startingIndex: 0,
             isOpenable: false,
-            imageUrl: 'http://img1-url'
+            imageUrl: 'http://img1-url',
           },
           {
             id: 2,
@@ -163,11 +180,11 @@ describe('MFLPackTemplate', () => {
             currentSupply: 0,
             startingIndex: 0,
             isOpenable: false,
-            imageUrl: 'http://img2-url'
-          }
+            imageUrl: 'http://img2-url',
+          },
         ]);
-      })
-    })
+      });
+    });
 
     describe('getPackTemplate()', () => {
       test('should get a specific packTemplate data', async () => {
@@ -179,10 +196,13 @@ describe('MFLPackTemplate', () => {
         await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: args2, signers});
 
         // execute
-        const packTemplates= await testsUtils.executeValidScript({name: 'mfl/packs/get_pack_template.script', args: [2]});
+        const packTemplate = await testsUtils.executeValidScript({
+          name: 'mfl/packs/get_pack_template.script',
+          args: [2],
+        });
 
         // assert
-        expect(packTemplates).toEqual({
+        expect(packTemplate).toEqual({
           id: 2,
           name: 'Rare',
           description: 'This is a rare pack template',
@@ -190,9 +210,9 @@ describe('MFLPackTemplate', () => {
           currentSupply: 0,
           startingIndex: 0,
           isOpenable: false,
-          imageUrl: 'http://img2-url'
+          imageUrl: 'http://img2-url',
         });
-      })
+      });
 
       test('should return nil if packTemplate id does not exist', async () => {
         // prepare
@@ -202,12 +222,75 @@ describe('MFLPackTemplate', () => {
         await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: args1, signers});
 
         // execute
-        const packTemplates= await testsUtils.executeValidScript({name: 'mfl/packs/get_pack_template.script', args: [2]});
+        const packTemplate = await testsUtils.executeValidScript({
+          name: 'mfl/packs/get_pack_template.script',
+          args: [2],
+        });
 
         // assert
-        expect(packTemplates).toEqual(null)
-      })
+        expect(packTemplate).toEqual(null);
+      });
+    });
 
-    })
-  })
+    describe('startingIndex', () => {
+      test('should increase the starting index when purchasing pack', async () => {
+        // prepare
+        const packTemplateSupply = 10;
+        await MFLPackTestsUtils.deployMFLPackContract('AliceAdminAccount');
+        await MFLPackTestsUtils.initPackTemplateAndDrop(
+          'AliceAdminAccount', 'AliceAdminAccount',
+          ['Common', 'This is a common pack template', packTemplateSupply, 'http://img1-url'],
+          ['Drop name', '19,99', 1, 20],
+        );
+        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
+        const aliceAddressSumValue = _
+          .chunk(testsUtils.sansPrefix(aliceAdminAccountAddress), 4)
+          .map((addressParts) => addressParts.join(''))
+          .map((addressPart) => parseInt(addressPart, 16))
+          .reduce((sum, x) => sum + x);
+        const aliceExpectedIncrease = aliceAddressSumValue % 500;
+
+        const bobAccountAddress = await getAccountAddress('BobAccount');
+        const bobAddressSumValue = _
+          .chunk(testsUtils.sansPrefix(bobAccountAddress), 4)
+          .map((addressParts) => addressParts.join(''))
+          .map((addressPart) => parseInt(addressPart, 16))
+          .reduce((sum, x) => sum + x);
+        const bobExpectedIncrease = bobAddressSumValue % 500;
+
+        await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '40.00');
+
+        // execute
+        await testsUtils.shallPass({
+          name: 'mfl/drops/purchase.tx',
+          args: [1, 1, '19,99'],
+          signers: [aliceAdminAccountAddress],
+        });
+        let packTemplate = await testsUtils.executeValidScript({
+          name: 'mfl/packs/get_pack_template.script',
+          args: [1],
+        });
+        const startingIndexAfterFirstBuy = packTemplate.startingIndex;
+        await testsUtils.shallPass({
+          name: 'mfl/drops/purchase.tx',
+          args: [1, 2, '39,98'],
+          signers: [bobAccountAddress],
+        });
+        packTemplate = await testsUtils.executeValidScript({
+          name: 'mfl/packs/get_pack_template.script',
+          args: [1],
+        });
+
+        // assert
+        const expectedStartingIndexAfterFirstBuy = aliceExpectedIncrease % packTemplateSupply;
+        expect(startingIndexAfterFirstBuy).toEqual(expectedStartingIndexAfterFirstBuy);
+        expect(startingIndexAfterFirstBuy).toBeGreaterThanOrEqual(0);
+        expect(startingIndexAfterFirstBuy).toBeLessThan(packTemplateSupply);
+        const expectedStartingIndexAfterBobPurchase = (startingIndexAfterFirstBuy + bobExpectedIncrease) % packTemplateSupply;
+        expect(packTemplate.startingIndex).toEqual(expectedStartingIndexAfterBobPurchase);
+        expect(packTemplate.startingIndex).toBeGreaterThanOrEqual(0);
+        expect(packTemplate.startingIndex).toBeLessThan(packTemplateSupply);
+      });
+    });
+  });
 });
