@@ -9,7 +9,12 @@ bobAddress=0x179b6b1cb6755e31
 cd $configPath
 
 # Get packs ids on Bob's Collection
-packsIDs=$(flow scripts execute ./scripts/mfl/packs/get_ids_in_collection.script.cdc $bobAddress | grep -o '\[.*\]')
+packsIDs=$(flow scripts execute ./scripts/mfl/packs/get_ids_in_collection.script.cdc $bobAddress | grep -o '[0-9]')
+echo "Packs ids in your wallet : "
+if [ -z "$packsIDs" ]; then
+    echo "None"
+    exit 0
+fi
 echo $packsIDs
 read -p "Which pack do you want to open? : " packIDToOpen
 

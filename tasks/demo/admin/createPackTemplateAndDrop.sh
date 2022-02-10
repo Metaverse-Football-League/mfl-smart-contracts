@@ -50,7 +50,7 @@ sleep 0.5
 if [ -z $dropDefaultValues ]; then
     dropName=$(generateString)
     price="$((1 + $RANDOM % 50)).00" # nbr between 1 and 50
-    packTemplateID=1 # link to the packTemplate above
+    packTemplateID=$nextPackTemplateID # link to the packTemplate above
     maxTokensPerAddress=$((1 + $RANDOM % 20)) #nbr between 1 and 20
 else
     read -p "What is drop name? : " dropName
@@ -59,12 +59,11 @@ else
     read -p "what is the maxTokensPerAddress? : " maxTokensPerAddress
 fi
 
-dropStatus=-1
-until [ "$dropStatus" == 0 ] || [ "$dropStatus" == 1 ] || [ "$dropStatus" == 2 ] 
-do
-    read -p $'What is the status of the drop?: 0 (closed), 1 (opened_whitelist), 2 (opened_all)\n' -n1 dropStatus;
-    echo ""
-done
+read -p $'The drop is closed by default. Do you want to open it for whitelisted addresses (1) or to all (2) : \n' -n1 dropStatus
+echo ""
+if [ "$dropStatus" != 1 ] && [ "$dropStatus" != 2 ]; then
+    dropStatus=0
+fi
 
 echo "------------------- INFOS DROP -------------------"
 echo "Drop name: $dropName"
@@ -82,6 +81,10 @@ echo "The drop id will be : $nextDropID"
 
 # Bob'account whitelisted or not
 read -p $'Do you want to whitelist bob\'s address? If so, what is the max number of packs he can buy? (Press Enter to pass)\n' bobNbrPacksWhitelist
+if [[ $bobNbrPacksWhitelist -gt $maxTokensPerAddress ]]; then
+    echo "Error - max number of packs ($bobNbrPacksWhitelist) must be smaller or equal to max tokens per address ($maxTokensPerAddress)"
+    exit 1
+fi
 
 # Create an admin proxy for Alice to be able to receive claims capability
 flow transactions send ./transactions/mfl/core/create_admin_proxy.tx.cdc --signer $signerAdminAlice
