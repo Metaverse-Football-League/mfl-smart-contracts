@@ -21,6 +21,9 @@ to perform actions in the smart contract like creating players, buying packs, ..
 
 Tests contain the unit test for the contracts, transactions and scripts.
 
+Tasks contain higher level scripts used for workflows needing multiple transactions / user inputs. Currently only used for scripts used to quickly
+test the contracts, can be used for audits for example. 
+
 ## Contracts Overview
 
 ### MFLPlayer
