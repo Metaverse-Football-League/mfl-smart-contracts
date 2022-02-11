@@ -29,19 +29,19 @@ if [ -z $packTemplateDefaultValues ]; then
     imageUrl="https://$(generateString).png"
 else
     while [ -z "$packTemplateName" ]
-    do 
+    do
         read -p "What is the pack template name? : " packTemplateName
     done
 
     read -p "What is the description? (optional) : " description
 
     while ! [[ "${maxSupply}" =~ ^[0-9]+$ ]]
-    do 
+    do
         read -p "What is the max supply? (must be an unsigned int) : " maxSupply
     done
 
     while [ -z "$imageUrl" ]
-    do 
+    do
         read -p "what is the imageUrl? : " imageUrl
     done
 fi
@@ -75,25 +75,25 @@ if [ -z $dropDefaultValues ]; then
     dropName=$(generateString)
     price="$((1 + $RANDOM % 50)).00" # nbr between 1 and 50
     packTemplateID=$nextPackTemplateID # link to the packTemplate above
-    maxTokensPerAddress=$((1 + $RANDOM % 20)) #nbr between 1 and 20
+    maxTokensPerAddress=$((10 + $RANDOM % 20)) #nbr between 10 and 30
 else
     while [ -z "$dropName" ]
-    do 
+    do
         read -p "What is drop name? : " dropName
     done
-    
+
     while ! [[ "${price}" =~ ^[0-9]+[.][0-9]+$ ]]
-    do 
+    do
         read -p "What is the price of a pack? (must be a float ex: 9.50) : " price
     done
-    
+
     while ! [[ "${packTemplateID}" =~ ^[0-9]+$ ]]
-    do 
+    do
         read -p "What is the packTemplate id? (must be an unsigned int) : " packTemplateID
     done
 
     while ! [[ "${maxTokensPerAddress}" =~ ^[0-9]+$ ]]
-    do 
+    do
         read -p "what is the maxTokensPerAddress? (must be an unsigned int) : " maxTokensPerAddress
     done
 fi
