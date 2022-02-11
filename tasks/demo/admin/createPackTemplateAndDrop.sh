@@ -1,5 +1,8 @@
 #!/bin/bash
 
+BLUE="\033[0;34m"
+NC="\033[0m"
+
 # This script creates a new PackTemplate.
 
 configPath="../../.."
@@ -50,10 +53,16 @@ echo "Max supply: $maxSupply"
 echo "Image url: $imageUrl"
 echo "-----------------------------------------------------------"
 
-# Get pack templates ids
-packTemplatesIDs=$(flow scripts execute scripts/mfl/packs/get_pack_template_ids.script.cdc | grep -o "[0-9]")
-currenPackTemplateID=$(echo "${packTemplatesIDs[*]}" | sort -nr | head -n1)
-[ -z $currenPackTemplateID ] && nextPackTemplateID=1 || nextPackTemplateID="$(($currenPackTemplateID+1))"
+echo -e "${BLUE}[Script] Get pack templates ids${NC}"
+getPackTemplateIdsResult=$(flow scripts execute scripts/mfl/packs/get_pack_template_ids.script.cdc)
+currentPackTemplateID=$(echo $getPackTemplateIdsResult | sed -r 's/^.*Result: \[.*([^,]+)\]$/\1/')
+re='^[0-9]+$'
+if ! [[ $currentPackTemplateID =~ $re ]] ; then
+    nextPackTemplateID=1
+else
+    nextPackTemplateID="$(($currentPackTemplateID+1))"
+fi
+
 echo "The pack template id will be : $nextPackTemplateID"
 echo ""
 
@@ -103,10 +112,15 @@ echo "Max tokens per address: $maxTokensPerAddress"
 echo "Drop status: $dropStatus"
 echo "--------------------------------------------------"
 
-# Get drops ids
-dropIDs=$(flow scripts execute scripts/mfl/drops/get_ids.script.cdc | grep -o "[0-9]")
-currentDropID=$(echo "${dropIDs[*]}" | sort -nr | head -n1)
-[ -z $currentDropID ] && nextDropID=1 || nextDropID="$(($currentDropID+1))"
+echo -e "${BLUE}[Script] Get drops ids${NC}"
+getDropIdsResult=$(flow scripts execute scripts/mfl/drops/get_ids.script.cdc)
+currentDropID=$(echo $getDropIdsResult | sed -r 's/^.*Result: \[.*([^,]+)\]$/\1/')
+re='^[0-9]+$'
+if ! [[ $currentDropID =~ $re ]] ; then
+    nextDropID=1
+else
+    nextDropID="$(($currentDropID+1))"
+fi
 echo "The drop id will be : $nextDropID"
 echo ""
 
@@ -120,55 +134,56 @@ if [ -n "$bobIsWhitelisted" ]; then
     done
 fi
 
-# Create an admin proxy for Alice to be able to receive claims capability
+echo -e "${BLUE}[Tx] Create an admin proxy for Alice to be able to receive claims capability${NC}"
 flow transactions send ./transactions/mfl/core/create_admin_proxy.tx.cdc --signer $signerAdminAlice
 sleep 1
 
-# Give Alice a PackTemplate admin claim capability
+echo -e "${BLUE}[Tx] Give Alice a PackTemplate admin claim capability${NC}"
 flow transactions send ./transactions/mfl/packs/give_pack_template_admin_claim.tx.cdc $adminAliceAddress /private/packTemplateAdminClaim_$adminAliceAddress --signer $signerAdminRoot
 sleep 1
 
-# Alice can now create a pack template
+echo -e "${BLUE}[Tx] Alice can now create a pack template${NC}"
 flow transactions send ./transactions/mfl/packs/create_pack_template.tx.cdc $packTemplateName $description $maxSupply $imageUrl --signer $signerAdminAlice
 sleep 1
 
-# Allow pack opening for this pack template
+echo -e "${BLUE}[Tx] Allow pack opening for this pack template${NC}"
 flow transactions send ./transactions/mfl/packs/set_allow_to_open_packs.tx.cdc $nextPackTemplateID --signer $signerAdminAlice
 sleep 1
 
-# Script to execute if we want to check pack template infos :
+echo -e "${BLUE}[Script] Get all pack templates${NC}"
 flow scripts execute ./scripts/mfl/packs/get_pack_templates.script.cdc
 
-# Give Alice a Drop admin claim capability
+echo -e "${BLUE}[Tx] Give Alice a Drop admin claim capability${NC}"
 flow transactions send ./transactions/mfl/drops/give_drop_admin_claim.tx.cdc $adminAliceAddress /private/dropAdminClaim_$adminAliceAddress --signer $signerAdminRoot
 sleep 1
 
-# Alice can now create the drop
+echo -e "${BLUE}[Tx] Alice creates the drop${NC}"
 flow transactions send ./transactions/mfl/drops/create_drop.tx.cdc $dropName $price $packTemplateID $maxTokensPerAddress --signer $signerAdminAlice
 sleep 1
 
-# Setup Alice's FUSD vault
+echo -e "${BLUE}[Tx] Setup Alice's FUSD vault${NC}"
 flow transactions send ./transactions/fusd/setup_account.tx.cdc --signer $signerAdminAlice
 sleep 1
 
-# Set owner vault
+echo -e "${BLUE}[Tx] Set drop owner vault${NC}"
 flow transactions send ./transactions/mfl/drops/set_owner_vault.tx.cdc --signer $signerAdminAlice
 sleep 1
 
 if [ ! -z $bobNbrPacksWhitelist ]; then
+    echo -e "${BLUE}[Tx] Add bob to whitelisted addresses${NC}"
     flow transactions send ./transactions/mfl/drops/set_whitelisted_addresses.tx.cdc $nextDropID "{$bobAddress : $bobNbrPacksWhitelist}" --signer $signerAdminAlice
     sleep 1
 fi
 
 if [ "$dropStatus" == 1 ]; then
-    # Open the drop to whitelisted addresses only
+    echo -e "${BLUE}[Tx] Open the drop to whitelisted addresses only${NC}"
     flow transactions send ./transactions/mfl/drops/set_status_opened_whitelist.tx.cdc $nextDropID --signer $signerAdminAlice
     sleep 1
 elif [ "$dropStatus" == 2 ]; then
-    # Open the drop to all
+    echo -e "${BLUE}[Tx] Open the drop to all${NC}"
     flow transactions send ./transactions/mfl/drops/set_status_opened_all.tx.cdc $nextDropID --signer $signerAdminAlice
     sleep 1
 fi
 
-# Script to get drops infos :
+echo -e "${BLUE}[Script] Get drops${NC}"
 flow scripts execute ./scripts/mfl/drops/get_drops.script.cdc

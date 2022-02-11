@@ -1,5 +1,8 @@
 #!/bin/bash
 
+BLUE="\033[0;34m"
+NC="\033[0m"
+
 # This script buys packs
 
 configPath="../../.."
@@ -15,7 +18,7 @@ do
 done
 echo ""
 
-# Get drops ids
+echo -e "${BLUE}[Script] Get drops ids${NC}"
 dropIDs=$(flow scripts execute ./scripts/mfl/drops/get_ids.script.cdc | grep -o '\[.*\]')
 echo "Drops ids available: $dropIDs"
 
@@ -25,11 +28,11 @@ do
 done
 echo ""
 
-# Setup Bob's FUSD vault
+echo -e "${BLUE}[Tx] Setup Bob's FUSD vault${NC}"
 flow transactions send ./transactions/fusd/setup_account.tx.cdc --signer $signerBob
 sleep 1
 
-# Get Bob's FUSD vault balance
+echo -e "${BLUE}[Script] Get Bob's FUSD vault balance${NC}"
 currentBalance=$(flow scripts execute ./scripts/fusd/get_balance.script.cdc $bobAddress | grep -o '[0-9]*[.][0-9]*')
 echo "Current Balance $currentBalance"
 
@@ -45,7 +48,7 @@ fi
 
 echo "------------------- INFOS BUY PACKS -------------------"
 echo "Number of packs to buy: $nbrPacks"
-# Get the price for this dropID
+echo -e "${BLUE}[Script] Get the price for this dropID${NC}"
 price=$(flow scripts execute ./scripts/mfl/drops/get_drop.script.cdc $dropID | grep -o 'price: [0-9]*[.][0-9]*'  | cut -d ' ' -f 2)
 if [ -z $price ]; then
     echo "Drop does not exist."
@@ -57,14 +60,14 @@ echo "Amount: $amount"
 echo "Current Balance: $currentBalance"
 echo "-------------------------------------------------------"
 
-# Send amountFUSD to Bob
+echo -e "${BLUE}[Tx] Send amountFUSD to Bob${NC}"
 flow transactions send ./transactions/fusd/send_fusd.tx.cdc $bobAddress $amountFUSD --signer $signerAdminRoot
 sleep 1
 
 echo "Bob received $amountFUSD FUSD from service account"
 
-# Send the tx with the previous values to purchase packs
+echo -e "${BLUE}[Tx] Purchase packs with the previous values${NC}"
 flow transactions send ./transactions/mfl/drops/purchase.tx.cdc $dropID $nbrPacks $amount --signer $signerBob
 
-# Script to get packs infos :
+echo -e "${BLUE}[Script] Get packs${NC}"
 flow scripts execute ./scripts/mfl/packs/get_packs_data_view_from_collection.script.cdc $bobAddress
