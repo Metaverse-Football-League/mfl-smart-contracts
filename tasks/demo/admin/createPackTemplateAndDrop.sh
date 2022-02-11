@@ -55,7 +55,7 @@ echo "-----------------------------------------------------------"
 
 echo -e "${BLUE}[Script] Get pack templates ids${NC}"
 getPackTemplateIdsResult=$(flow scripts execute scripts/mfl/packs/get_pack_template_ids.script.cdc)
-currentPackTemplateID=$(echo $getPackTemplateIdsResult | sed -r 's/^.*Result: \[.*([^,]+)\]$/\1/')
+currentPackTemplateID=$(echo $getPackTemplateIdsResult | perl -0777 -pe 's/^.*Result: \[.*?([0-9]+)\]$/\1/')
 re='^[0-9]+$'
 if ! [[ $currentPackTemplateID =~ $re ]] ; then
     nextPackTemplateID=1
@@ -98,10 +98,10 @@ else
     done
 fi
 
-read -p $'The drop is closed by default. Do you want to open it for whitelisted addresses (press 1) or to all (press 2). (Press Enter to pass) : \n' -n1 dropStatus
+read -p $'The drop is opened to all by default. Do you want to open it only for whitelisted addresses (press 1) or close it (press 0). (Press Enter to pass) : \n' -n1 dropStatus
 echo ""
-if [ "$dropStatus" != 1 ] && [ "$dropStatus" != 2 ]; then
-    dropStatus=0
+if [ "$dropStatus" != 1 ] && [ "$dropStatus" != 0 ]; then
+    dropStatus=2
 fi
 
 echo "------------------- INFOS DROP -------------------"
@@ -114,7 +114,7 @@ echo "--------------------------------------------------"
 
 echo -e "${BLUE}[Script] Get drops ids${NC}"
 getDropIdsResult=$(flow scripts execute scripts/mfl/drops/get_ids.script.cdc)
-currentDropID=$(echo $getDropIdsResult | sed -r 's/^.*Result: \[.*([^,]+)\]$/\1/')
+currentDropID=$(echo $getDropIdsResult | perl -0777 -pe 's/^.*Result: \[.*?([0-9]+)\]$/\1/')
 re='^[0-9]+$'
 if ! [[ $currentDropID =~ $re ]] ; then
     nextDropID=1

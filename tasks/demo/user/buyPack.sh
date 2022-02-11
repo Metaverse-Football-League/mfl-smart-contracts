@@ -19,8 +19,9 @@ done
 echo ""
 
 echo -e "${BLUE}[Script] Get drops ids${NC}"
-dropIDs=$(flow scripts execute ./scripts/mfl/drops/get_ids.script.cdc | grep -o '\[.*\]')
-echo "Drops ids available: $dropIDs"
+getDropIdsResult=$(flow scripts execute ./scripts/mfl/drops/get_ids.script.cdc)
+currentDropIDs=$(echo $getDropIdsResult | perl -0777 -pe 's/^.*Result: \[(.*?[0-9])\]$/\1/')
+echo "Drops ids available: $currentDropIDs"
 
 while ! [[ "${dropID}" =~ ^[0-9]+$ ]]
 do 
@@ -33,7 +34,8 @@ flow transactions send ./transactions/fusd/setup_account.tx.cdc --signer $signer
 sleep 1
 
 echo -e "${BLUE}[Script] Get Bob's FUSD vault balance${NC}"
-currentBalance=$(flow scripts execute ./scripts/fusd/get_balance.script.cdc $bobAddress | grep -o '[0-9]*[.][0-9]*')
+getCurrentBalanceResult=$(flow scripts execute ./scripts/fusd/get_balance.script.cdc $bobAddress)
+currentBalance=$(echo $getCurrentBalanceResult | perl -0777 -pe 's/^.*Result: ([0-9]*[.][0-9]*)$/\1/')
 echo "Current Balance $currentBalance"
 
 while ! [[ "${amountFUSD}" =~ ^[0-9]+[.][0-9]+$ ]]
@@ -49,7 +51,10 @@ fi
 echo "------------------- INFOS BUY PACKS -------------------"
 echo "Number of packs to buy: $nbrPacks"
 echo -e "${BLUE}[Script] Get the price for this dropID${NC}"
-price=$(flow scripts execute ./scripts/mfl/drops/get_drop.script.cdc $dropID | grep -o 'price: [0-9]*[.][0-9]*'  | cut -d ' ' -f 2)
+getPriceResult=$(flow scripts execute ./scripts/mfl/drops/get_drop.script.cdc $dropID)
+price=$(echo $getPriceResult | perl -0777 -pe 's/^.*price: ([0-9]*[.][0-9]*).*/\1/')
+echo $price
+
 if [ -z $price ]; then
     echo "Drop does not exist."
     exit 1
