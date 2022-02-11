@@ -16,6 +16,7 @@ cd $configPath
 
 # PackTemplate creation
 read -p $'Do you want default values for the PackTemplate? (Press Enter for yes)\n' -n1 packTemplateDefaultValues
+echo ""
 sleep 0.5
 
 if [ -z $packTemplateDefaultValues ]; then
@@ -24,10 +25,22 @@ if [ -z $packTemplateDefaultValues ]; then
     maxSupply=$RANDOM
     imageUrl="https://$(generateString).png"
 else
-    read -p "What is the pack template name? : " packTemplateName
-    read -p "What is the description? : " description
-    read -p "What is the max supply? : " maxSupply
-    read -p "what is the imageUrl? : " imageUrl
+    while [ -z "$packTemplateName" ]
+    do 
+        read -p "What is the pack template name? : " packTemplateName
+    done
+
+    read -p "What is the description? (optional) : " description
+
+    while ! [[ "${maxSupply}" =~ ^[0-9]+$ ]]
+    do 
+        read -p "What is the max supply? (must be an unsigned int) : " maxSupply
+    done
+
+    while [ -z "$imageUrl" ]
+    do 
+        read -p "what is the imageUrl? : " imageUrl
+    done
 fi
 
 echo "------------------- INFOS PACK TEMPLATE -------------------"
@@ -42,9 +55,11 @@ packTemplatesIDs=$(flow scripts execute scripts/mfl/packs/get_pack_template_ids.
 currenPackTemplateID=$(echo "${packTemplatesIDs[*]}" | sort -nr | head -n1)
 [ -z $currenPackTemplateID ] && nextPackTemplateID=1 || nextPackTemplateID="$(($currenPackTemplateID+1))"
 echo "The pack template id will be : $nextPackTemplateID"
+echo ""
 
 # Drop creation
 read -p $'Do you want default values for the drop? (Press Enter for yes)\n' -n1 dropDefaultValues
+echo ""
 sleep 0.5
 
 if [ -z $dropDefaultValues ]; then
@@ -53,13 +68,28 @@ if [ -z $dropDefaultValues ]; then
     packTemplateID=$nextPackTemplateID # link to the packTemplate above
     maxTokensPerAddress=$((1 + $RANDOM % 20)) #nbr between 1 and 20
 else
-    read -p "What is drop name? : " dropName
-    read -p "What is the price of a pack? : " price
-    read -p "What is the packTemplate id? : " packTemplateID
-    read -p "what is the maxTokensPerAddress? : " maxTokensPerAddress
+    while [ -z "$dropName" ]
+    do 
+        read -p "What is drop name? : " dropName
+    done
+    
+    while ! [[ "${price}" =~ ^[0-9]+[.][0-9]+$ ]]
+    do 
+        read -p "What is the price of a pack? (must be a float ex: 9.50) : " price
+    done
+    
+    while ! [[ "${packTemplateID}" =~ ^[0-9]+$ ]]
+    do 
+        read -p "What is the packTemplate id? (must be an unsigned int) : " packTemplateID
+    done
+
+    while ! [[ "${maxTokensPerAddress}" =~ ^[0-9]+$ ]]
+    do 
+        read -p "what is the maxTokensPerAddress? (must be an unsigned int) : " maxTokensPerAddress
+    done
 fi
 
-read -p $'The drop is closed by default. Do you want to open it for whitelisted addresses (1) or to all (2) : \n' -n1 dropStatus
+read -p $'The drop is closed by default. Do you want to open it for whitelisted addresses (press 1) or to all (press 2). (Press Enter to pass) : \n' -n1 dropStatus
 echo ""
 if [ "$dropStatus" != 1 ] && [ "$dropStatus" != 2 ]; then
     dropStatus=0
@@ -78,12 +108,16 @@ dropIDs=$(flow scripts execute scripts/mfl/drops/get_ids.script.cdc | grep -o "[
 currentDropID=$(echo "${dropIDs[*]}" | sort -nr | head -n1)
 [ -z $currentDropID ] && nextDropID=1 || nextDropID="$(($currentDropID+1))"
 echo "The drop id will be : $nextDropID"
+echo ""
 
 # Bob'account whitelisted or not
-read -p $'Do you want to whitelist bob\'s address? If so, what is the max number of packs he can buy? (Press Enter to pass)\n' bobNbrPacksWhitelist
-if [[ $bobNbrPacksWhitelist -gt $maxTokensPerAddress ]]; then
-    echo "Error - max number of packs ($bobNbrPacksWhitelist) must be smaller or equal to max tokens per address ($maxTokensPerAddress)"
-    exit 1
+read -p $'Do you want to whitelist bob\'s address? (Press Enter to pass) : \n' -n1 bobIsWhitelisted
+echo ""
+if [ -n "$bobIsWhitelisted" ]; then
+    while ! [[ "${bobNbrPacksWhitelist}" =~ ^[0-9]+$ ]] || [[ $bobNbrPacksWhitelist -gt $maxTokensPerAddress ]]
+    do
+        read -p $'What is the max number of packs he can buy? (must be an unsigned int and smaller or equal to the max tokens number per address)\n' bobNbrPacksWhitelist
+    done
 fi
 
 # Create an admin proxy for Alice to be able to receive claims capability

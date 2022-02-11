@@ -16,7 +16,11 @@ if [ -z "$packsIDs" ]; then
     exit 0
 fi
 echo $packsIDs
-read -p "Which pack do you want to open? : " packIDToOpen
+
+while ! [[ "${packIDToOpen}" =~ ^[0-9]+$ ]]
+do 
+    read -p "Which pack do you want to open? (must be an unsigned int) : " packIDToOpen
+done
 
 # Send the tx with to open this pack
 flow transactions send ./transactions/mfl/packs/open_pack.tx.cdc $packIDToOpen --signer $signerBob

@@ -9,11 +9,21 @@ bobAddress=0x179b6b1cb6755e31
 
 cd $configPath
 
-read -p "How many packs do you want to buy? : " nbrPacks
+while ! [[ "${nbrPacks}" =~ ^[0-9]+$ ]]
+do 
+    read -p "How many packs do you want to buy? (must be an unsigned int) : " nbrPacks
+done
+echo ""
+
 # Get drops ids
 dropIDs=$(flow scripts execute ./scripts/mfl/drops/get_ids.script.cdc | grep -o '\[.*\]')
 echo "Drops ids available: $dropIDs"
-read -p "From which drop id? : " dropID
+
+while ! [[ "${dropID}" =~ ^[0-9]+$ ]]
+do 
+    read -p "From which drop id? (must be an unsigned int) : " dropID
+done
+echo ""
 
 # Setup Bob's FUSD vault
 flow transactions send ./transactions/fusd/setup_account.tx.cdc --signer $signerBob
@@ -22,7 +32,12 @@ sleep 1
 # Get Bob's FUSD vault balance
 currentBalance=$(flow scripts execute ./scripts/fusd/get_balance.script.cdc $bobAddress | grep -o '[0-9]*[.][0-9]*')
 echo "Current Balance $currentBalance"
-read -p "How much FUSD do you want to receive (Expecting UFix64 : 0.00, 9.90, ...) : " amountFUSD
+
+while ! [[ "${amountFUSD}" =~ ^[0-9]+[.][0-9]+$ ]]
+do 
+    read -p "How much FUSD do you want to receive (Expecting UFix64 : 0.00, 9.90, ...) :  " amountFUSD;
+done
+
 
 if [ -z $amountFUSD ]; then
     amountFUSD=0.00

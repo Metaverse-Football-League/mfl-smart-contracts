@@ -9,10 +9,13 @@ adminAliceAddress=0x01cf0e2f2f715450
 
 cd $configPath
 
-read -p "How many players do you want to mint? : " playersNbr
+while ! [[ "${playersNbr}" =~ ^[0-9]+$ ]]
+do 
+    read -p "How many players do you want to mint? (must be an unsigned int) : " playersNbr
+done
 
 echo "------------------- INFOS MINTING PLAYERS -------------------"
-echo "Number of players to mint: $playersNbr"
+echo "Number of players to mint : $playersNbr"
 echo "---------------------------------------------"
 
 # Create an admin proxy for Alice to be able to receive claims capability
