@@ -96,7 +96,7 @@ pub contract MFLPackTemplate {
             for accountAddrByte in accountAddrBytes {
                 addrValue = addrValue + UInt32(accountAddrByte)
             }
-            self.startingIndex = (self.startingIndex + (addrValue % 500)) % self.maxSupply
+            self.startingIndex = (self.startingIndex + addrValue) % self.maxSupply
         }
     }
 
