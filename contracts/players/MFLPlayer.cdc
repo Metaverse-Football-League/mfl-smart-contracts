@@ -3,6 +3,12 @@ import MetadataViews from "../_libs/MetadataViews.cdc"
 import MFLViews from "../views/MFLViews.cdc"
 import MFLAdmin from "../core/MFLAdmin.cdc"
 
+/**
+  This contract is based on the NonFungibleToken standard on Flow.
+  It allows an admin to mint players (NFTs). A player has metadata
+  that can be updated by an admin.
+**/
+
 pub contract MFLPlayer: NonFungibleToken {
 
     // Events
@@ -21,6 +27,7 @@ pub contract MFLPlayer: NonFungibleToken {
 
     // The total number of Players that have been minted
     pub var totalSupply: UInt64
+    // All players datas are stored in this dictionary
     access(self) let playersDatas: {UInt64: PlayerData}
 
     // Data stored in playersdatas. Updatable by an admin
@@ -57,13 +64,15 @@ pub contract MFLPlayer: NonFungibleToken {
             emit Minted(id: self.id)
         }
 
-         pub fun getViews(): [Type] {
+        // Get all supported views for this NFT
+        pub fun getViews(): [Type] {
             return [
                 Type<MetadataViews.Display>(),
                 Type<MFLViews.PlayerDataViewV1>()
             ]
         }
         
+        // Resolve a specific view
         pub fun resolveView(_ view: Type): AnyStruct? {
             let playerData = MFLPlayer.getPlayerData(id: self.id)!
             switch view {
@@ -166,6 +175,7 @@ pub contract MFLPlayer: NonFungibleToken {
         return self.playersDatas[id];
     }
 
+     // This interface allows any account that has a private capability to a PlayerAdminClaim to call the methods below
     pub resource interface PlayerAdminClaim {
         pub let name: String
         pub fun mintPlayer(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, image: {MetadataViews.File}): @MFLPlayer.NFT
@@ -232,7 +242,7 @@ pub contract MFLPlayer: NonFungibleToken {
         self.account.save<@Collection>(<- create Collection(), to: self.CollectionStoragePath)
         // Create a public capability for the Collection
         self.account.link<&MFLPlayer.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(self.CollectionPublicPath, target: self.CollectionStoragePath)
-
+        // Create a PlayerAdmin resource and save it to storage
         self.account.save(<- create PlayerAdmin() , to: self.PlayerAdminStoragePath)
 
         emit ContractInitialized()
