@@ -81,6 +81,12 @@
     },
     "testnet-drop-player-collection-account": {
       "fromFile": "./flow.testnet.json"
+    },
+    "testnet-player-admin-account": {
+      "fromFile": "./flow.testnet.json"
+    },
+    "testnet-buy-packs-account": {
+      "fromFile": "./flow.testnet.json"
     }
   },
   "deployments": {
