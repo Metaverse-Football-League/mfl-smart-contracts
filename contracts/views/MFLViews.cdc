@@ -1,6 +1,11 @@
 import MetadataViews from "../_libs/MetadataViews.cdc"
 import MFLPackTemplate from "../packs/MFLPackTemplate.cdc"
 
+/**
+  This contract defines MFL customised views. They are used to represent NFTs data.
+  This allows us to take full advantage of the new metadata standard.
+**/
+
 pub contract MFLViews {
 
     // Events

@@ -1,3 +1,10 @@
+/**
+  This contract allows MFL to create and manage packTemplates.
+  A packTemplate is in a way the skeleton of a pack, where the max supply is defined,
+  whether or not the packs linked to a packTemplate can be opened, and the startingIndex
+  (which is one of the central elements of the pack content randomness logic).
+**/
+
 pub contract MFLPackTemplate {
 
     // Events
@@ -9,6 +16,7 @@ pub contract MFLPackTemplate {
     pub let PackTemplateAdminStoragePath: StoragePath
 
     pub var nextPackTemplateID :UInt64
+    // All packTemplates  are stored in this dictionary
     access(self) let packTemplates : @{UInt64: PackTemplate}
 
     pub struct PackTemplateData {
@@ -65,6 +73,7 @@ pub contract MFLPackTemplate {
             self.imageUrl = imageUrl
         }
 
+        // Enable accounts to open their packs
         access(contract) fun allowToOpenPacks() {
             self.isOpenable = true
         }
@@ -100,10 +109,12 @@ pub contract MFLPackTemplate {
         }
     }
 
+    // Get all packTemplates IDs
     pub fun getPackTemplatesIDs(): [UInt64] {
         return self.packTemplates.keys
     }
 
+    // Get a data reprensation of a specific packTemplate
     pub fun getPackTemplate(id: UInt64): PackTemplateData? {
         if let packTemplate = self.getPackTemplateRef(id: id) {
             return PackTemplateData(
@@ -120,6 +131,7 @@ pub contract MFLPackTemplate {
         return nil
     }
 
+    // Get a data reprensation of all packTemplates
     pub fun getPackTemplates(): [PackTemplateData] {
         var packTemplatesData: [PackTemplateData] = []
         for id in self.getPackTemplatesIDs() {
@@ -139,6 +151,7 @@ pub contract MFLPackTemplate {
         return packTemplatesData
     }
 
+    // Get a specif packTemplate ref (in particular for calling admin methods)
     access(contract) fun getPackTemplateRef(id: UInt64): &MFLPackTemplate.PackTemplate? {
         if self.packTemplates[id] != nil {
             let ref = &self.packTemplates[id] as auth &MFLPackTemplate.PackTemplate
@@ -153,6 +166,7 @@ pub contract MFLPackTemplate {
         return self.getPackTemplateRef(id: id)?.getMintIndex(nbToMint: nbToMint, address: address)
     }
     
+    // This interface allows any account that has a private capability to a PackTemplateAdminClaim to call the methods below
     pub resource interface PackTemplateAdminClaim {
         pub let name: String
         pub fun allowToOpenPacks(id: UInt64)
@@ -202,7 +216,7 @@ pub contract MFLPackTemplate {
         self.nextPackTemplateID = 1
         self.packTemplates <- {}
 
-        // Create PackTemplateAdmin
+        // Create PackTemplateAdmin resource and save it to storage
         self.account.save(<- create PackTemplateAdmin() , to: self.PackTemplateAdminStoragePath)
         
         emit ContractInitialized()

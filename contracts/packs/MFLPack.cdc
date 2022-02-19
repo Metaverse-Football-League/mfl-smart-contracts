@@ -3,10 +3,13 @@ import MetadataViews from "../_libs/MetadataViews.cdc"
 import MFLViews from "../views/MFLViews.cdc"
 import MFLPackTemplate from "../packs/MFLPackTemplate.cdc"
 
-pub contract MFLPack: NonFungibleToken {
+/**
+  This contract is based on the NonFungibleToken standard on Flow.
+  It allows to mint packs (NFTs), which can then be opened. A pack
+  is always linked to a packTemplate (see MFLPackTemplate contract for more info).
+**/
 
-    pub let CollectionStoragePath: StoragePath
-    pub let CollectionPublicPath: PublicPath
+pub contract MFLPack: NonFungibleToken {
 
     // Events
     pub event ContractInitialized()
@@ -15,6 +18,10 @@ pub contract MFLPack: NonFungibleToken {
     pub event Opened(id: UInt64, packIndex: UInt32, packTemplateID: UInt64, from: Address?)
     pub event Created(ids: [UInt64], from: Address?)
     pub event Destroyed(id: UInt64)
+
+    // Named Paths
+    pub let CollectionStoragePath: StoragePath
+    pub let CollectionPublicPath: PublicPath
 
     // Counter for all the Packs ever minted
     pub var totalSupply: UInt64
@@ -35,6 +42,7 @@ pub contract MFLPack: NonFungibleToken {
             self.packTemplateID = packTemplateID
         }
 
+        // Get all supported views for this NFT
         pub fun getViews(): [Type] {
             return [
                 Type<MetadataViews.Display>(),
@@ -42,6 +50,7 @@ pub contract MFLPack: NonFungibleToken {
             ]
         }
 
+        // Resolve a specific view
         pub fun resolveView(_ view: Type): AnyStruct? {
             let packTemplateData = MFLPackTemplate.getPackTemplate(id: self.packTemplateID)!
             switch view {
@@ -129,6 +138,7 @@ pub contract MFLPack: NonFungibleToken {
             return packNFT as &AnyResource{MetadataViews.Resolver}
         }
 
+        // Called by any account that want to open a specific pack
         pub fun openPack(id: UInt64) {
             let pack <- self.withdraw(withdrawID: id) as! @MFLPack.NFT
             let packTemplate = MFLPackTemplate.getPackTemplate(id: pack.packTemplateID)!
@@ -136,6 +146,7 @@ pub contract MFLPack: NonFungibleToken {
             // Check if packTemplate is openable or if the owner must wait before opening the pack
             assert(packTemplate.isOpenable, message: "PackTemplate is not openable")
 
+            // Emit an event which will be processed by the backend to distribute the content of the pack
             emit Opened(
                 id: pack.id,
                 packIndex: (packTemplate.startingIndex + pack.packTemplateMintIndex) % packTemplate.maxSupply,
@@ -180,7 +191,9 @@ pub contract MFLPack: NonFungibleToken {
         // Initialize contract fields
         self.totalSupply = 0
 
+        // Create a Collection and save it to storage
         self.account.save<@MFLPack.Collection>(<- MFLPack.createEmptyCollection(), to: MFLPack.CollectionStoragePath)
+        // Create a public capability for the Collection
         self.account.link<&MFLPack.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(MFLPack.CollectionPublicPath, target: MFLPack.CollectionStoragePath)
 
         emit ContractInitialized()

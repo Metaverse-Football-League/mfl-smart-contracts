@@ -1,8 +1,13 @@
 import FungibleToken from "../_libs/FungibleToken.cdc"
 import NonFungibleToken from "../_libs/NonFungibleToken.cdc"
-// import FUSD from "../_libs/FUSD.cdc" // TODO
 import MFLPack from "../packs/MFLPack.cdc"
 import MFLPackTemplate from "../packs/MFLPackTemplate.cdc"
+
+/**
+  This contract allows MFL to create and manage drops. Basically, a drop can have different status 
+  and will among other things define the price of a pack, the maximum number of packs per address,... . 
+  Each drop must be linked to an existing packTemplate (see MFLPackTemplate contract for more info).
+**/
 
 pub contract MFLDrop {
 
@@ -15,6 +20,7 @@ pub contract MFLDrop {
     // Named Paths
     pub let DropAdminStoragePath: StoragePath
 
+    // Possible status of a drop
     pub enum Status: UInt8 {
         pub case closed
         pub case opened_whitelist
@@ -22,7 +28,9 @@ pub contract MFLDrop {
     }
 
     pub var nextDropID: UInt64
+    // The owner vault allows MFL to receveive payments from the purchase of the packs
     pub var ownerVault: Capability<&AnyResource{FungibleToken.Receiver}>?
+    // All drops  are stored in this dictionary
     access(self) let drops : @{UInt64: Drop}
 
     pub struct DropData {
@@ -86,6 +94,7 @@ pub contract MFLDrop {
             self.whitelistedAddresses = {}
         }
 
+        // Called by purchase fct below and ensures that an account has the right to buy packs
         access(contract) fun mint(address: Address, nbToMint: UInt32, senderVault: @FungibleToken.Vault, recipientCap: Capability<&{NonFungibleToken.CollectionPublic}>) {
             pre {
                 address == recipientCap.borrow()!.owner!.address : "Address is not valid" // Check if address is the right one (to ensure fair randmoness logic in MFLPackTemplate)
@@ -110,11 +119,13 @@ pub contract MFLDrop {
             destroy tokens
         }
 
+        // Update the drop status
         access(contract) fun setStatus(status: Status) {
             self.status = status
             emit StatusUpdated(status: status.rawValue)
         }
 
+        // Update the drop whitelistedAddresses dictionary
         access(contract) fun setWhitelistedAddresses(addresses: {Address: UInt32}) {
             for address in addresses.keys {
                 if addresses[address]! > self.maxTokensPerAddress {
@@ -125,11 +136,13 @@ pub contract MFLDrop {
             emit SetWhitelistedAddresses(addresses: addresses)
         }
 
+        // Update the drop maxTokensPerAddress
         access(contract) fun setMaxTokensPerAddress(maxTokensPerAddress: UInt32) {
             self.maxTokensPerAddress = maxTokensPerAddress
         }
     }
 
+    // Get a data reprensation of a specific drop
     pub fun getDrop(id: UInt64): DropData? {
         if let drop = self.getDropRef(id: id) {
             return DropData(
@@ -146,6 +159,7 @@ pub contract MFLDrop {
         return nil
     }
 
+    // Get a data reprensation of all drops
     pub fun getDrops(): [DropData] {
         var dropsData: [DropData] = []
         for id in self.getDropsIDs() {
@@ -165,10 +179,12 @@ pub contract MFLDrop {
         return dropsData
     }
 
+    // Get all drop IDs
     pub fun getDropsIDs(): [UInt64] {
         return self.drops.keys
     }
 
+    // Get all drop statuses
     pub fun getDropsStatuses(): {UInt64: Status} {
         let dropsStatus: {UInt64: Status} = {}
         for id in self.getDropsIDs() {
@@ -179,6 +195,7 @@ pub contract MFLDrop {
         return dropsStatus
     }
 
+    // Get a specif drop ref (in particular for calling admin methods)
     access(self) fun getDropRef(id: UInt64): &MFLDrop.Drop? {
         if self.drops[id] != nil {
             let ref = &self.drops[id] as auth &MFLDrop.Drop
@@ -188,6 +205,7 @@ pub contract MFLDrop {
         }
     }
 
+    // This is the entrypoint of the contract for accounts that wish to purchase packs
     pub fun purchase(
         dropID: UInt64,
         address: Address,
@@ -201,6 +219,7 @@ pub contract MFLDrop {
         self.getDropRef(id: dropID)!.mint(address: address, nbToMint: nbToMint, senderVault: <-senderVault, recipientCap: recipientCap)
     }
 
+    // This interface allows any account that has a private capability to a DropAdminClaim to call the methods below
     pub resource interface DropAdminClaim {
         pub let name: String
         pub fun createDrop(name: String, price: UFix64, packTemplateID: UInt64, maxTokensPerAddress: UInt32)
@@ -263,7 +282,7 @@ pub contract MFLDrop {
         self.drops <- {}
         self.ownerVault = nil
 
-        // Create DropAdmin
+        // Create a DropAdmin resource and save it to storage
         self.account.save(<- create DropAdmin() , to: self.DropAdminStoragePath)
         
         emit ContractInitialized()
