@@ -12,10 +12,56 @@ jest.setTimeout(40000);
 
 describe('MFLPack', () => {
   let addressMap = null;
-  // argsDrop: [drop name, price, packTemplateId, maxTokensPerAddress]
-  const argsDrop = ['Drop name', '19,99', 1, 20];
-  // argsPackTemplate: [title, description, maxSupply, imageUrl]
-  const argsPackTemplate = ['Common', 'This is a common pack', 8500, 'http://img1-url'];
+
+  const argsDrop = {
+    name: "Drop name",
+    price: "19.99",
+    packTemplateID: 1,
+    maxTokensPerAddress: 20
+  };
+  const argsDropTx = [
+    argsDrop.name,
+    argsDrop.price,
+    argsDrop.packTemplateID,
+    argsDrop.maxTokensPerAddress
+  ];
+
+  const argsPackTemplate = {
+    name: 'Base Pack',
+    description: 'This is a Base pack template',
+    maxSupply: 8500,
+    imageUrl: 'http://img1-url',
+    type: 'BASE',
+    slotsNbr: 2,
+    slotsType: ['common', 'uncommon'],
+    slotsChances: [
+      {
+        common: '93.8',
+        uncommon: '5',
+        rare: '1',
+        legendary: '0.2'
+      },
+      {
+        common: '0',
+        uncommon: '90',
+        rare: '9.5',
+        legendary: '0.5'
+      },
+    ],
+    slotsCount: [2,1]
+  };
+
+  const argsPackTemplateTx = [
+    argsPackTemplate.name,
+    argsPackTemplate.description,
+    argsPackTemplate.maxSupply,
+    argsPackTemplate.imageUrl,
+    argsPackTemplate.type,
+    argsPackTemplate.slotsNbr,
+    argsPackTemplate.slotsType,
+    argsPackTemplate.slotsChances,
+    argsPackTemplate.slotsCount
+  ];
 
   beforeEach(async () => {
     await testsUtils.initEmulator(8084);
@@ -40,7 +86,7 @@ describe('MFLPack', () => {
       test('should withdraw a NFT from a collection and deposit it in another collection', async () => {
         // prepare
         const argsPurchase = [1, 1, '19.99'];
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplate, argsDrop);
+        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
         const jackAccountAddress = await getAccountAddress('JackAccount');
@@ -84,7 +130,7 @@ describe('MFLPack', () => {
       test('should panic when trying to withdraw a NFT which is not in the collection', async () => {
         // prepare
         const argsPurchase = [1, 1, '19.99'];
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplate, argsDrop);
+        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
         await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
@@ -106,7 +152,7 @@ describe('MFLPack', () => {
       test('should withdraw a NFT from a collection and deposit it in another collection', async () => {
         // prepare
         const argsPurchase = [1, 2, '39.98'];
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplate, argsDrop);
+        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
         const jackAccountAddress = await getAccountAddress('JackAccount');
@@ -124,38 +170,64 @@ describe('MFLPack', () => {
 
         // assert
         expect(result.events).toHaveLength(8);
-        expect(result.events[0]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Withdraw`,
-          data: {id: 1, from: bobAccountAddress},
-        }));
-        expect(result.events[1]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Deposit`,
-          data: {id: 1, to: null},
-        }));
-        expect(result.events[2]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Withdraw`,
-          data: {id: 2, from: bobAccountAddress},
-        }));
-        expect(result.events[3]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Deposit`,
-          data: {id: 2, to: null},
-        }));
-        expect(result.events[4]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Withdraw`,
-          data: {id: 2, from: null},
-        }));
-        expect(result.events[5]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Deposit`,
-          data: {id: 2, to: jackAccountAddress},
-        }));
-        expect(result.events[6]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Withdraw`,
-          data: {id: 1, from: null},
-        }));
-        expect(result.events[7]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Deposit`,
-          data: {id: 1, to: jackAccountAddress},
-        }));
+        expect(result.events).toEqual(expect.arrayContaining([
+          {
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Withdraw`,
+            transactionId: expect.toBeString(),
+            transactionIndex: 1,
+            eventIndex: expect.toBeNumber(),
+            data: {id: 1, from: bobAccountAddress},
+          },
+          {
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Deposit`,
+            transactionId: expect.toBeString(),
+            transactionIndex: 1,
+            eventIndex: expect.toBeNumber(),
+            data: {id: 1, to: null},
+          },
+          {
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Withdraw`,
+            transactionId: expect.toBeString(),
+            transactionIndex: 1,
+            eventIndex: expect.toBeNumber(),
+            data: {id: 2, from: bobAccountAddress},
+          },
+          {
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Deposit`,
+            transactionId: expect.toBeString(),
+            transactionIndex: 1,
+            eventIndex: expect.toBeNumber(),
+            data: {id: 2, to: null},
+          },
+          {
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Withdraw`,
+            transactionId: expect.toBeString(),
+            transactionIndex: 1,
+            eventIndex: expect.toBeNumber(),
+            data: {id: 2, from: null},
+          },
+          {
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Deposit`,
+            transactionId: expect.toBeString(),
+            transactionIndex: 1,
+            eventIndex: expect.toBeNumber(),
+            data: {id: 2, to: jackAccountAddress},
+          },
+          {
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Withdraw`,
+            transactionId: expect.toBeString(),
+            transactionIndex: 1,
+            eventIndex: expect.toBeNumber(),
+            data: {id: 1, from: null},
+          },
+          {
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Deposit`,
+            transactionId: expect.toBeString(),
+            transactionIndex: 1,
+            eventIndex: expect.toBeNumber(),
+            data: {id: 1, to: jackAccountAddress},
+          }
+        ]));
         const bobPackIds = await testsUtils.executeValidScript({
           name: 'mfl/packs/get_ids_in_collection.script',
           args: [bobAccountAddress],
@@ -175,8 +247,8 @@ describe('MFLPack', () => {
     describe('getIDs()', () => {
       test('should get the IDs in the collection', async () => {
         // prepare
-        const argsPurchase = [1, 10, '190.99'];
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplate, argsDrop);
+        const argsPurchase = [1, 10, '199.99'];
+        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
         await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '200.00');
@@ -199,7 +271,7 @@ describe('MFLPack', () => {
       test('should borrow a NFT in the collection', async () => {
         // prepare
         const argsPurchase = [1, 1, '19.99'];
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplate, argsDrop);
+        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
         await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
@@ -225,7 +297,7 @@ describe('MFLPack', () => {
       test('should return a reference to a NFT as a MetadataViews.Resolver interface', async () => {
         // prepare
         const argsPurchase = [1, 1, '19.99'];
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplate, argsDrop);
+        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
         await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
@@ -251,7 +323,7 @@ describe('MFLPack', () => {
       test('should burn a pack when opening it', async () => {
         // prepare
         await MFLPackTestsUtils.initPackTemplateAndDrop(
-          'AliceAdminAccount', 'AliceAdminAccount', ['Common', 'This is a common pack', 2, 'http://img1-url'], argsDrop,
+          'AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx
         );
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, aliceAdminAccountAddress, '100.00');
@@ -285,7 +357,7 @@ describe('MFLPack', () => {
           type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Opened`,
           data: {
             id: 2,
-            packIndex: 0,
+            packIndex: expect.toBeNumber(),
             packTemplateID: 1,
             from: aliceAdminAccountAddress,
           },
@@ -299,7 +371,7 @@ describe('MFLPack', () => {
       test('should panic when opening a pack while the pack template is not openable', async () => {
         // prepare
         await MFLPackTestsUtils.initPackTemplateAndDrop(
-          'AliceAdminAccount', 'AliceAdminAccount', argsPackTemplate, argsDrop,
+          'AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx,
         );
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, aliceAdminAccountAddress, '100.00');
@@ -322,7 +394,7 @@ describe('MFLPack', () => {
       test('should destroy a collection', async () => {
         // prepare
         const argsPurchase = [1, 2, '39.98'];
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplate, argsDrop);
+        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
         await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
@@ -346,14 +418,22 @@ describe('MFLPack', () => {
 
         // assert
         expect(result.events).toHaveLength(2);
-        expect(result.events[0]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Destroyed`,
-          data: {id: 1},
-        }));
-        expect(result.events[1]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Destroyed`,
-          data: {id: 2},
-        }));
+        expect(result.events).toEqual(expect.arrayContaining([
+          {
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Destroyed`,
+            transactionId: expect.toBeString(),
+            transactionIndex: 1,
+            eventIndex: expect.toBeNumber(),
+            data: {id: 1},
+          },
+          {
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Destroyed`,
+            transactionId: expect.toBeString(),
+            transactionIndex: 1,
+            eventIndex: expect.toBeNumber(),
+            data: {id: 2},
+          }
+        ]));
         const error = await testsUtils.executeFailingScript({
           name: 'mfl/packs/get_ids_in_collection.script',
           args: [bobAccountAddress],
@@ -391,7 +471,7 @@ describe('MFLPack', () => {
     describe('getViews()', () => {
       test('should get views types', async () => {
         // prepare
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplate, argsDrop);
+        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
         await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
@@ -404,6 +484,7 @@ describe('MFLPack', () => {
         });
 
         // assert
+        expect(viewsTypes).toHaveLength(2);
         expect(viewsTypes).toEqual(expect.arrayContaining([
           `A.${testsUtils.sansPrefix(addressMap.MetadataViews)}.MetadataViews.Display`,
           `A.${testsUtils.sansPrefix(addressMap.MFLViews)}.MFLViews.PackDataViewV1`,
@@ -414,7 +495,7 @@ describe('MFLPack', () => {
     describe('resolveView()', () => {
       test('should resolve Display view for a specific pack', async () => {
         // prepare
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplate, argsDrop);
+        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
         await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
@@ -429,9 +510,9 @@ describe('MFLPack', () => {
         // assert
         expect(packDisplayView).toEqual(
           {
-            name: 'Common',
+            name: argsPackTemplate.name,
             description: 'MFL Pack #1',
-            thumbnail: 'http://img1-url',
+            thumbnail: argsPackTemplate.imageUrl,
             owner: bobAccountAddress,
             type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.NFT`,
           },
@@ -440,7 +521,7 @@ describe('MFLPack', () => {
 
       test('should resolve Display view for all packs', async () => {
         // prepare
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplate, argsDrop);
+        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
         await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
@@ -454,18 +535,19 @@ describe('MFLPack', () => {
         });
 
         // assert
+        expect(packsDisplayView).toHaveLength(2);
         expect(packsDisplayView).toEqual(expect.arrayContaining([
           {
-            name: 'Common',
+            name: argsPackTemplate.name,
             description: 'MFL Pack #1',
-            thumbnail: 'http://img1-url',
+            thumbnail: argsPackTemplate.imageUrl,
             owner: bobAccountAddress,
             type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.NFT`,
           },
           {
-            name: 'Common',
+            name: argsPackTemplate.name,
             description: 'MFL Pack #2',
-            thumbnail: 'http://img1-url',
+            thumbnail: argsPackTemplate.imageUrl,
             owner: bobAccountAddress,
             type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.NFT`,
           },
@@ -474,7 +556,7 @@ describe('MFLPack', () => {
 
       test('should resolve PackData view for a specific pack', async () => {
         // prepare
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplate, argsDrop);
+        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
         await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
@@ -493,13 +575,21 @@ describe('MFLPack', () => {
             packTemplateMintIndex: 0,
             packTemplate: {
               id: 1,
-              name: 'Common',
-              description: 'This is a common pack',
-              maxSupply: 8500,
+              name: argsPackTemplate.name,
+              description: argsPackTemplate.description,
+              maxSupply: argsPackTemplate.maxSupply,
               currentSupply: 1,
-              startingIndex: 255,
+              startingIndex: expect.toBeNumber(),
               isOpenable: false,
-              imageUrl: 'http://img1-url',
+              imageUrl: argsPackTemplate.imageUrl,
+              type: argsPackTemplate.type,
+              slots:  [...Array(argsPackTemplate.slotsNbr)].map((_, i) => {
+                return {
+                  type: argsPackTemplate.slotsType[i],
+                  chances: argsPackTemplate.slotsChances[i],
+                  count: argsPackTemplate.slotsCount[i]
+                }
+              })
             },
           },
         );
@@ -507,7 +597,7 @@ describe('MFLPack', () => {
 
       test('should resolve PackData view for all packs', async () => {
         // prepare
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplate, argsDrop);
+        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
         await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
@@ -521,19 +611,28 @@ describe('MFLPack', () => {
         });
 
         // assert
+        expect(packsDataView).toHaveLength(3);
         expect(packsDataView).toEqual(expect.arrayContaining([
           {
             id: 1,
             packTemplateMintIndex: 0,
             packTemplate: {
               id: 1,
-              name: 'Common',
-              description: 'This is a common pack',
-              maxSupply: 8500,
+              name: argsPackTemplate.name,
+              description: argsPackTemplate.description,
+              maxSupply: argsPackTemplate.maxSupply,
               currentSupply: 3,
-              startingIndex: 255,
+              startingIndex: expect.toBeNumber(),
               isOpenable: false,
-              imageUrl: 'http://img1-url',
+              imageUrl: argsPackTemplate.imageUrl,
+              type: argsPackTemplate.type,
+              slots:  [...Array(argsPackTemplate.slotsNbr)].map((_, i) => {
+                return {
+                  type: argsPackTemplate.slotsType[i],
+                  chances: argsPackTemplate.slotsChances[i],
+                  count: argsPackTemplate.slotsCount[i]
+                }
+              })
             },
           },
           {
@@ -541,13 +640,21 @@ describe('MFLPack', () => {
             packTemplateMintIndex: 1,
             packTemplate: {
               id: 1,
-              name: 'Common',
-              description: 'This is a common pack',
-              maxSupply: 8500,
+              name: argsPackTemplate.name,
+              description: argsPackTemplate.description,
+              maxSupply: argsPackTemplate.maxSupply,
               currentSupply: 3,
-              startingIndex: 255,
+              startingIndex: expect.toBeNumber(),
               isOpenable: false,
-              imageUrl: 'http://img1-url',
+              imageUrl: argsPackTemplate.imageUrl,
+              type: argsPackTemplate.type,
+              slots:  [...Array(argsPackTemplate.slotsNbr)].map((_, i) => {
+                return {
+                  type: argsPackTemplate.slotsType[i],
+                  chances: argsPackTemplate.slotsChances[i],
+                  count: argsPackTemplate.slotsCount[i]
+                }
+              })
             },
           },
           {
@@ -555,13 +662,21 @@ describe('MFLPack', () => {
             packTemplateMintIndex: 2,
             packTemplate: {
               id: 1,
-              name: 'Common',
-              description: 'This is a common pack',
-              maxSupply: 8500,
+              name: argsPackTemplate.name,
+              description: argsPackTemplate.description,
+              maxSupply: argsPackTemplate.maxSupply,
               currentSupply: 3,
-              startingIndex: 255,
+              startingIndex: expect.toBeNumber(),
               isOpenable: false,
-              imageUrl: 'http://img1-url',
+              imageUrl: argsPackTemplate.imageUrl,
+              type: argsPackTemplate.type,
+              slots:  [...Array(argsPackTemplate.slotsNbr)].map((_, i) => {
+                return {
+                  type: argsPackTemplate.slotsType[i],
+                  chances: argsPackTemplate.slotsChances[i],
+                  count: argsPackTemplate.slotsCount[i]
+                }
+              })
             },
           },
         ]));
@@ -571,7 +686,7 @@ describe('MFLPack', () => {
     describe('destroy()', () => {
       test('should destroy the NFT', async () => {
         // prepare
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplate, argsDrop);
+        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
         await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
