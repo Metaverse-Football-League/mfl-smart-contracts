@@ -21,8 +21,55 @@ describe('MFLDrop', () => {
 
   describe('DropAdmin', () => {
 
-    const argsDrop = ["Drop name", "9.99", 1, 10];
-    const argsPackTemplate = ["Rare", "This is a rare pack template", 10000, "http://img1-url"];
+    const argsDrop = {
+      name: "Drop name",
+      price: "9.99",
+      packTemplateID: 1,
+      maxTokensPerAddress: 10
+    };
+    const argsDropTx = [
+      argsDrop.name,
+      argsDrop.price,
+      argsDrop.packTemplateID,
+      argsDrop.maxTokensPerAddress
+    ];
+
+    const argsPackTemplate = {
+      name: 'Base Pack',
+      description: 'This is a Base pack template',
+      maxSupply: 10000,
+      imageUrl: 'http://img1-url',
+      type: 'BASE',
+      slotsNbr: 2,
+      slotsType: ['common', 'uncommon'],
+      slotsChances: [
+        {
+          common: '93.8',
+          uncommon: '5',
+          rare: '1',
+          legendary: '0.2'
+        },
+        {
+          common: '0',
+          uncommon: '90',
+          rare: '9.5',
+          legendary: '0.5'
+        },
+      ],
+      slotsCount: [2,1]
+    };
+
+    const argsPackTemplateTx = [
+      argsPackTemplate.name,
+      argsPackTemplate.description,
+      argsPackTemplate.maxSupply,
+      argsPackTemplate.imageUrl,
+      argsPackTemplate.type,
+      argsPackTemplate.slotsNbr,
+      argsPackTemplate.slotsType,
+      argsPackTemplate.slotsChances,
+      argsPackTemplate.slotsCount
+    ];
 
     describe('createDrop()', () => {
       test('should create a drop', async () => {
@@ -31,10 +78,10 @@ describe('MFLDrop', () => {
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const signers = [aliceAdminAccountAddress];
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplateTx, signers});
 
         // execute
-        const result = await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});
+        const result = await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDropTx, signers});
 
         // assert
         expect(result.events).toHaveLength(1);
@@ -48,11 +95,11 @@ describe('MFLDrop', () => {
         });
         expect(dropData).toEqual({
           id: 1,
-          name: "Drop name",
-          price: "9.99000000",
+          name: argsDrop.name,
+          price: parseFloat(argsDrop.price).toFixed(8).toString(),
           status: 0,
-          packTemplateID: 1,
-          maxTokensPerAddress: 10,
+          packTemplateID: argsDrop.packTemplateID,
+          maxTokensPerAddress: argsDrop.maxTokensPerAddress,
           minters: {},
           whitelistedAddresses: {}
         })
@@ -69,7 +116,7 @@ describe('MFLDrop', () => {
         const signers = [aliceAdminAccountAddress];
 
         // execute
-        const error = await testsUtils.shallRevert({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});
+        const error = await testsUtils.shallRevert({name: 'mfl/drops/create_drop.tx', args: argsDropTx, signers});
 
         // assert
         expect(error).toContain('Pack template id does not exist');
@@ -84,8 +131,8 @@ describe('MFLDrop', () => {
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const signers = [aliceAdminAccountAddress];
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplateTx, signers});
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDropTx, signers});
 
         // execute
         await testsUtils.shallPass({name: 'mfl/drops/set_owner_vault.tx', args: [], signers});
@@ -109,8 +156,8 @@ describe('MFLDrop', () => {
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const signers = [aliceAdminAccountAddress];
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplateTx, signers});
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDropTx, signers});
 
         // execute
         let result = await testsUtils.shallPass({name: 'mfl/drops/set_status_opened_whitelist.tx', args: [1], signers});
@@ -135,8 +182,8 @@ describe('MFLDrop', () => {
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const signers = [aliceAdminAccountAddress];
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplateTx, signers});
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDropTx, signers});
 
         // execute
         let result = await testsUtils.shallPass({name: 'mfl/drops/set_status_opened_all.tx', args: [1], signers});
@@ -161,8 +208,8 @@ describe('MFLDrop', () => {
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const signers = [aliceAdminAccountAddress];
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplateTx, signers});
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDropTx, signers});
         await testsUtils.shallPass({name: 'mfl/drops/set_status_opened_all.tx', args: [1], signers});
 
         // execute
@@ -193,8 +240,8 @@ describe('MFLDrop', () => {
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const signers = [aliceAdminAccountAddress];
         const whitelistedAddresses = {"0x0000000000000001": 1, "0x0000000000000002": 2, "0x0000000000000003": 3};
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplateTx, signers});
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDropTx, signers});
 
         // execute
         const result = await testsUtils.shallPass({name: 'mfl/drops/set_whitelisted_addresses.tx', args: [1,  whitelistedAddresses], signers});
@@ -219,8 +266,8 @@ describe('MFLDrop', () => {
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const signers = [aliceAdminAccountAddress];
         const whitelistedAddresses = {"0x0000000000000001": 1, "0x0000000000000002": 20, "0x0000000000000003": 3};
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplateTx, signers});
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDropTx, signers});
 
         // execute
         const error = await testsUtils.shallRevert({name: 'mfl/drops/set_whitelisted_addresses.tx', args: [1,  whitelistedAddresses], signers});
@@ -238,8 +285,8 @@ describe('MFLDrop', () => {
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const signers = [aliceAdminAccountAddress];
         const maxTokensPerAddress = 42;
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplateTx, signers});
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDropTx, signers});
 
         // execute
         await testsUtils.shallPass({name: 'mfl/drops/set_max_tokens_per_address.tx', args: [1, maxTokensPerAddress], signers});
@@ -297,10 +344,111 @@ describe('MFLDrop', () => {
 
   describe('Drop', () => {
 
-    const argsDrop1 = ["Drop 1 name", "9.99", 1, 10];
-    const argsPackTemplate1 = ["Rare", "This is a rare pack template", 10000, "http://img1-url"];
-    const argsDrop2 = ["Drop 2 name", "29.00", 2, 3];
-    const argsPackTemplate2 = ["Legendary", "This is a legendary pack template", 99, "http://img2-url"];
+    const argsDrop1 = {
+      name: "Drop 1 name",
+      price: "9.99",
+      packTemplateID: 1,
+      maxTokensPerAddress: 10
+    };
+    const argsDrop1Tx = [
+      argsDrop1.name,
+      argsDrop1.price,
+      argsDrop1.packTemplateID,
+      argsDrop1.maxTokensPerAddress
+    ];
+
+    const argsDrop2 = {
+      name: "Drop 2 name",
+      price: "29.00",
+      packTemplateID: 2,
+      maxTokensPerAddress: 3
+    };
+    const argsDrop2Tx = [
+      argsDrop2.name,
+      argsDrop2.price,
+      argsDrop2.packTemplateID,
+      argsDrop2.maxTokensPerAddress
+    ];
+
+    const argsPackTemplate1 = {
+      name: 'Base Pack',
+      description: 'This is a Base pack template',
+      maxSupply: 10000,
+      imageUrl: 'http://img1-url',
+      type: 'BASE',
+      slotsNbr: 2,
+      slotsType: ['common', 'uncommon'],
+      slotsChances: [
+        {
+          common: '93.8',
+          uncommon: '5',
+          rare: '1',
+          legendary: '0.2'
+        },
+        {
+          common: '0',
+          uncommon: '90',
+          rare: '9.5',
+          legendary: '0.5'
+        },
+      ],
+      slotsCount: [2,1]
+    };
+
+    const argsPackTemplate1Tx = [
+      argsPackTemplate1.name,
+      argsPackTemplate1.description,
+      argsPackTemplate1.maxSupply,
+      argsPackTemplate1.imageUrl,
+      argsPackTemplate1.type,
+      argsPackTemplate1.slotsNbr,
+      argsPackTemplate1.slotsType,
+      argsPackTemplate1.slotsChances,
+      argsPackTemplate1.slotsCount
+    ];
+
+    const argsPackTemplate2 = {
+      name: 'Rare Pack',
+      description: 'This is a Rare pack template',
+      maxSupply: 99,
+      imageUrl: 'http://img2-url',
+      type: 'RARE',
+      slotsNbr: 3,
+      slotsType: ['common', 'uncommon', 'rare'],
+      slotsChances: [
+        {
+          common: '93.8',
+          uncommon: '5',
+          rare: '1',
+          legendary: '0.2'
+        },
+        {
+          common: '0',
+          uncommon: '90',
+          rare: '9.5',
+          legendary: '0.5'
+        },
+        {
+          common: '0',
+          uncommon: '0',
+          rare: '98',
+          legendary: '2'
+        }
+      ],
+      slotsCount: [3,1,1]
+    };
+
+    const argsPackTemplate2Tx = [
+      argsPackTemplate2.name,
+      argsPackTemplate2.description,
+      argsPackTemplate2.maxSupply,
+      argsPackTemplate2.imageUrl,
+      argsPackTemplate2.type,
+      argsPackTemplate2.slotsNbr,
+      argsPackTemplate2.slotsType,
+      argsPackTemplate2.slotsChances,
+      argsPackTemplate2.slotsCount
+    ];
 
     describe('getDrops()', () => {
       test('should get all drops data', async () => {
@@ -309,10 +457,10 @@ describe('MFLDrop', () => {
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const signers = [aliceAdminAccountAddress];
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate1, signers});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop1, signers});
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate2, signers});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop2, signers});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate1Tx, signers});
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop1Tx, signers});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate2Tx, signers});
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop2Tx, signers});
 
         // execute
         const dropsData = await testsUtils.executeValidScript({
@@ -324,21 +472,21 @@ describe('MFLDrop', () => {
         expect(dropsData).toEqual(expect.arrayContaining([
           {
             id: 1,
-            name: "Drop 1 name",
-            price: '9.99000000',
+            name: argsDrop1.name,
+            price: parseFloat(argsDrop1.price).toFixed(8).toString(),
             status: 0,
-            packTemplateID: 1,
-            maxTokensPerAddress: 10,
+            packTemplateID: argsDrop1.packTemplateID,
+            maxTokensPerAddress: argsDrop1.maxTokensPerAddress,
             minters: {},
             whitelistedAddresses: {}
           },
           {
             id: 2,
-            name: "Drop 2 name",
-            price: '29.00000000',
+            name: argsDrop2.name,
+            price: parseFloat(argsDrop2.price).toFixed(8).toString(),
             status: 0,
-            packTemplateID: 2,
-            maxTokensPerAddress: 3,
+            packTemplateID: argsDrop2.packTemplateID,
+            maxTokensPerAddress: argsDrop2.maxTokensPerAddress,
             minters: {},
             whitelistedAddresses: {}
           }
@@ -353,10 +501,10 @@ describe('MFLDrop', () => {
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const signers = [aliceAdminAccountAddress];
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate1, signers});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop1, signers});
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate2, signers});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop2, signers});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate1Tx, signers});
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop1Tx, signers});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate2Tx, signers});
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop2Tx, signers});
 
         // execute
         const dropData = await testsUtils.executeValidScript({
@@ -368,11 +516,11 @@ describe('MFLDrop', () => {
         expect(dropData).toEqual(
           {
             id: 2,
-            name: "Drop 2 name",
-            price: '29.00000000',
+            name: argsDrop2.name,
+            price: parseFloat(argsDrop2.price).toFixed(8).toString(),
             status: 0,
-            packTemplateID: 2,
-            maxTokensPerAddress: 3,
+            packTemplateID: argsDrop2.packTemplateID,
+            maxTokensPerAddress: argsDrop2.maxTokensPerAddress,
             minters: {},
             whitelistedAddresses: {}
           }
@@ -385,8 +533,8 @@ describe('MFLDrop', () => {
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const signers = [aliceAdminAccountAddress];
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate1, signers});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop1, signers});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate1Tx, signers});
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop1Tx, signers});
 
         // execute
         const dropData = await testsUtils.executeValidScript({
@@ -407,10 +555,10 @@ describe('MFLDrop', () => {
           await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
           const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
           const signers = [aliceAdminAccountAddress];
-          await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate1, signers});
-          await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop1, signers});
-          await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate2, signers});
-          await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop2, signers});
+          await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate1Tx, signers});
+          await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop1Tx, signers});
+          await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate2Tx, signers});
+          await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop2Tx, signers});
 
           // execute
           const dropsIds = await testsUtils.executeValidScript({
@@ -431,10 +579,10 @@ describe('MFLDrop', () => {
           await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
           const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
           const signers = [aliceAdminAccountAddress];
-          await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate1, signers});
-          await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop1, signers});
-          await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate2, signers});
-          await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop2, signers});
+          await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate1Tx, signers});
+          await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop1Tx, signers});
+          await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate2Tx, signers});
+          await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop2Tx, signers});
 
           // execute
           const dropsStatuses = await testsUtils.executeValidScript({
@@ -452,8 +600,9 @@ describe('MFLDrop', () => {
 
     describe('purchase()', () => {
 
-      const argsDrop = ["Drop name", "5.00", 1, 10];
-      const argsPackTemplate = ["Rare", "This is a rare pack template", 10000, "http://img1-url"];
+      const price = '5.00';
+      argsDrop1.price = price;
+      argsDrop1Tx[1] = price;
 
       test('should create one pack in collection', async () => {
         // prepare
@@ -461,8 +610,8 @@ describe('MFLDrop', () => {
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers: [aliceAdminAccountAddress]});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers: [aliceAdminAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate1Tx, signers: [aliceAdminAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop1Tx, signers: [aliceAdminAccountAddress]});
         await testsUtils.shallPass({name: 'mfl/drops/set_owner_vault.tx', args: [], signers: [aliceAdminAccountAddress]});
         await testsUtils.shallPass({name: 'mfl/drops/set_status_opened_all.tx', args: [1], signers: [aliceAdminAccountAddress]});
         await testsUtils.shallPass({name: 'fusd/setup_account.tx', args: [], signers: [bobAccountAddress] });
@@ -485,8 +634,8 @@ describe('MFLDrop', () => {
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers: [aliceAdminAccountAddress]});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers: [aliceAdminAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate1Tx, signers: [aliceAdminAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop1Tx, signers: [aliceAdminAccountAddress]});
         await testsUtils.shallPass({name: 'mfl/drops/set_owner_vault.tx', args: [], signers: [aliceAdminAccountAddress]});
         await testsUtils.shallPass({name: 'mfl/drops/set_status_opened_all.tx', args: [1], signers: [aliceAdminAccountAddress]});
         await testsUtils.shallPass({name: 'fusd/setup_account.tx', args: [], signers: [bobAccountAddress] });
@@ -510,8 +659,8 @@ describe('MFLDrop', () => {
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers: [aliceAdminAccountAddress]});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers: [aliceAdminAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate1Tx, signers: [aliceAdminAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop1Tx, signers: [aliceAdminAccountAddress]});
         await testsUtils.shallPass({name: 'fusd/setup_account.tx', args: [], signers: [bobAccountAddress] });
         await testsUtils.shallPass({name: 'fusd/send_fusd.tx', args: [bobAccountAddress, "100.00"], signers: [aliceAdminAccountAddress]});
 
@@ -528,8 +677,8 @@ describe('MFLDrop', () => {
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers: [aliceAdminAccountAddress]});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers: [aliceAdminAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate1Tx, signers: [aliceAdminAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop1Tx, signers: [aliceAdminAccountAddress]});
         await testsUtils.shallPass({name: 'fusd/setup_account.tx', args: [], signers: [bobAccountAddress] });
         await testsUtils.shallPass({name: 'fusd/send_fusd.tx', args: [bobAccountAddress, "100.00"], signers: [aliceAdminAccountAddress]});
 
@@ -546,8 +695,8 @@ describe('MFLDrop', () => {
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers: [aliceAdminAccountAddress]});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers: [aliceAdminAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate1Tx, signers: [aliceAdminAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop1Tx, signers: [aliceAdminAccountAddress]});
         await testsUtils.shallPass({name: 'mfl/drops/set_status_opened_all.tx', args: [1], signers: [aliceAdminAccountAddress]});
         await testsUtils.shallPass({name: 'fusd/setup_account.tx', args: [], signers: [bobAccountAddress] });
         await testsUtils.shallPass({name: 'fusd/send_fusd.tx', args: [bobAccountAddress, "100.00"], signers: [aliceAdminAccountAddress]});
@@ -565,8 +714,8 @@ describe('MFLDrop', () => {
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers: [aliceAdminAccountAddress]});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers: [aliceAdminAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate1Tx, signers: [aliceAdminAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop1Tx, signers: [aliceAdminAccountAddress]});
         await testsUtils.shallPass({name: 'mfl/drops/set_status_opened_all.tx', args: [1], signers: [aliceAdminAccountAddress]});
         await testsUtils.shallPass({name: 'fusd/setup_account.tx', args: [], signers: [bobAccountAddress] });
         await testsUtils.shallPass({name: 'fusd/send_fusd.tx', args: [bobAccountAddress, "100.00"], signers: [aliceAdminAccountAddress]});
@@ -584,8 +733,8 @@ describe('MFLDrop', () => {
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers: [aliceAdminAccountAddress]});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers: [aliceAdminAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate1Tx, signers: [aliceAdminAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop1Tx, signers: [aliceAdminAccountAddress]});
         await testsUtils.shallPass({name: 'mfl/drops/set_status_opened_whitelist.tx', args: [1], signers: [aliceAdminAccountAddress]});
         await testsUtils.shallPass({name: 'fusd/setup_account.tx', args: [], signers: [bobAccountAddress] });
         await testsUtils.shallPass({name: 'fusd/send_fusd.tx', args: [bobAccountAddress, "100.00"], signers: [aliceAdminAccountAddress]});
@@ -605,8 +754,8 @@ describe('MFLDrop', () => {
         const bobAccountAddress = await getAccountAddress('BobAccount');
         let  whitelistedAddresses = {}
         whitelistedAddresses[bobAccountAddress] = 4
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers: [aliceAdminAccountAddress]});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers: [aliceAdminAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate1Tx, signers: [aliceAdminAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop1Tx, signers: [aliceAdminAccountAddress]});
         await testsUtils.shallPass({name: 'mfl/drops/set_status_opened_whitelist.tx', args: [1], signers: [aliceAdminAccountAddress]});
         await testsUtils.shallPass({name: 'mfl/drops/set_whitelisted_addresses.tx', args: [1, whitelistedAddresses], signers: [aliceAdminAccountAddress]});
         await testsUtils.shallPass({name: 'fusd/setup_account.tx', args: [], signers: [bobAccountAddress] });
@@ -625,8 +774,8 @@ describe('MFLDrop', () => {
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers: [aliceAdminAccountAddress]});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers: [aliceAdminAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate1Tx, signers: [aliceAdminAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop1Tx, signers: [aliceAdminAccountAddress]});
         await testsUtils.shallPass({name: 'mfl/drops/set_status_opened_all.tx', args: [1], signers: [aliceAdminAccountAddress]});
         await testsUtils.shallPass({name: 'fusd/setup_account.tx', args: [], signers: [bobAccountAddress] });
         await testsUtils.shallPass({name: 'fusd/send_fusd.tx', args: [bobAccountAddress, "100.00"], signers: [aliceAdminAccountAddress]});
@@ -644,8 +793,8 @@ describe('MFLDrop', () => {
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate, signers: [aliceAdminAccountAddress]});
-        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop, signers: [aliceAdminAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: argsPackTemplate1Tx, signers: [aliceAdminAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/drops/create_drop.tx', args: argsDrop1Tx, signers: [aliceAdminAccountAddress]});
         await testsUtils.shallPass({name: 'mfl/drops/set_status_opened_all.tx', args: [1], signers: [aliceAdminAccountAddress]});
         await testsUtils.shallPass({name: 'fusd/setup_account.tx', args: [], signers: [bobAccountAddress] });
         await testsUtils.shallPass({name: 'fusd/send_fusd.tx', args: [bobAccountAddress, "100.00"], signers: [aliceAdminAccountAddress]});

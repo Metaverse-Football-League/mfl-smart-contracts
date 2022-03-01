@@ -21,7 +21,43 @@ describe('MFLPackTemplate', () => {
   });
 
   describe('PackTemplateAdmin', () => {
-    const args = ['Common', 'This is a common pack template', 25000, 'http://img1-url'];
+    
+    const args = {
+      name: 'Base Pack',
+      description: 'This is a Base pack template',
+      maxSupply: 25000,
+      imageUrl: 'http://img1-url',
+      type: 'BASE',
+      slotsNbr: 2,
+      slotsType: ['common', 'uncommon'],
+      slotsChances: [
+        {
+          common: '93.8',
+          uncommon: '5',
+          rare: '1',
+          legendary: '0.2'
+        },
+        {
+          common: '0',
+          uncommon: '90',
+          rare: '9.5',
+          legendary: '0.5'
+        },
+      ],
+      slotsCount: [2,1]
+    };
+
+    const argsTx = [
+      args.name,
+      args.description,
+      args.maxSupply,
+      args.imageUrl,
+      args.type,
+      args.slotsNbr,
+      args.slotsType,
+      args.slotsChances,
+      args.slotsCount
+    ]
 
     describe('createPackTemplate()', () => {
       test('should create a pack template', async () => {
@@ -31,7 +67,11 @@ describe('MFLPackTemplate', () => {
         const signers = [aliceAdminAccountAddress];
 
         // execute
-        const result = await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args, signers});
+        const result = await testsUtils.shallPass({
+          name: 'mfl/packs/create_pack_template.tx',
+          args: argsTx,
+          signers
+        });
 
         // assert
         expect(result.events).toHaveLength(1);
@@ -47,13 +87,21 @@ describe('MFLPackTemplate', () => {
         });
         expect(packTemplateData).toEqual({
           id: 1,
-          name: 'Common',
-          description: 'This is a common pack template',
-          maxSupply: 25000,
+          name: args.name,
+          description: args.description,
+          maxSupply: args.maxSupply,
           currentSupply: 0,
           startingIndex: 0,
           isOpenable: false,
-          imageUrl: 'http://img1-url',
+          imageUrl: args.imageUrl,
+          type: args.type,
+          slots:  [...Array(args.slotsNbr)].map((_, i) => {
+            return {
+              type: args.slotsType[i],
+              chances: args.slotsChances[i],
+              count: args.slotsCount[i]
+            }
+          })
         });
       });
     });
@@ -64,7 +112,11 @@ describe('MFLPackTemplate', () => {
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const signers = [aliceAdminAccountAddress];
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args, signers});
+        await testsUtils.shallPass({
+          name: 'mfl/packs/create_pack_template.tx',
+          args: argsTx,
+          signers
+        });
 
         // execute
         const result = await testsUtils.shallPass({name: 'mfl/packs/set_allow_to_open_packs.tx', args: [1], signers});
@@ -120,9 +172,85 @@ describe('MFLPackTemplate', () => {
   });
 
   describe('PackTemplate', () => {
+    
+    const args1 = {
+      name: 'Base Pack',
+      description: 'This is a Base pack template',
+      maxSupply: 25000,
+      imageUrl: 'http://img1-url',
+      type: 'BASE',
+      slotsNbr: 2,
+      slotsType: ['common', 'uncommon'],
+      slotsChances: [
+        {
+          common: '93.8',
+          uncommon: '5',
+          rare: '1',
+          legendary: '0.2'
+        },
+        {
+          common: '0',
+          uncommon: '90',
+          rare: '9.5',
+          legendary: '0.5'
+        },
+      ],
+      slotsCount: [2,1]
+    };
 
-    const args1 = ['Common', 'This is a common pack template', 25000, 'http://img1-url'];
-    const args2 = ['Rare', 'This is a rare pack template', 11050, 'http://img2-url'];
+    const args2 = {
+      name: 'Rare Pack',
+      description: 'This is a Rare pack template',
+      maxSupply: 11050,
+      imageUrl: 'http://img2-url',
+      type: 'RARE',
+      slotsNbr: 3,
+      slotsType: ['common', 'uncommon', 'rare'],
+      slotsChances: [
+        {
+          common: '93.8',
+          uncommon: '5',
+          rare: '1',
+          legendary: '0.2'
+        },
+        {
+          common: '0',
+          uncommon: '90',
+          rare: '9.5',
+          legendary: '0.5'
+        },
+        {
+          common: '0',
+          uncommon: '0',
+          rare: '98',
+          legendary: '2'
+        }
+      ],
+      slotsCount: [3,1,1]
+    };
+
+    const args1Tx = [
+      args1.name,
+      args1.description,
+      args1.maxSupply,
+      args1.imageUrl,
+      args1.type,
+      args1.slotsNbr,
+      args1.slotsType,
+      args1.slotsChances,
+      args1.slotsCount
+    ];
+    const args2Tx = [
+      args2.name,
+      args2.description,
+      args2.maxSupply,
+      args2.imageUrl,
+      args2.type,
+      args2.slotsNbr,
+      args2.slotsType,
+      args2.slotsChances,
+      args2.slotsCount
+    ]
 
     describe('getPackTemplateIDs()', () => {
       test('should get ids', async () => {
@@ -130,8 +258,16 @@ describe('MFLPackTemplate', () => {
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const signers = [aliceAdminAccountAddress];
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: args1, signers});
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: args2, signers});
+        await testsUtils.shallPass({
+          name: 'mfl/packs/create_pack_template.tx',
+          args: args1Tx,
+          signers
+        });
+        await testsUtils.shallPass({
+          name: 'mfl/packs/create_pack_template.tx',
+          args: args2Tx,
+          signers
+        });
 
         // execute
         const packTemplateIds = await testsUtils.executeValidScript({
@@ -151,8 +287,16 @@ describe('MFLPackTemplate', () => {
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const signers = [aliceAdminAccountAddress];
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: args1, signers});
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: args2, signers});
+        await testsUtils.shallPass({
+          name: 'mfl/packs/create_pack_template.tx',
+          args: args1Tx,
+          signers
+        });
+        await testsUtils.shallPass({
+          name: 'mfl/packs/create_pack_template.tx',
+          args: args2Tx,
+          signers
+        });
 
         // execute
         const packTemplates = await testsUtils.executeValidScript({
@@ -161,28 +305,45 @@ describe('MFLPackTemplate', () => {
         });
 
         // assert
-        expect(packTemplates).toEqual([
+        expect(packTemplates).toHaveLength(2);
+        expect(packTemplates).toEqual(expect.arrayContaining([
           {
             id: 1,
-            name: 'Common',
-            description: 'This is a common pack template',
-            maxSupply: 25000,
+            name: args1.name,
+            description: args1.description,
+            maxSupply: args1.maxSupply,
             currentSupply: 0,
             startingIndex: 0,
             isOpenable: false,
-            imageUrl: 'http://img1-url',
+            imageUrl: args1.imageUrl,
+            type: args1.type,
+            slots:  [...Array(args1.slotsNbr)].map((_, i) => {
+              return {
+                type: args1.slotsType[i],
+                chances: args1.slotsChances[i],
+                count: args1.slotsCount[i]
+              }
+            })
           },
           {
             id: 2,
-            name: 'Rare',
-            description: 'This is a rare pack template',
-            maxSupply: 11050,
+            name: args2.name,
+            description: args2.description,
+            maxSupply: args2.maxSupply,
             currentSupply: 0,
             startingIndex: 0,
             isOpenable: false,
-            imageUrl: 'http://img2-url',
-          },
-        ]);
+            imageUrl: args2.imageUrl,
+            type: args2.type,
+            slots:  [...Array(args2.slotsNbr)].map((_, i) => {
+              return {
+                type: args2.slotsType[i],
+                chances: args2.slotsChances[i],
+                count: args2.slotsCount[i]
+              }
+            })
+          }
+        ]));
       });
     });
 
@@ -192,8 +353,16 @@ describe('MFLPackTemplate', () => {
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const signers = [aliceAdminAccountAddress];
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: args1, signers});
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: args2, signers});
+        await testsUtils.shallPass({
+          name: 'mfl/packs/create_pack_template.tx',
+          args: args1Tx,
+          signers
+        });
+        await testsUtils.shallPass({
+          name: 'mfl/packs/create_pack_template.tx',
+          args: args2Tx,
+          signers
+        });
 
         // execute
         const packTemplate = await testsUtils.executeValidScript({
@@ -204,13 +373,21 @@ describe('MFLPackTemplate', () => {
         // assert
         expect(packTemplate).toEqual({
           id: 2,
-          name: 'Rare',
-          description: 'This is a rare pack template',
-          maxSupply: 11050,
+          name: args2.name,
+          description: args2.description,
+          maxSupply: args2.maxSupply,
           currentSupply: 0,
           startingIndex: 0,
           isOpenable: false,
-          imageUrl: 'http://img2-url',
+          imageUrl: args2.imageUrl,
+          type: args2.type,
+          slots:  [...Array(args2.slotsNbr)].map((_, i) => {
+            return {
+              type: args2.slotsType[i],
+              chances: args2.slotsChances[i],
+              count: args2.slotsCount[i]
+            }
+          })
         });
       });
 
@@ -219,7 +396,11 @@ describe('MFLPackTemplate', () => {
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const signers = [aliceAdminAccountAddress];
-        await testsUtils.shallPass({name: 'mfl/packs/create_pack_template.tx', args: args1, signers});
+        await testsUtils.shallPass({
+          name: 'mfl/packs/create_pack_template.tx',
+          args: args1Tx,
+          signers
+        });
 
         // execute
         const packTemplate = await testsUtils.executeValidScript({
@@ -239,7 +420,7 @@ describe('MFLPackTemplate', () => {
         await MFLPackTestsUtils.deployMFLPackContract('AliceAdminAccount');
         await MFLPackTestsUtils.initPackTemplateAndDrop(
           'AliceAdminAccount', 'AliceAdminAccount',
-          ['Common', 'This is a common pack template', packTemplateSupply, 'http://img1-url'],
+          [args1.name, args1.description, packTemplateSupply, args1.imageUrl, args1.type, args1.slotsNbr, args1.slotsType, args1.slotsChances, args1.slotsCount],
           ['Drop name', '19,99', 1, 20],
         );
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');

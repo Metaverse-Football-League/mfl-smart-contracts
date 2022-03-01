@@ -29,6 +29,8 @@ pub contract MFLPackTemplate {
         pub let startingIndex: UInt32
         pub let isOpenable: Bool
         pub let imageUrl: String
+        pub let type: String
+        pub let slots: [Slot]
 
         init(
             id: UInt64,
@@ -38,7 +40,9 @@ pub contract MFLPackTemplate {
             currentSupply: UInt32,
             startingIndex: UInt32,
             isOpenable: Bool,
-            imageUrl: String
+            imageUrl: String,
+            type: String,
+            slots: [Slot]
         ) {
             self.id = id
             self.name = name
@@ -48,6 +52,20 @@ pub contract MFLPackTemplate {
             self.startingIndex = startingIndex
             self.isOpenable = isOpenable
             self.imageUrl = imageUrl
+            self.type = type
+            self.slots = slots
+        }
+    }
+
+    pub struct Slot {
+        pub let type: String
+        pub let chances: {String: String}
+        pub let count: UInt32
+
+        init(type: String, chances: {String: String}, count: UInt32) {
+            self.type = type
+            self.chances = chances
+            self.count = count
         }
     }
 
@@ -60,8 +78,10 @@ pub contract MFLPackTemplate {
         access(contract) var startingIndex: UInt32
         access(contract) var isOpenable: Bool
         access(contract) var imageUrl: String
+        access(contract) let type: String
+        access(contract) let slots: [Slot]
 
-        init(name: String, description: String?, maxSupply: UInt32, imageUrl: String) {
+        init(name: String, description: String?, maxSupply: UInt32, imageUrl: String, type: String, slots: [Slot]) {
             self.id = MFLPackTemplate.nextPackTemplateID
             MFLPackTemplate.nextPackTemplateID = MFLPackTemplate.nextPackTemplateID + (1 as UInt64)
             self.name = name
@@ -71,6 +91,8 @@ pub contract MFLPackTemplate {
             self.startingIndex = 0
             self.isOpenable = false
             self.imageUrl = imageUrl
+            self.type = type
+            self.slots = slots
         }
 
         // Enable accounts to open their packs
@@ -125,7 +147,9 @@ pub contract MFLPackTemplate {
                 currentSupply : packTemplate.currentSupply,
                 startingIndex : packTemplate.startingIndex,
                 isOpenable: packTemplate.isOpenable,
-                imageUrl: packTemplate.imageUrl
+                imageUrl: packTemplate.imageUrl,
+                type: packTemplate.type,
+                slots: packTemplate.slots
             )
         }
         return nil
@@ -144,7 +168,9 @@ pub contract MFLPackTemplate {
                     currentSupply : packTemplate.currentSupply,
                     startingIndex : packTemplate.startingIndex,
                     isOpenable: packTemplate.isOpenable,
-                    imageUrl: packTemplate.imageUrl
+                    imageUrl: packTemplate.imageUrl,
+                    type: packTemplate.type,
+                    slots: packTemplate.slots
                 ))
             }
         }
@@ -170,7 +196,7 @@ pub contract MFLPackTemplate {
     pub resource interface PackTemplateAdminClaim {
         pub let name: String
         pub fun allowToOpenPacks(id: UInt64)
-        pub fun createPackTemplate(name: String, description: String?, maxSupply: UInt32, imageUrl: String)
+        pub fun createPackTemplate(name: String, description: String?, maxSupply: UInt32, imageUrl: String, type: String, slots: [Slot])
     }
 
     pub resource PackTemplateAdmin: PackTemplateAdminClaim {
@@ -187,12 +213,14 @@ pub contract MFLPackTemplate {
             }
         }
 
-        pub fun createPackTemplate(name: String, description: String?, maxSupply: UInt32, imageUrl: String) {
+        pub fun createPackTemplate(name: String, description: String?, maxSupply: UInt32, imageUrl: String, type: String, slots: [Slot]) {
             let newPackTemplate <- create PackTemplate(
                 name: name,
                 description: description,
                 maxSupply: maxSupply,
-                imageUrl: imageUrl
+                imageUrl: imageUrl,
+                type: type,
+                slots: slots
             )
 
             emit Created(id: newPackTemplate.id)

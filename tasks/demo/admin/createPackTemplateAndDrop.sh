@@ -143,7 +143,7 @@ flow transactions send ./transactions/mfl/packs/give_pack_template_admin_claim.t
 sleep 1
 
 echo -e "${BLUE}[Tx] Alice can now create a pack template${NC}"
-flow transactions send ./transactions/mfl/packs/create_pack_template.tx.cdc $packTemplateName $description $maxSupply $imageUrl --signer $signerAdminAlice
+flow transactions send ./transactions/mfl/packs/create_pack_template.tx.cdc $packTemplateName $description $maxSupply $imageUrl "BASE" 0 [] [] [] --signer $signerAdminAlice
 sleep 1
 
 echo -e "${BLUE}[Tx] Allow pack opening for this pack template${NC}"
