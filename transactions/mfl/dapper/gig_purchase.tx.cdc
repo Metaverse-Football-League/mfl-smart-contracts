@@ -1,8 +1,8 @@
-import FungibleToken from "../../contracts/_libs/FungibleToken.cdc"
-import NonFungibleToken from "../../contracts/_libs/NonFungibleToken.cdc"
-import MetadataViews from "../../contracts/_libs/MetadataViews.cdc"
-import DapperUtilityCoin from "../../contracts/_libs/DapperUtilityCoin.cdc"
-import MFLPack from "../../contracts/packs/MFLPack.cdc"
+import FungibleToken from "../../../contracts/_libs/FungibleToken.cdc"
+import NonFungibleToken from "../../../contracts/_libs/NonFungibleToken.cdc"
+import MetadataViews from "../../../contracts/_libs/MetadataViews.cdc"
+import DapperUtilityCoin from "../../../contracts/_libs/DapperUtilityCoin.cdc"
+import MFLPack from "../../../contracts/packs/MFLPack.cdc"
 
 // This transaction takes a list of NFT IDs as an argument because there is no actual pack.
 // It also passes metadata as an argument, because the lack of an on-chain pack means we have
