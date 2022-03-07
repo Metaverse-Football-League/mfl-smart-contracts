@@ -87,6 +87,9 @@
     },
     "testnet-buy-packs-account": {
       "fromFile": "./flow.testnet.json"
+    },
+    "testnet-ppichier-admin-account": {
+      "fromFile": "./flow.testnet.json"
     }
   },
   "deployments": {
