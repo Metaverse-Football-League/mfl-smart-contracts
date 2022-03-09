@@ -8,7 +8,7 @@ import FUSD from "../../contracts/_libs/FUSD.cdc"
 
 transaction(receiverAddress: Address, amount: UFix64) {
 
-    let receiverVaultRef : &FUSD.Vault{FungibleToken.Receiver}
+    let receiverVaultRef : &FUS.Vault{FungibleToken.Receiver}
     let senderVaultRef : &FUSD.Vault{FungibleToken.Provider}
     
     prepare(acct: AuthAccount) {
@@ -21,3 +21,4 @@ transaction(receiverAddress: Address, amount: UFix64) {
         self.receiverVaultRef.deposit(from: <-vault)
     }
 }
+ 

@@ -175,7 +175,7 @@ pub contract MFLPlayer: NonFungibleToken {
         return self.playersDatas[id];
     }
 
-     // This interface allows any account that has a private capability to a PlayerAdminClaim to call the methods below
+    // This interface allows any account that has a private capability to a PlayerAdminClaim to call the methods below
     pub resource interface PlayerAdminClaim {
         pub let name: String
         pub fun mintPlayer(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, image: {MetadataViews.File}): @MFLPlayer.NFT

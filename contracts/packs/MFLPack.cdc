@@ -15,8 +15,8 @@ pub contract MFLPack: NonFungibleToken {
     pub event ContractInitialized()
     pub event Withdraw(id: UInt64, from: Address?)
     pub event Deposit(id: UInt64, to: Address?)
-    pub event Opened(id: UInt64, packIndex: UInt32, packTemplateID: UInt64, from: Address?)
-    pub event Created(ids: [UInt64], from: Address?)
+    pub event Opened(id: UInt64, packTemplateID: UInt64, from: Address?)
+    pub event Created(id: UInt64, packTemplateID: UInt64, from: Address?)
     pub event Destroyed(id: UInt64)
 
     // Named Paths
@@ -30,15 +30,13 @@ pub contract MFLPack: NonFungibleToken {
 
         // Unique ID across all packs
         pub let id: UInt64
-        // Index at which the pack has been minted for the given pack template
-        pub let packTemplateMintIndex: UInt32
+
         // ID used to identify the kind of pack it is
         pub let packTemplateID: UInt64
 
-        init(packTemplateMintIndex: UInt32, packTemplateID: UInt64) {
+        init(packTemplateID: UInt64) {
             MFLPack.totalSupply = MFLPack.totalSupply + (1 as UInt64)
             self.id = MFLPack.totalSupply
-            self.packTemplateMintIndex = packTemplateMintIndex
             self.packTemplateID = packTemplateID
         }
 
@@ -63,7 +61,6 @@ pub contract MFLPack: NonFungibleToken {
                 case Type<MFLViews.PackDataViewV1>():
                     return MFLViews.PackDataViewV1(
                        id: self.id,
-                       packTemplateMintIndex: self.packTemplateMintIndex,
                        packTemplate: packTemplateData
                     )
             }
@@ -149,7 +146,6 @@ pub contract MFLPack: NonFungibleToken {
             // Emit an event which will be processed by the backend to distribute the content of the pack
             emit Opened(
                 id: pack.id,
-                packIndex: (packTemplate.startingIndex + pack.packTemplateMintIndex) % packTemplate.maxSupply,
                 packTemplateID: pack.packTemplateID,
                 from: self.owner!.address,
             )
@@ -165,22 +161,42 @@ pub contract MFLPack: NonFungibleToken {
     pub fun createEmptyCollection(): @Collection {
         return <- create Collection()
     }
+    
+    // This interface allows any account that has a private capability to a PackAdminClaim to call the methods below
+    pub resource interface PackAdminClaim {
+        pub let name: String
+        pub fun mintPack(packTemplateID: UInt64): @MFLPack.NFT
+        pub fun batchMintPack(packTemplateID: UInt64, nbToMint: UInt32): @Collection
+    }
 
-    // Only callable by a Drop mint fct
-    access(account) fun mint(
-        packTemplateID: UInt64,
-        nbToMint: UInt32,
-        address: Address,
-    ): @Collection {
-        let mintIndex = MFLPackTemplate.getPackTemplateMintIndex(id: packTemplateID, nbToMint: nbToMint, address: address)!
-        let newCollection <- create Collection()
-        var i: UInt32 = 0
-        while i < nbToMint {
-            newCollection.deposit(token: <- create NFT(packTemplateMintIndex: mintIndex + i, packTemplateID: packTemplateID))
-            i = i + (1 as UInt32)
+    pub resource PackAdmin: PackAdminClaim {
+        pub let name: String
+
+        init() {
+            self.name = "PackAdminClaim"
         }
-        emit Created(ids: newCollection.getIDs(), from: address)
-        return <-newCollection
+
+        pub fun mintPack(packTemplateID: UInt64): @MFLPack.NFT {
+            let pack <- create NFT(packTemplateID: packTemplateID)
+            emit Created(id: pack.id, packTemplateID: packTemplateID, from: self.owner?.address)
+            return <- pack
+        }
+
+        pub fun batchMintPack(packTemplateID: UInt64, nbToMint: UInt32): @Collection {
+            let newCollection <- create Collection()
+            var i: UInt32 = 0
+            while i < nbToMint {
+                let pack <- create NFT(packTemplateID: packTemplateID)
+                emit Created(id: pack.id, packTemplateID: packTemplateID, from: self.owner?.address)
+                newCollection.deposit(token: <- pack)
+                i = i + (1 as UInt32)
+            }
+            return <- newCollection
+        }
+
+        pub fun createPackAdmin(): @PackAdmin {
+            return <- create PackAdmin()
+        }
     }
 
     init() {
