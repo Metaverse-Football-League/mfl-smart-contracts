@@ -15,7 +15,7 @@ pub contract MFLPack: NonFungibleToken {
     pub event ContractInitialized()
     pub event Withdraw(id: UInt64, from: Address?)
     pub event Deposit(id: UInt64, to: Address?)
-    pub event Opened(id: UInt64, packTemplateID: UInt64, from: Address?)
+    pub event Opened(id: UInt64, from: Address?)
     pub event Created(id: UInt64, packTemplateID: UInt64, from: Address?)
     pub event Destroyed(id: UInt64)
 
@@ -146,7 +146,6 @@ pub contract MFLPack: NonFungibleToken {
             // Emit an event which will be processed by the backend to distribute the content of the pack
             emit Opened(
                 id: pack.id,
-                packTemplateID: pack.packTemplateID,
                 from: self.owner!.address,
             )
             destroy pack
