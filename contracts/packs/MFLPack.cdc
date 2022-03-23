@@ -22,6 +22,7 @@ pub contract MFLPack: NonFungibleToken {
     // Named Paths
     pub let CollectionStoragePath: StoragePath
     pub let CollectionPublicPath: PublicPath
+    pub let PackAdminStoragePath: StoragePath
 
     // Counter for all the Packs ever minted
     pub var totalSupply: UInt64
@@ -200,8 +201,9 @@ pub contract MFLPack: NonFungibleToken {
 
     init() {
         // Set our named paths
-        self.CollectionStoragePath=/storage/MFLPackCollection
-        self.CollectionPublicPath=/public/MFLPackCollection
+        self.CollectionStoragePath = /storage/MFLPackCollection
+        self.CollectionPublicPath = /public/MFLPackCollection
+        self.PackAdminStoragePath = /storage/MFLPackAdmin
 
         // Initialize contract fields
         self.totalSupply = 0
@@ -210,6 +212,9 @@ pub contract MFLPack: NonFungibleToken {
         self.account.save<@MFLPack.Collection>(<- MFLPack.createEmptyCollection(), to: MFLPack.CollectionStoragePath)
         // Create a public capability for the Collection
         self.account.link<&MFLPack.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(MFLPack.CollectionPublicPath, target: MFLPack.CollectionStoragePath)
+
+        // Create PackAdmin resource and save it to storage
+        self.account.save(<- create PackAdmin() , to: self.PackAdminStoragePath)
 
         emit ContractInitialized()
     }

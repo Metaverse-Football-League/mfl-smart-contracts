@@ -1,6 +1,7 @@
 import NonFungibleToken from "../../../contracts/_libs/NonFungibleToken.cdc"
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 import MFLPack from "../../../contracts/packs/MFLPack.cdc"
+import MFLPackTemplate from "../../../contracts/packs/MFLPackTemplate.cdc"
 
 /** 
   This tx mints an arbitray number of packs. 
@@ -14,6 +15,10 @@ transaction(packTemplateID: UInt64,  receiverAddr: Address, nbToMint: UInt32){
     prepare(acct: AuthAccount) {
         self.packTemplateAdminProxyRef = acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
         self.receiverCollectionRef = getAccount(receiverAddr).getCapability<&MFLPack.Collection{NonFungibleToken.CollectionPublic}>(MFLPack.CollectionPublicPath).borrow() ?? panic("Could not borrow receiver collection ref")
+    }
+
+    pre {
+        MFLPackTemplate.getPackTemplate(id: packTemplateID) != nil: "PackTemplate does not exist"
     }
 
     execute {

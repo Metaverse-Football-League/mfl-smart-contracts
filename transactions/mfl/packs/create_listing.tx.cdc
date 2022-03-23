@@ -6,7 +6,7 @@ import NFTStorefront from "../../../contracts/_libs/NFTStorefront.cdc"
 
 /** 
   For a Dapper user to be able to purchase a Pack NFT,  the transaction that creates the Listing transaction 
-  needs to be different than the above example so that Dapper users can pay for an NFT using off-chain payment methods, 
+  needs to be different than the standard example so that Dapper users can pay for an NFT using off-chain payment methods, 
   such as Dapper Balance, credit cards, ACH, wires and/or cryptocurrencies on other chains
 **/
 
