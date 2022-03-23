@@ -9,7 +9,7 @@ import MFLPackTemplate from "../../../contracts/packs/MFLPackTemplate.cdc"
 transaction(
     name: String,
     description: String,
-    supply: UInt32,
+    maxSupply: UInt32,
     imageUrl: String,
     type: String,
     slotsNbr: UInt32,
@@ -39,6 +39,6 @@ transaction(
             _slots.append(MFLPackTemplate.Slot(type: slotsType[i], chances: slotsChances[i], count: slotsCount[i]))
             i = i + 1
         }
-        packTemplateAdminClaimRef.createPackTemplate(name: name, description: description, supply: supply, imageUrl: imageUrl, type: type, slots: _slots)
+        packTemplateAdminClaimRef.createPackTemplate(name: name, description: description, maxSupply: maxSupply, imageUrl: imageUrl, type: type, slots: _slots)
     } 
 }

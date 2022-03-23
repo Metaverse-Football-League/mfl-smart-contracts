@@ -177,12 +177,14 @@ pub contract MFLPack: NonFungibleToken {
         }
 
         pub fun mintPack(packTemplateID: UInt64): @MFLPack.NFT {
+            MFLPackTemplate.increasePackTemplateSupply(id: packTemplateID, nbToMint: 1)
             let pack <- create NFT(packTemplateID: packTemplateID)
             emit Created(id: pack.id, packTemplateID: packTemplateID, from: self.owner?.address)
             return <- pack
         }
 
         pub fun batchMintPack(packTemplateID: UInt64, nbToMint: UInt32): @Collection {
+            MFLPackTemplate.increasePackTemplateSupply(id: packTemplateID, nbToMint: nbToMint)
             let newCollection <- create Collection()
             var i: UInt32 = 0
             while i < nbToMint {
