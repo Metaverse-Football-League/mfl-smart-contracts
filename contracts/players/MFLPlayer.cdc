@@ -24,7 +24,6 @@ pub contract MFLPlayer: NonFungibleToken {
     pub let CollectionPublicPath: PublicPath
     pub let PlayerAdminStoragePath: StoragePath
 
-
     // The total number of Players that have been minted
     pub var totalSupply: UInt64
     // All players datas are stored in this dictionary
