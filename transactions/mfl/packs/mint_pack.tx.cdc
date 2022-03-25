@@ -9,11 +9,11 @@ import MFLPackTemplate from "../../../contracts/packs/MFLPackTemplate.cdc"
 
 transaction(packTemplateID: UInt64,  receiverAddr: Address){
     
-    let packTemplateAdminProxyRef: &MFLAdmin.AdminProxy
+    let packAdminProxyRef: &MFLAdmin.AdminProxy
     let receiverCollectionRef: &MFLPack.Collection{NonFungibleToken.CollectionPublic} 
 
     prepare(acct: AuthAccount) {
-        self.packTemplateAdminProxyRef = acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
+        self.packAdminProxyRef = acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
         self.receiverCollectionRef = getAccount(receiverAddr).getCapability<&MFLPack.Collection{NonFungibleToken.CollectionPublic}>(MFLPack.CollectionPublicPath).borrow() ?? panic("Could not borrow receiver collection ref")
     }
 
@@ -22,7 +22,7 @@ transaction(packTemplateID: UInt64,  receiverAddr: Address){
     }
 
     execute {
-        let packAdminClaimCap = self.packTemplateAdminProxyRef.getClaimCapability(name: "PackAdminClaim") ?? panic("PackAdminClaim capability not found")
+        let packAdminClaimCap = self.packAdminProxyRef.getClaimCapability(name: "PackAdminClaim") ?? panic("PackAdminClaim capability not found")
         let packAdminClaimRef = packAdminClaimCap.borrow<&{MFLPack.PackAdminClaim}>() ?? panic("Could not borrow PackAdminClaim")
         let pack <- packAdminClaimRef.mintPack(packTemplateID: packTemplateID)
         self.receiverCollectionRef.deposit(token: <- pack)
