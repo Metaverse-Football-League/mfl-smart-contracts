@@ -11,7 +11,7 @@ import NFTStorefront from "../../../contracts/_libs/NFTStorefront.cdc"
 **/
 
 transaction(saleItemID: UInt64, saleItemPrice: UFix64) {
-    let ducReceiver: Capability<&DapperUtilityCoin.Vault{FungibleToken.Receiver}>
+    let ducReceiver: Capability<&{FungibleToken.Receiver}>
     let packCollectionProvider: Capability<&MFLPack.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
     let storefront: &NFTStorefront.Storefront
 
@@ -19,7 +19,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64) {
         // We need a provider capability, but one is not provided by default so we create one if needed.
         let packCollectionProviderPrivatePath = /private/MFLPackCollectionProviderForNFTStorefront
 
-        self.ducReceiver = acct.getCapability<&DapperUtilityCoin.Vault{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
+        self.ducReceiver = acct.getCapability<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
         assert(self.ducReceiver.borrow() != nil, message: "Missing or mis-typed DUC receiver")
 
         if !acct.getCapability<&MFLPack.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(packCollectionProviderPrivatePath)!.check() {

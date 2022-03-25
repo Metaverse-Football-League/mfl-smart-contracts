@@ -19,10 +19,10 @@ transaction(receiverAddress: Address, privatePath: Path) {
         let receiverAccount = getAccount(receiverAddress)
         self.receveiverAdminProxyRef = receiverAccount.getCapability<&{MFLAdmin.AdminProxyPublic}>(MFLAdmin.AdminProxyPublicPath).borrow() ?? panic("Could not borrow AdminProxyPublic ref")
         let privateCapabilityPath = privatePath as? PrivatePath
-        self.storefrontClaimCapability = acct.link<&{NFTStorefront.StorefrontManager}>(privateCapabilityPath!, target: /storage/NFTStorefront) ?? panic("path already exists")
+        self.storefrontClaimCapability = acct.link<&{NFTStorefront.StorefrontManager}>(privateCapabilityPath!, target: NFTStorefront.StorefrontStoragePath) ?? panic("path already exists")
     }
 
     execute {
-        self.adminRootRef.setAdminProxyClaimCapability(name: "NFTStorefrontClaim", adminProxyRef: self.receveiverAdminProxyRef, newCapability: self.storefrontClaimCapability)
+        self.adminRootRef.setAdminProxyClaimCapability(name: "StorefrontClaim", adminProxyRef: self.receveiverAdminProxyRef, newCapability: self.storefrontClaimCapability)
     }
 }
