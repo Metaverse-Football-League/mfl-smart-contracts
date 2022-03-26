@@ -149,7 +149,7 @@ pub contract MFLPackTemplate {
         }
     }
 
-    // Called from MFLPack mintPack / batchMintPack fct
+    // Called from MFLPack batchMintPack fct
     access(account) fun increasePackTemplateCurrentSupply(id: UInt64, nbToMint: UInt32) {
         self.getPackTemplateRef(id: id)?.increaseCurrentSupply(nbToMint: nbToMint)
     }

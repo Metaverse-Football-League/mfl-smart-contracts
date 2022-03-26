@@ -166,7 +166,6 @@ pub contract MFLPack: NonFungibleToken {
     // This interface allows any account that has a private capability to a PackAdminClaim to call the methods below
     pub resource interface PackAdminClaim {
         pub let name: String
-        pub fun mintPack(packTemplateID: UInt64): @MFLPack.NFT
         pub fun batchMintPack(packTemplateID: UInt64, nbToMint: UInt32): @Collection
     }
 
@@ -175,12 +174,6 @@ pub contract MFLPack: NonFungibleToken {
 
         init() {
             self.name = "PackAdminClaim"
-        }
-
-        pub fun mintPack(packTemplateID: UInt64): @MFLPack.NFT {
-            MFLPackTemplate.increasePackTemplateCurrentSupply(id: packTemplateID, nbToMint: 1)
-            let pack <- create NFT(packTemplateID: packTemplateID)
-            return <- pack
         }
 
         pub fun batchMintPack(packTemplateID: UInt64, nbToMint: UInt32): @Collection {
