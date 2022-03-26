@@ -9,7 +9,7 @@ pub contract MFLPackTemplate {
 
     // Events
     pub event ContractInitialized()
-    pub event Created(id: UInt64)
+    pub event Minted(id: UInt64)
     pub event AllowToOpenPacks(id: UInt64)
 
     // Named Paths
@@ -88,6 +88,7 @@ pub contract MFLPackTemplate {
             self.imageUrl = imageUrl
             self.type = type
             self.slots = slots
+            emit Minted(id: self.id)
         }
 
         // Enable accounts to open their packs
@@ -95,8 +96,8 @@ pub contract MFLPackTemplate {
             self.isOpenable = true
         }
 
-        // Increase supply
-        access(contract) fun increaseSupply(nbToMint: UInt32) {
+        // Increase current supply
+        access(contract) fun increaseCurrentSupply(nbToMint: UInt32) {
             pre {
                 nbToMint <=  self.maxSupply - self.currentSupply : "Supply exceeded"
             }
@@ -131,18 +132,8 @@ pub contract MFLPackTemplate {
     pub fun getPackTemplates(): [PackTemplateData] {
         var packTemplatesData: [PackTemplateData] = []
         for id in self.getPackTemplatesIDs() {
-            if let packTemplate = self.getPackTemplateRef(id: id) {
-                packTemplatesData.append(PackTemplateData(
-                    id: packTemplate.id,
-                    name: packTemplate.name,
-                    description : packTemplate.description,
-                    maxSupply : packTemplate.maxSupply,
-                    currentSupply : packTemplate.currentSupply,
-                    isOpenable: packTemplate.isOpenable,
-                    imageUrl: packTemplate.imageUrl,
-                    type: packTemplate.type,
-                    slots: packTemplate.slots
-                ))
+            if let packTemplate = self.getPackTemplate(id: id) {
+                packTemplatesData.append(packTemplate)
             }
         }
         return packTemplatesData
@@ -159,8 +150,8 @@ pub contract MFLPackTemplate {
     }
 
     // Called from MFLPack mintPack / batchMintPack fct
-    access(account) fun increasePackTemplateSupply(id: UInt64, nbToMint: UInt32) {
-        self.getPackTemplateRef(id: id)?.increaseSupply(nbToMint: nbToMint)
+    access(account) fun increasePackTemplateCurrentSupply(id: UInt64, nbToMint: UInt32) {
+        self.getPackTemplateRef(id: id)?.increaseCurrentSupply(nbToMint: nbToMint)
     }
     
     // This interface allows any account that has a private capability to a PackTemplateAdminClaim to call the methods below
@@ -193,9 +184,6 @@ pub contract MFLPackTemplate {
                 type: type,
                 slots: slots
             )
-
-            emit Created(id: newPackTemplate.id)
-
             let oldPackTemplate <- MFLPackTemplate.packTemplates[newPackTemplate.id] <- newPackTemplate
             destroy oldPackTemplate
         }

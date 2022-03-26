@@ -16,7 +16,7 @@ pub contract MFLPack: NonFungibleToken {
     pub event Withdraw(id: UInt64, from: Address?)
     pub event Deposit(id: UInt64, to: Address?)
     pub event Opened(id: UInt64, from: Address?)
-    pub event Created(id: UInt64, packTemplateID: UInt64, from: Address?)
+    pub event Minted(id: UInt64, packTemplateID: UInt64, from: Address?)
     pub event Destroyed(id: UInt64)
 
     // Named Paths
@@ -39,6 +39,7 @@ pub contract MFLPack: NonFungibleToken {
             MFLPack.totalSupply = MFLPack.totalSupply + (1 as UInt64)
             self.id = MFLPack.totalSupply
             self.packTemplateID = packTemplateID
+            emit Minted(id: self.id, packTemplateID: packTemplateID, from: self.owner?.address)
         }
 
         // Get all supported views for this NFT
@@ -177,19 +178,17 @@ pub contract MFLPack: NonFungibleToken {
         }
 
         pub fun mintPack(packTemplateID: UInt64): @MFLPack.NFT {
-            MFLPackTemplate.increasePackTemplateSupply(id: packTemplateID, nbToMint: 1)
+            MFLPackTemplate.increasePackTemplateCurrentSupply(id: packTemplateID, nbToMint: 1)
             let pack <- create NFT(packTemplateID: packTemplateID)
-            emit Created(id: pack.id, packTemplateID: packTemplateID, from: self.owner?.address)
             return <- pack
         }
 
         pub fun batchMintPack(packTemplateID: UInt64, nbToMint: UInt32): @Collection {
-            MFLPackTemplate.increasePackTemplateSupply(id: packTemplateID, nbToMint: nbToMint)
+            MFLPackTemplate.increasePackTemplateCurrentSupply(id: packTemplateID, nbToMint: nbToMint)
             let newCollection <- create Collection()
             var i: UInt32 = 0
             while i < nbToMint {
                 let pack <- create NFT(packTemplateID: packTemplateID)
-                emit Created(id: pack.id, packTemplateID: packTemplateID, from: self.owner?.address)
                 newCollection.deposit(token: <- pack)
                 i = i + (1 as UInt32)
             }
