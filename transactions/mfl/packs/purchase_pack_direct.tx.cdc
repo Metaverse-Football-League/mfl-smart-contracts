@@ -2,12 +2,12 @@ import FungibleToken from "../../../contracts/_libs/FungibleToken.cdc"
 import NonFungibleToken from "../../../contracts/_libs/NonFungibleToken.cdc"
 import MetadataViews from "../../../contracts/_libs/MetadataViews.cdc"
 import NFTStorefront from "../../../contracts/_libs/NFTStorefront.cdc"
-import MFLPack from "../../../contracts/packs/MFLPack.cdc"
 import DapperUtilityCoin from "../../../contracts/_libs/DapperUtilityCoin.cdc"
+import MFLPack from "../../../contracts/packs/MFLPack.cdc"
 import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 
-// This transcation purchases a pack on from a dapp. This tranasction will also initialize the buyer's account with a pack NFT
-// collection and an NFT collection if it does not already have them.
+// This transaction purchases a pack on from a dapp. This transaction will also initialize the buyer's account with a Pack NFT
+// collection and an Player NFT collection if it does not already have them.
 transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice: UFix64) {
     let paymentVault: @FungibleToken.Vault
     let buyerNFTCollection: &AnyResource{NonFungibleToken.CollectionPublic}
@@ -21,7 +21,7 @@ transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice
     prepare(dapp: AuthAccount, dapper: AuthAccount, buyer: AuthAccount) {
         self.dappAddress = dapp.address
 
-        // Initialize the collection if the buyer does not already have one
+        // Initialize the MFLPlayer collection if the buyer does not already have one
         if buyer.borrow<&MFLPlayer.Collection>(from: MFLPlayer.CollectionStoragePath) == nil {
             buyer.save(<- MFLPlayer.createEmptyCollection(), to: MFLPlayer.CollectionStoragePath)
             buyer.link<&MFLPlayer.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(
@@ -42,7 +42,7 @@ transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice
         }
 
         // Although the Storefront is available as a public capability, we want to borrow
-        // from storage so that we can enforce the need for MFLPack to sign this transaction
+        // from storage so that we can enforce the need for MFL to sign this transaction
         self.storefront = dapp
             .getCapability<&NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}>(NFTStorefront.StorefrontPublicPath)
             .borrow()
@@ -65,7 +65,7 @@ transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice
 
     pre {
         self.salePrice == expectedPrice: "unexpected price"
-        // self.dappAddress == ?? && self.dappAddress == storefrontAddress: "Requires valid authorizing signature" // TODO
+        // self.dappAddress == ${NFTContractAddress} && self.dappAddress == storefrontAddress: "Requires valid authorizing signature"
     }
 
     execute {
