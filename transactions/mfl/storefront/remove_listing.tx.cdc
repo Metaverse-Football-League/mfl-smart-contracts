@@ -1,7 +1,7 @@
 import NFTStorefront from "../../../contracts/_libs/NFTStorefront.cdc"
 
 /* 
-  This transaction removes a listing from the account's storefront.
+  This transaction removes a NFT listing from the user's storefront.
 */
 
 transaction(listingResourceID: UInt64) {
