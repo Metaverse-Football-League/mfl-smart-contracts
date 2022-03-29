@@ -6,8 +6,11 @@ import DapperUtilityCoin from "../../../contracts/_libs/DapperUtilityCoin.cdc"
 import MFLPack from "../../../contracts/packs/MFLPack.cdc"
 import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 
-// This transaction purchases a pack on from a dapp. This transaction will also initialize the buyer's account with a Pack NFT
-// collection and an Player NFT collection if it does not already have them.
+/** 
+  This transaction purchases a pack on from a dapp. This transaction will also initialize the buyer's account with a Pack NFT
+  collection and a Player NFT collection if it does not already have them.
+**/
+
 transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice: UFix64) {
     let paymentVault: @FungibleToken.Vault
     let buyerNFTCollection: &AnyResource{NonFungibleToken.CollectionPublic}
@@ -41,9 +44,7 @@ transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice
                 ?? panic("Could not link MFLPack.Collection Pub Path")
         }
 
-        // Although the Storefront is available as a public capability, we want to borrow
-        // from storage so that we can enforce the need for MFL to sign this transaction
-        self.storefront = dapp
+        self.storefront = getAccount(storefrontAddress)
             .getCapability<&NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}>(NFTStorefront.StorefrontPublicPath)
             .borrow()
             ?? panic("Could not borrow a reference to the storefront")
@@ -65,7 +66,7 @@ transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice
 
     pre {
         self.salePrice == expectedPrice: "unexpected price"
-        self.dappAddress == 0x683564e46977788a && self.dappAddress == storefrontAddress: "Requires valid authorizing signature"
+        self.dappAddress == 0xbfff3f3685929cbd : "Requires valid authorizing signature"
     }
 
     execute {
