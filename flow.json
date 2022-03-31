@@ -98,6 +98,9 @@
     },
     "testnet-deploy-account": {
       "fromFile": "./flow.testnet.json"
+    },
+    "testnet-dapp-account": {
+      "fromFile": "./flow.testnet.json"
     }
   },
   "deployments": {
