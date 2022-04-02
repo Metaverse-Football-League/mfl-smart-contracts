@@ -1,4 +1,3 @@
-
 const CHECK_PLAYER_ADMIN_CLAIM = `
     import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
     import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
@@ -12,25 +11,25 @@ const CHECK_PLAYER_ADMIN_CLAIM = `
         
         execute {
             let playerAdminClaimCap = self.playerAdminProxyRef.getClaimCapability(name: "PlayerAdminClaim") ?? panic("PlayerAdminClaim capability not found")
-            let playerAdminClaimRef = playerAdminClaimCap.borrow<&{MFLPlayer.PlayerAdminClaim}>() ?? panic("Could not borrow PlayerAdminClaim")
+            playerAdminClaimCap.borrow<&{MFLPlayer.PlayerAdminClaim}>() ?? panic("Could not borrow PlayerAdminClaim")
         }
     }
 `
 
-const CHECK_DROP_ADMIN_CLAIM = `
+const CHECK_PACK_ADMIN_CLAIM = `
     import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
-    import MFLDrop from "../../../contracts/drops/MFLDrop.cdc"
+    import MFLPack from "../../../contracts/packs/MFLPack.cdc"
 
     transaction() {
-        let dropAdminProxyRef: &MFLAdmin.AdminProxy
+        let packAdminProxyRef: &MFLAdmin.AdminProxy
 
         prepare(acct: AuthAccount) {
-            self.dropAdminProxyRef = acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
+            self.packAdminProxyRef = acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
         }
 
         execute {
-            let dropAdminClaimCap = self.dropAdminProxyRef.getClaimCapability(name: "DropAdminClaim") ?? panic("DropAdminClaim capability not found")
-            let dropAdminClaimRef = dropAdminClaimCap.borrow<&{MFLDrop.DropAdminClaim}>() ?? panic("Could not borrow DropAdminClaim")
+            let packAdminClaimCap = self.packAdminProxyRef.getClaimCapability(name: "PackAdminClaim") ?? panic("PackAdminClaim capability not found")
+            packAdminClaimCap.borrow<&{MFLPack.PackAdminClaim}>() ?? panic("Could not borrow PackAdminClaim")
         }
     }
 `
@@ -47,13 +46,13 @@ const CHECK_PACK_TEMPLATE_ADMIN_CLAIM = `
 
         execute {
             let packTemplateAdminClaimCap = self.packTemplateAdminProxyRef.getClaimCapability(name: "PackTemplateAdminClaim") ?? panic("PackTemplateAdminClaim capability not found")
-            let packTemplateAdminClaimRef = packTemplateAdminClaimCap.borrow<&{MFLPackTemplate.PackTemplateAdminClaim}>() ?? panic("Could not borrow PackTemplateAdminClaim")
+            packTemplateAdminClaimCap.borrow<&{MFLPackTemplate.PackTemplateAdminClaim}>() ?? panic("Could not borrow PackTemplateAdminClaim")
         }
     }
 `
 
 module.exports = {
     CHECK_PLAYER_ADMIN_CLAIM,
-    CHECK_DROP_ADMIN_CLAIM,
+    CHECK_PACK_ADMIN_CLAIM,
     CHECK_PACK_TEMPLATE_ADMIN_CLAIM
 }

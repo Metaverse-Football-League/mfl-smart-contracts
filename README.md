@@ -41,19 +41,12 @@ can be burned to open it and receive the associated resources after the opening 
 Contract used to store pack templates. A pack template defines common characteristics shared between multiples packs:
 - a name for the packs
 - an optional description of the packs
-- maximum supply that can be purchased
+- maximum supply (nb of packs that can be minted)
+- current supply
 - image used for the packs
 - a flag indicating if packs' owners can open them or not
-
-### MFLDrop
-
-Contract handling drops. A drop allows users to buy packs. Each drop contain the configuration for how a pack is sold:
-- the pack template used for the packs that are purchased
-- the price of a pack
-- the maximum number of packs allowed to be bought for a single address
-- a potential list of whitelisted addresses that can be used to restrict who can purchase a pack
-- the status of the drop, allowing the admin to open it to all, only to whitelisted or to close the drop
-
+- a type (Base, Rare, Legendary,...)
+- slots
 ### MFLAdmin
 
 Contract to access admin claims given by specific resources created for each contracts
