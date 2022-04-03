@@ -23,7 +23,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64) {
         assert(self.ducReceiver.borrow() != nil, message: "Missing or mis-typed DUC receiver")
 
         if !acct.getCapability<&MFLPack.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(packCollectionProviderPrivatePath)!.check() {
-            acct.link<&MFLPack.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(packCollectionProviderPrivatePath, target: /storage/MFLPackCollection)
+            acct.link<&MFLPack.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(packCollectionProviderPrivatePath, target: MFLPack.CollectionStoragePath)
         }
 
         self.packCollectionProvider = acct.getCapability<&MFLPack.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(packCollectionProviderPrivatePath)!
