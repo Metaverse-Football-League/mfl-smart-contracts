@@ -10,7 +10,7 @@ import NFTStorefront from "../../../contracts/_libs/NFTStorefront.cdc"
   such as Dapper Balance, credit cards, ACH, wires and/or cryptocurrencies on other chains
 **/
 
-transaction(saleItemID: UInt64, saleItemPrice: UFix64) {
+transaction(saleItemIDs: [UInt64], saleItemPrice: UFix64) {
     let ducReceiver: Capability<&{FungibleToken.Receiver}>
     let packCollectionProvider: Capability<&MFLPack.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
     let storefront: &NFTStorefront.Storefront
@@ -38,12 +38,14 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64) {
             receiver: self.ducReceiver,
             amount: saleItemPrice
         )
-        self.storefront.createListing(
-            nftProviderCapability: self.packCollectionProvider,
-            nftType: Type<@MFLPack.NFT>(),
-            nftID: saleItemID,
-            salePaymentVaultType: Type<@DapperUtilityCoin.Vault>(),
-            saleCuts: [saleCut]
-        )
+        for saleItemID in saleItemIDs {
+            self.storefront.createListing(
+                nftProviderCapability: self.packCollectionProvider,
+                nftType: Type<@MFLPack.NFT>(),
+                nftID: saleItemID,
+                salePaymentVaultType: Type<@DapperUtilityCoin.Vault>(),
+                saleCuts: [saleCut]
+            )
+        }
     }
 }
