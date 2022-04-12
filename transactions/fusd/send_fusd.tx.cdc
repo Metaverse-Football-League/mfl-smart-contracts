@@ -21,3 +21,4 @@ transaction(receiverAddress: Address, amount: UFix64) {
         self.receiverVaultRef.deposit(from: <-vault)
     }
 }
+ 

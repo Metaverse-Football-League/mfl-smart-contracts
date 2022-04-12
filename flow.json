@@ -51,9 +51,29 @@
         "mainnet": "1654653399040a61"
       }
     },
+    "DapperUtilityCoin": {
+      "source": "./contracts/_libs/DapperUtilityCoin.cdc",
+      "aliases": {
+        "testnet": "82ec283f88a62e65",
+        "mainnet": "ead892083b3e2c6c"
+      }
+    },
+    "TokenForwarding": {
+      "source": "./contracts/_libs/TokenForwarding.cdc",
+      "aliases": {
+        "testnet": "51ea0e37c27a1f1a",
+        "mainnet": "e544175ee0461c4b"
+      }
+    },
+    "NFTStorefront": {
+      "source": "./contracts/_libs/NFTStorefront.cdc",
+      "aliases": {
+        "testnet": "94b06cfca1d8a476",
+        "mainnet": "4eb8a10cb9f87357"
+      }
+    },
     "MFLAdmin": "./contracts/core/MFLAdmin.cdc",
     "MFLPlayer": "./contracts/players/MFLPlayer.cdc",
-    "MFLDrop": "./contracts/drops/MFLDrop.cdc",
     "MFLPack": "./contracts/packs/MFLPack.cdc",
     "MFLPackTemplate": "./contracts/packs/MFLPackTemplate.cdc",
     "MFLViews": "./contracts/views/MFLViews.cdc"
@@ -79,13 +99,7 @@
     "testnet-deploy-account": {
       "fromFile": "./flow.testnet.json"
     },
-    "testnet-drop-player-collection-account": {
-      "fromFile": "./flow.testnet.json"
-    },
-    "testnet-player-admin-account": {
-      "fromFile": "./flow.testnet.json"
-    },
-    "testnet-buy-packs-account": {
+    "testnet-dapp-account": {
       "fromFile": "./flow.testnet.json"
     }
   },
@@ -95,9 +109,11 @@
         "FUSD",
         "NonFungibleToken",
         "MetadataViews",
+        "DapperUtilityCoin",
+        "TokenForwarding",
+        "NFTStorefront",
         "MFLAdmin",
         "MFLPlayer",
-        "MFLDrop",
         "MFLPackTemplate",
         "MFLPack",
         "MFLViews"
@@ -107,7 +123,6 @@
       "testnet-deploy-account": [
         "MFLAdmin",
         "MFLPlayer",
-        "MFLDrop",
         "MFLPackTemplate",
         "MFLPack",
         "MFLViews"

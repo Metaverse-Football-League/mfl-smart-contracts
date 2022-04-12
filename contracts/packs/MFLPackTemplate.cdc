@@ -1,15 +1,15 @@
 /**
   This contract allows MFL to create and manage packTemplates.
-  A packTemplate is in a way the skeleton of a pack, where the max supply is defined,
-  whether or not the packs linked to a packTemplate can be opened, and the startingIndex
-  (which is one of the central elements of the pack content randomness logic).
+  A packTemplate is in a way the skeleton of a pack, where, among other things,
+  a max supply and  current supply are defined,
+  and whether or not packs linked to a packTemplate can be opened.
 **/
 
 pub contract MFLPackTemplate {
 
     // Events
     pub event ContractInitialized()
-    pub event Created(id: UInt64)
+    pub event Minted(id: UInt64)
     pub event AllowToOpenPacks(id: UInt64)
 
     // Named Paths
@@ -26,7 +26,6 @@ pub contract MFLPackTemplate {
         pub let description: String?
         pub let maxSupply: UInt32
         pub let currentSupply: UInt32
-        pub let startingIndex: UInt32
         pub let isOpenable: Bool
         pub let imageUrl: String
         pub let type: String
@@ -38,7 +37,6 @@ pub contract MFLPackTemplate {
             description: String?,
             maxSupply: UInt32,
             currentSupply: UInt32,
-            startingIndex: UInt32,
             isOpenable: Bool,
             imageUrl: String,
             type: String,
@@ -49,7 +47,6 @@ pub contract MFLPackTemplate {
             self.description = description
             self.maxSupply = maxSupply
             self.currentSupply = currentSupply
-            self.startingIndex = startingIndex
             self.isOpenable = isOpenable
             self.imageUrl = imageUrl
             self.type = type
@@ -75,7 +72,6 @@ pub contract MFLPackTemplate {
         access(contract) let description: String?
         access(contract) let maxSupply: UInt32
         access(contract) var currentSupply: UInt32
-        access(contract) var startingIndex: UInt32
         access(contract) var isOpenable: Bool
         access(contract) var imageUrl: String
         access(contract) let type: String
@@ -88,11 +84,11 @@ pub contract MFLPackTemplate {
             self.description = description
             self.maxSupply = maxSupply
             self.currentSupply = 0
-            self.startingIndex = 0
             self.isOpenable = false
             self.imageUrl = imageUrl
             self.type = type
             self.slots = slots
+            emit Minted(id: self.id)
         }
 
         // Enable accounts to open their packs
@@ -100,34 +96,12 @@ pub contract MFLPackTemplate {
             self.isOpenable = true
         }
 
-        // Only callable by a Pack mint fct (through getPackTemplateMintIndex). Update startingIndex and returns the mintIndex for the pack NFT
-        access(contract) fun getMintIndex(nbToMint: UInt32, address: Address): UInt32 {
+        // Increase current supply
+        access(contract) fun increaseCurrentSupply(nbToMint: UInt32) {
             pre {
-                nbToMint <= self.maxSupply - self.currentSupply : "Not enough packs available"
+                nbToMint <=  self.maxSupply - self.currentSupply : "Supply exceeded"
             }
-
-            let mintIndex = self.currentSupply
             self.currentSupply = self.currentSupply + nbToMint
-
-            if(!self.isOpenable) {
-                self.increaseStartingIndex(address: address)
-            }
-
-            return mintIndex
-        }
-
-        // Compute startingIndex for off-chain randomness logic of pack distribution
-        access(self) fun increaseStartingIndex(address: Address) {
-            pre {
-                !self.isOpenable : "Starting index can't change once isOpenable is true"
-            }
-
-            var addrValue: UInt32 = 0
-            let accountAddrBytes = address.toBytes()
-            for accountAddrByte in accountAddrBytes {
-                addrValue = addrValue + UInt32(accountAddrByte)
-            }
-            self.startingIndex = (self.startingIndex + addrValue) % self.maxSupply
         }
     }
 
@@ -145,7 +119,6 @@ pub contract MFLPackTemplate {
                 description : packTemplate.description,
                 maxSupply : packTemplate.maxSupply,
                 currentSupply : packTemplate.currentSupply,
-                startingIndex : packTemplate.startingIndex,
                 isOpenable: packTemplate.isOpenable,
                 imageUrl: packTemplate.imageUrl,
                 type: packTemplate.type,
@@ -159,19 +132,8 @@ pub contract MFLPackTemplate {
     pub fun getPackTemplates(): [PackTemplateData] {
         var packTemplatesData: [PackTemplateData] = []
         for id in self.getPackTemplatesIDs() {
-            if let packTemplate = self.getPackTemplateRef(id: id) {
-                packTemplatesData.append(PackTemplateData(
-                    id: packTemplate.id,
-                    name: packTemplate.name,
-                    description : packTemplate.description,
-                    maxSupply : packTemplate.maxSupply,
-                    currentSupply : packTemplate.currentSupply,
-                    startingIndex : packTemplate.startingIndex,
-                    isOpenable: packTemplate.isOpenable,
-                    imageUrl: packTemplate.imageUrl,
-                    type: packTemplate.type,
-                    slots: packTemplate.slots
-                ))
+            if let packTemplate = self.getPackTemplate(id: id) {
+                packTemplatesData.append(packTemplate)
             }
         }
         return packTemplatesData
@@ -186,10 +148,10 @@ pub contract MFLPackTemplate {
             return nil
         }
     }
-    
-    // Only callable by the Pack mint fct
-    access(account) fun getPackTemplateMintIndex(id: UInt64, nbToMint: UInt32, address: Address): UInt32? {
-        return self.getPackTemplateRef(id: id)?.getMintIndex(nbToMint: nbToMint, address: address)
+
+    // Called from MFLPack batchMintPack fct
+    access(account) fun increasePackTemplateCurrentSupply(id: UInt64, nbToMint: UInt32) {
+        self.getPackTemplateRef(id: id)?.increaseCurrentSupply(nbToMint: nbToMint)
     }
     
     // This interface allows any account that has a private capability to a PackTemplateAdminClaim to call the methods below
@@ -222,9 +184,6 @@ pub contract MFLPackTemplate {
                 type: type,
                 slots: slots
             )
-
-            emit Created(id: newPackTemplate.id)
-
             let oldPackTemplate <- MFLPackTemplate.packTemplates[newPackTemplate.id] <- newPackTemplate
             destroy oldPackTemplate
         }

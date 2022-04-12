@@ -13,12 +13,10 @@ pub contract MFLViews {
 
     pub struct PackDataViewV1 {
         pub let id: UInt64
-        pub let packTemplateMintIndex: UInt32
         pub let packTemplate: MFLPackTemplate.PackTemplateData
 
-        init(id: UInt64, packTemplateMintIndex: UInt32, packTemplate: MFLPackTemplate.PackTemplateData) {
+        init(id: UInt64, packTemplate: MFLPackTemplate.PackTemplateData) {
             self.id = id
-            self.packTemplateMintIndex = packTemplateMintIndex
             self.packTemplate = packTemplate
         }
     }

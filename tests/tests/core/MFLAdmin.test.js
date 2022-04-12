@@ -37,7 +37,7 @@ describe('MFLAdmin', () => {
         await testsUtils.shallPass({name: 'mfl/core/create_admin_root.tx', signers: [bobAccountAddress, jackAccountAddress]});
         expect(result.events).toHaveLength(1);
         expect(result.events[0]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLDrop)}.MFLAdmin.AdminRootCreated`,
+          type: `A.${testsUtils.sansPrefix(addressMap.MFLAdmin)}.MFLAdmin.AdminRootCreated`,
           data: {by: aliceAdminAccountAddress}
         }));
       })
@@ -75,20 +75,24 @@ describe('MFLAdmin', () => {
         });
       })
 
-      test('should set a DropAdminClaim capability in an admin proxy', async () => {
+      test('should set a PackAdminClaim capability in an admin proxy', async () => {
         // prepare
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
-        const privatePath = `/private/${bobAccountAddress}-dropAdminClaim`
+        const privatePath = `/private/${bobAccountAddress}-packAdminClaim`;
         await testsUtils.shallPass({name: 'mfl/core/create_admin_proxy.tx', signers: [bobAccountAddress]});
 
         // execute
-        await testsUtils.shallPass({name: 'mfl/drops/give_drop_admin_claim.tx', args: [bobAccountAddress, privatePath], signers: [aliceAdminAccountAddress]})
+        await testsUtils.shallPass({
+          name: 'mfl/packs/give_pack_admin_claim.tx',
+          args: [bobAccountAddress, privatePath],
+          signers: [aliceAdminAccountAddress]
+        });
 
         // assert
-        // Bob should have a DropAdminClaim Capability in his AdminProxy
+        // Bob should have a PackAdminClaim Capability in his AdminProxy
         await testsUtils.shallPass({
-          code: adminClaim.CHECK_DROP_ADMIN_CLAIM,
+          code: adminClaim.CHECK_PACK_ADMIN_CLAIM,
           signers: [bobAccountAddress],
         });
       })
@@ -131,24 +135,32 @@ describe('MFLAdmin', () => {
         expect(error).toContain('Could not borrow PlayerAdminClaim');
       })
 
-      test('should revoke a DropAdminClaim capability', async () => {
+      test('should revoke a PackAdminClaim capability', async () => {
         // prepare
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
-        const privatePath = `/private/${bobAccountAddress}-dropAdminClaim`
+        const privatePath = `/private/${bobAccountAddress}-packAdminClaim`;
         await testsUtils.shallPass({name: 'mfl/core/create_admin_proxy.tx', signers: [bobAccountAddress]});
-        await testsUtils.shallPass({name: 'mfl/drops/give_drop_admin_claim.tx', args: [bobAccountAddress, privatePath], signers: [aliceAdminAccountAddress]})
+        await testsUtils.shallPass({
+          name: 'mfl/packs/give_pack_admin_claim.tx',
+          args: [bobAccountAddress, privatePath],
+          signers: [aliceAdminAccountAddress]
+        });
 
         // execute
-        await testsUtils.shallPass({name: 'mfl/drops/revoke_drop_admin_claim.tx', args: [privatePath], signers: [aliceAdminAccountAddress]})
+        await testsUtils.shallPass({
+          name: 'mfl/packs/revoke_pack_admin_claim.tx',
+          args: [privatePath],
+          signers: [aliceAdminAccountAddress]
+        });
 
         // assert
-        // Bob should not have a DropAdminClaim Capability in his AdminProxy
+        // Bob should not have a PackAdminClaim Capability in his AdminProxy
         const error = await testsUtils.shallRevert({
-          code: adminClaim.CHECK_DROP_ADMIN_CLAIM,
+          code: adminClaim.CHECK_PACK_ADMIN_CLAIM,
           signers: [bobAccountAddress],
         });
-        expect(error).toContain('Could not borrow DropAdminClaim');
+        expect(error).toContain('Could not borrow PackAdminClaim');
       })
 
       test('should revoke a PackTemplateAdminClaim capability', async () => {

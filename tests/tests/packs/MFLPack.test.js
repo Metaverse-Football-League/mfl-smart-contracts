@@ -13,19 +13,6 @@ jest.setTimeout(40000);
 describe('MFLPack', () => {
   let addressMap = null;
 
-  const argsDrop = {
-    name: "Drop name",
-    price: "19.99",
-    packTemplateID: 1,
-    maxTokensPerAddress: 20
-  };
-  const argsDropTx = [
-    argsDrop.name,
-    argsDrop.price,
-    argsDrop.packTemplateID,
-    argsDrop.maxTokensPerAddress
-  ];
-
   const argsPackTemplate = {
     name: 'Base Pack',
     description: 'This is a Base pack template',
@@ -63,9 +50,21 @@ describe('MFLPack', () => {
     argsPackTemplate.slotsCount
   ];
 
+  let aliceAdminAccountAddress = null;
+  let bobAccountAddress = null;
+  let jackAccountAddress = null;
+
   beforeEach(async () => {
-    await testsUtils.initEmulator(8084);
+    await testsUtils.initEmulator(8081);
     addressMap = await MFLPackTestsUtils.deployMFLPackContract('AliceAdminAccount');
+    // Create PackTemplate
+    await MFLPackTestsUtils.initPackTemplate('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx);
+    // Give Alice PackAdminClaim to mint Packs
+    await MFLPackTestsUtils.createPackAdmin('AliceAdminAccount', 'AliceAdminAccount');
+    // Store 3 accounts addresses
+    aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
+    bobAccountAddress = await getAccountAddress('BobAccount');
+    jackAccountAddress = await getAccountAddress('JackAccount');
   });
 
   afterEach(async () => {
@@ -81,19 +80,162 @@ describe('MFLPack', () => {
     });
   });
 
+  describe('PackAdmin', () => {
+    describe('batchMintPack()', () => {
+      test('should mint 1 pack', async () => {
+        // prepare
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [bobAccountAddress]});
+        const argsMint = [1, bobAccountAddress, 1];
+
+        // execute
+        await testsUtils.shallPass({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        // Bob should have 1 pack
+        const bobPackIds = await testsUtils.executeValidScript({
+          name: 'mfl/packs/get_ids_in_collection.script',
+          args: [bobAccountAddress],
+        });
+        expect(bobPackIds).toEqual([1]);
+      });
+
+      test('should mint 5 packs', async () => {
+        // prepare
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [bobAccountAddress]});
+        const argsMint = [1, bobAccountAddress, 5];
+
+        // execute
+        await testsUtils.shallPass({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        // Bob should have 5 packs
+        const bobPackIds = await testsUtils.executeValidScript({
+          name: 'mfl/packs/get_ids_in_collection.script',
+          args: [bobAccountAddress],
+        });
+        expect(bobPackIds).toEqual(expect.arrayContaining([1,2,3,4,5]));
+      });
+
+      test('should increase supply', async () => {
+        // prepare
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [bobAccountAddress]});
+        const argsMint = [1, bobAccountAddress, 5];
+
+        // execute
+        await testsUtils.shallPass({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        // supply should now be 5
+        const packTemplate = await testsUtils.executeValidScript({
+          name: 'mfl/packs/get_pack_template.script',
+          args: [1],
+        });
+        expect(packTemplate.currentSupply).toEqual(5);
+      });
+
+      test('should panic if Pack Template does not exist', async () => {
+        // prepare
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [bobAccountAddress]});
+        const argsMint = [2, bobAccountAddress, 1];
+
+        // execute
+        const error = await testsUtils.shallRevert({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        expect(error).toContain('PackTemplate does not exist');
+      });
+
+      test('should panic if supply is exceeded', async () => {
+        // prepare
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [bobAccountAddress]});
+        const argsMint = [1, bobAccountAddress, 8501];
+
+        // execute
+        const error = await testsUtils.shallRevert({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        expect(error).toContain('Supply exceeded');
+      });
+    });
+
+    describe('createPackAdmin()', () => {
+      test('should create a Pack admin', async () => {
+        // prepare
+        const signers = [aliceAdminAccountAddress, bobAccountAddress];
+
+        // execute
+        await testsUtils.shallPass({name: 'mfl/packs/create_pack_admin.tx', signers});
+
+        // assert
+        // bob must now be able to create another Pack admin
+        await testsUtils.shallPass({
+          name: 'mfl/packs/create_pack_admin.tx',
+          signers: [bobAccountAddress, jackAccountAddress],
+        });
+      });
+
+      test('should panic when trying to create a Pack admin with a non admin account', async () => {
+        // prepare
+        const signers = [bobAccountAddress, jackAccountAddress];
+
+        // execute
+        const error = await testsUtils.shallRevert({name: 'mfl/packs/create_pack_admin.tx', signers});
+
+        // assert
+        expect(error).toContain('Could not borrow pack admin ref');
+      });
+
+      test('should panic when trying to batch mint Packs with a non admin account', async () => {
+        // prepare
+        await testsUtils.shallPass({name: 'mfl/core/create_admin_proxy.tx', signers: [bobAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [jackAccountAddress]});
+        const argsMint = [1, jackAccountAddress, 1];
+
+        // execute
+        const error = await testsUtils.shallRevert({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [bobAccountAddress],
+        });
+
+        // assert
+        expect(error).toContain('PackAdminClaim capability not found');
+      });
+    });
+  });
+
   describe('Collection', () => {
     describe('withdraw() / deposit()', () => {
       test('should withdraw a NFT from a collection and deposit it in another collection', async () => {
         // prepare
-        const argsPurchase = [1, 1, '19.99'];
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
-        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
-        const bobAccountAddress = await getAccountAddress('BobAccount');
-        const jackAccountAddress = await getAccountAddress('JackAccount');
-        await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
-        await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, jackAccountAddress, '100.00');
-        await MFLPackTestsUtils.purchase(bobAccountAddress, argsPurchase);
-        await MFLPackTestsUtils.purchase(jackAccountAddress, argsPurchase);
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [bobAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [jackAccountAddress]});
+        const argsMint = [1, bobAccountAddress, 1];
+        await testsUtils.shallPass({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
 
         // execute
         const result = await testsUtils.shallPass({
@@ -123,18 +265,19 @@ describe('MFLPack', () => {
         // Bob should have 0 pack
         expect(bobPackIds).toEqual([]);
         // Jack should have 2 packs
-        expect(jackPackIds).toHaveLength(2);
-        expect(jackPackIds).toEqual(expect.arrayContaining([1, 2]));
+        expect(jackPackIds).toHaveLength(1);
+        expect(jackPackIds).toEqual(expect.arrayContaining([1]));
       });
 
       test('should panic when trying to withdraw a NFT which is not in the collection', async () => {
         // prepare
-        const argsPurchase = [1, 1, '19.99'];
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
-        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
-        const bobAccountAddress = await getAccountAddress('BobAccount');
-        await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
-        await MFLPackTestsUtils.purchase(bobAccountAddress, argsPurchase);
+        const argsMint = [1, bobAccountAddress, 1];
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [bobAccountAddress]});
+        await testsUtils.shallPass({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
 
         // execute
         const error = await testsUtils.shallRevert({
@@ -151,15 +294,14 @@ describe('MFLPack', () => {
     describe('batchWithdraw()', () => {
       test('should withdraw a NFT from a collection and deposit it in another collection', async () => {
         // prepare
-        const argsPurchase = [1, 2, '39.98'];
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
-        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
-        const bobAccountAddress = await getAccountAddress('BobAccount');
-        const jackAccountAddress = await getAccountAddress('JackAccount');
-        await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
-        await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, jackAccountAddress, '100.00');
-        await MFLPackTestsUtils.purchase(bobAccountAddress, argsPurchase);
-        await MFLPackTestsUtils.purchase(jackAccountAddress, argsPurchase);
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [bobAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [jackAccountAddress]});
+        const argsMint = [1, bobAccountAddress, 2];
+        await testsUtils.shallPass({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
 
         // execute
         const result = await testsUtils.shallPass({
@@ -239,20 +381,21 @@ describe('MFLPack', () => {
         // Bob shoud have 0 pack
         expect(bobPackIds).toEqual([]);
         // Jack should have 4 packs
-        expect(jackPackIds).toHaveLength(4);
-        expect(jackPackIds).toEqual(expect.arrayContaining([1, 2, 3, 4]));
+        expect(jackPackIds).toHaveLength(2);
+        expect(jackPackIds).toEqual(expect.arrayContaining([1, 2]));
       });
     });
 
     describe('getIDs()', () => {
       test('should get the IDs in the collection', async () => {
         // prepare
-        const argsPurchase = [1, 10, '199.99'];
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
-        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
-        const bobAccountAddress = await getAccountAddress('BobAccount');
-        await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '200.00');
-        await MFLPackTestsUtils.purchase(bobAccountAddress, argsPurchase);
+        const argsMint = [1, bobAccountAddress, 10];
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [bobAccountAddress]});
+        await testsUtils.shallPass({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
 
         // execute
         const bobPackIds = await testsUtils.executeValidScript({
@@ -270,12 +413,13 @@ describe('MFLPack', () => {
     describe('borrowNFT()', () => {
       test('should borrow a NFT in the collection', async () => {
         // prepare
-        const argsPurchase = [1, 1, '19.99'];
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
-        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
-        const bobAccountAddress = await getAccountAddress('BobAccount');
-        await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
-        await MFLPackTestsUtils.purchase(bobAccountAddress, argsPurchase);
+        const argsMint = [1, bobAccountAddress, 1];
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [bobAccountAddress]});
+        await testsUtils.shallPass({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
 
         // execute
         const pack = await testsUtils.executeValidScript({
@@ -287,7 +431,6 @@ describe('MFLPack', () => {
         expect(pack).toEqual({
           uuid: expect.toBeNumber(),
           id: 1,
-          packTemplateMintIndex: 0,
           packTemplateID: 1,
         });
       });
@@ -296,12 +439,13 @@ describe('MFLPack', () => {
     describe('borrowViewResolver()', () => {
       test('should return a reference to a NFT as a MetadataViews.Resolver interface', async () => {
         // prepare
-        const argsPurchase = [1, 1, '19.99'];
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
-        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
-        const bobAccountAddress = await getAccountAddress('BobAccount');
-        await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
-        await MFLPackTestsUtils.purchase(bobAccountAddress, argsPurchase);
+        const argsMint = [1, bobAccountAddress, 1];
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [bobAccountAddress]});
+        await testsUtils.shallPass({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
 
         // execute
         const pack = await testsUtils.executeValidScript({
@@ -313,7 +457,6 @@ describe('MFLPack', () => {
         expect(pack).toEqual({
           uuid: expect.toBeNumber(),
           id: 1,
-          packTemplateMintIndex: 0,
           packTemplateID: 1,
         });
       });
@@ -322,13 +465,14 @@ describe('MFLPack', () => {
     describe('openPack()', () => {
       test('should burn a pack when opening it', async () => {
         // prepare
-        await MFLPackTestsUtils.initPackTemplateAndDrop(
-          'AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx
-        );
-        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
-        await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, aliceAdminAccountAddress, '100.00');
-        const argsPurchase = [1, 2, '39.98'];
-        await MFLPackTestsUtils.purchase(aliceAdminAccountAddress, argsPurchase);
+        const argsMint = [1, bobAccountAddress, 2];
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [bobAccountAddress]});
+        await testsUtils.shallPass({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
+        
         await testsUtils.shallPass({
           name: 'mfl/packs/set_allow_to_open_packs.tx',
           args: [1],
@@ -339,27 +483,25 @@ describe('MFLPack', () => {
         const result = await testsUtils.shallPass({
           name: 'mfl/packs/open_pack.tx',
           args: [2],
-          signers: [aliceAdminAccountAddress],
+          signers: [bobAccountAddress],
         });
 
         // assert
         const packIds = await testsUtils.executeValidScript({
           name: 'mfl/packs/get_ids_in_collection.script',
-          args: [aliceAdminAccountAddress],
+          args: [bobAccountAddress],
         });
         expect(packIds).toEqual([1]);
         expect(result.events).toHaveLength(3);
         expect(result.events[0]).toEqual(expect.objectContaining({
           type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Withdraw`,
-          data: {id: 2, from: aliceAdminAccountAddress},
+          data: {id: 2, from: bobAccountAddress},
         }));
         expect(result.events[1]).toEqual(expect.objectContaining({
           type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Opened`,
           data: {
             id: 2,
-            packIndex: expect.toBeNumber(),
-            packTemplateID: 1,
-            from: aliceAdminAccountAddress,
+            from: bobAccountAddress,
           },
         }));
         expect(result.events[2]).toEqual(expect.objectContaining({
@@ -370,19 +512,19 @@ describe('MFLPack', () => {
 
       test('should panic when opening a pack while the pack template is not openable', async () => {
         // prepare
-        await MFLPackTestsUtils.initPackTemplateAndDrop(
-          'AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx,
-        );
-        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
-        await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, aliceAdminAccountAddress, '100.00');
-        const argsPurchase = [1, 2, '39.98'];
-        await MFLPackTestsUtils.purchase(aliceAdminAccountAddress, argsPurchase);
+        const argsMint = [1, bobAccountAddress, 2];
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [bobAccountAddress]});
+        await testsUtils.shallPass({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
 
         // execute
         const error = await testsUtils.shallRevert({
           name: 'mfl/packs/open_pack.tx',
           args: [2],
-          signers: [aliceAdminAccountAddress],
+          signers: [bobAccountAddress],
         });
 
         // assert
@@ -393,12 +535,13 @@ describe('MFLPack', () => {
     describe('destroy()', () => {
       test('should destroy a collection', async () => {
         // prepare
-        const argsPurchase = [1, 2, '39.98'];
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
-        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
-        const bobAccountAddress = await getAccountAddress('BobAccount');
-        await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
-        await MFLPackTestsUtils.purchase(bobAccountAddress, argsPurchase);
+        const argsMint = [1, bobAccountAddress, 2];
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [bobAccountAddress]});
+        await testsUtils.shallPass({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
 
         // execute
         const result = await testsUtils.shallPass({
@@ -466,16 +609,16 @@ describe('MFLPack', () => {
 
   describe('NFT', () => {
 
-    const argsPurchase = [1, 1, '19.99'];
-
     describe('getViews()', () => {
       test('should get views types', async () => {
         // prepare
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
-        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
-        const bobAccountAddress = await getAccountAddress('BobAccount');
-        await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
-        await MFLPackTestsUtils.purchase(bobAccountAddress, argsPurchase);
+        const argsMint = [1, bobAccountAddress, 1];
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [bobAccountAddress]});
+        await testsUtils.shallPass({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
 
         // execute
         const viewsTypes = await testsUtils.executeValidScript({
@@ -495,11 +638,13 @@ describe('MFLPack', () => {
     describe('resolveView()', () => {
       test('should resolve Display view for a specific pack', async () => {
         // prepare
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
-        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
-        const bobAccountAddress = await getAccountAddress('BobAccount');
-        await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
-        await MFLPackTestsUtils.purchase(bobAccountAddress, argsPurchase);
+        const argsMint = [1, bobAccountAddress, 1];
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [bobAccountAddress]});
+        await testsUtils.shallPass({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
 
         // execute
         const packDisplayView = await testsUtils.executeValidScript({
@@ -521,12 +666,13 @@ describe('MFLPack', () => {
 
       test('should resolve Display view for all packs', async () => {
         // prepare
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
-        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
-        const bobAccountAddress = await getAccountAddress('BobAccount');
-        await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
-        const argsPurchase = [1, 2, '39.98'];
-        await MFLPackTestsUtils.purchase(bobAccountAddress, argsPurchase);
+        const argsMint = [1, bobAccountAddress, 2];
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [bobAccountAddress]});
+        await testsUtils.shallPass({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
 
         // execute
         const packsDisplayView = await testsUtils.executeValidScript({
@@ -556,11 +702,13 @@ describe('MFLPack', () => {
 
       test('should resolve PackData view for a specific pack', async () => {
         // prepare
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
-        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
-        const bobAccountAddress = await getAccountAddress('BobAccount');
-        await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
-        await MFLPackTestsUtils.purchase(bobAccountAddress, argsPurchase);
+        const argsMint = [1, bobAccountAddress, 1];
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [bobAccountAddress]});
+        await testsUtils.shallPass({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
 
         // execute
         const packDataView = await testsUtils.executeValidScript({
@@ -572,14 +720,12 @@ describe('MFLPack', () => {
         expect(packDataView).toEqual(
           {
             id: 1,
-            packTemplateMintIndex: 0,
             packTemplate: {
               id: 1,
               name: argsPackTemplate.name,
               description: argsPackTemplate.description,
               maxSupply: argsPackTemplate.maxSupply,
               currentSupply: 1,
-              startingIndex: expect.toBeNumber(),
               isOpenable: false,
               imageUrl: argsPackTemplate.imageUrl,
               type: argsPackTemplate.type,
@@ -597,12 +743,13 @@ describe('MFLPack', () => {
 
       test('should resolve PackData view for all packs', async () => {
         // prepare
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
-        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
-        const bobAccountAddress = await getAccountAddress('BobAccount');
-        await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
-        const argsPurchase = [1, 3, '59.97'];
-        await MFLPackTestsUtils.purchase(bobAccountAddress, argsPurchase);
+        const argsMint = [1, bobAccountAddress, 3];
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [bobAccountAddress]});
+        await testsUtils.shallPass({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
 
         // execute
         const packsDataView = await testsUtils.executeValidScript({
@@ -615,14 +762,12 @@ describe('MFLPack', () => {
         expect(packsDataView).toEqual(expect.arrayContaining([
           {
             id: 1,
-            packTemplateMintIndex: 0,
             packTemplate: {
               id: 1,
               name: argsPackTemplate.name,
               description: argsPackTemplate.description,
               maxSupply: argsPackTemplate.maxSupply,
               currentSupply: 3,
-              startingIndex: expect.toBeNumber(),
               isOpenable: false,
               imageUrl: argsPackTemplate.imageUrl,
               type: argsPackTemplate.type,
@@ -637,14 +782,12 @@ describe('MFLPack', () => {
           },
           {
             id: 2,
-            packTemplateMintIndex: 1,
             packTemplate: {
               id: 1,
               name: argsPackTemplate.name,
               description: argsPackTemplate.description,
               maxSupply: argsPackTemplate.maxSupply,
               currentSupply: 3,
-              startingIndex: expect.toBeNumber(),
               isOpenable: false,
               imageUrl: argsPackTemplate.imageUrl,
               type: argsPackTemplate.type,
@@ -659,14 +802,12 @@ describe('MFLPack', () => {
           },
           {
             id: 3,
-            packTemplateMintIndex: 2,
             packTemplate: {
               id: 1,
               name: argsPackTemplate.name,
               description: argsPackTemplate.description,
               maxSupply: argsPackTemplate.maxSupply,
               currentSupply: 3,
-              startingIndex: expect.toBeNumber(),
               isOpenable: false,
               imageUrl: argsPackTemplate.imageUrl,
               type: argsPackTemplate.type,
@@ -686,11 +827,13 @@ describe('MFLPack', () => {
     describe('destroy()', () => {
       test('should destroy the NFT', async () => {
         // prepare
-        await MFLPackTestsUtils.initPackTemplateAndDrop('AliceAdminAccount', 'AliceAdminAccount', argsPackTemplateTx, argsDropTx);
-        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
-        const bobAccountAddress = await getAccountAddress('BobAccount');
-        await MFLPackTestsUtils.setupAndTopupFusdAccount(aliceAdminAccountAddress, bobAccountAddress, '100.00');
-        await MFLPackTestsUtils.purchase(bobAccountAddress, argsPurchase);
+        const argsMint = [1, bobAccountAddress, 1];
+        await testsUtils.shallPass({name: 'mfl/packs/create_and_link_pack_collection.tx', signers: [bobAccountAddress]});
+        await testsUtils.shallPass({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
 
         // execute
         const result = await testsUtils.shallPass({

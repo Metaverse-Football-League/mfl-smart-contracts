@@ -24,7 +24,6 @@ pub contract MFLPlayer: NonFungibleToken {
     pub let CollectionPublicPath: PublicPath
     pub let PlayerAdminStoragePath: StoragePath
 
-
     // The total number of Players that have been minted
     pub var totalSupply: UInt64
     // All players datas are stored in this dictionary
@@ -175,7 +174,7 @@ pub contract MFLPlayer: NonFungibleToken {
         return self.playersDatas[id];
     }
 
-     // This interface allows any account that has a private capability to a PlayerAdminClaim to call the methods below
+    // This interface allows any account that has a private capability to a PlayerAdminClaim to call the methods below
     pub resource interface PlayerAdminClaim {
         pub let name: String
         pub fun mintPlayer(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, image: {MetadataViews.File}): @MFLPlayer.NFT
