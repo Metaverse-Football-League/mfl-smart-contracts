@@ -3,7 +3,7 @@ import MetadataViews from "../../../contracts/_libs/MetadataViews.cdc"
 import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 
-/** 
+/**
   This tx mints a new player NFT given a certain number of parameters.
 **/
 
@@ -44,13 +44,11 @@ transaction(
         let metadata: {String: AnyStruct} = {}
         metadata.insert(key: "name", name)
         metadata.insert(key: "overall", overall)
-        metadata.insert(key: "name", name)
         metadata.insert(key: "nationalities", nationalities)
         metadata.insert(key: "positions", positions)
         metadata.insert(key: "preferredFoot", preferredFoot)
         metadata.insert(key: "ageAtMint", ageAtMint)
         metadata.insert(key: "height", height)
-        metadata.insert(key: "overall", overall)
         metadata.insert(key: "pace", pace)
         metadata.insert(key: "shooting", shooting)
         metadata.insert(key: "passing", passing)
