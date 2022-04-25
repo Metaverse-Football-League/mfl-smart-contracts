@@ -4,7 +4,8 @@ import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 
 /**
-  This tx mints a new player NFT given a certain number of parameters.
+  This tx mints a new player NFT given a certain number of parameters,
+  and deposit it in the receiver collection.
 **/
 
 transaction(
@@ -27,13 +28,14 @@ transaction(
     goalkeeping: UInt32,
     potential: String,
     resistance: UInt32,
+    receiverAddress: Address
 ) {
     let playerAdminProxyRef: &MFLAdmin.AdminProxy
     let receiverRef: &{NonFungibleToken.CollectionPublic}
 
     prepare(acct: AuthAccount) {
         self.playerAdminProxyRef = acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
-        let playerCollectionCap = getAccount(acct.address).getCapability<&{NonFungibleToken.CollectionPublic}>(MFLPlayer.CollectionPublicPath)
+        let playerCollectionCap = getAccount(receiverAddress).getCapability<&{NonFungibleToken.CollectionPublic}>(MFLPlayer.CollectionPublicPath)
         self.receiverRef = playerCollectionCap.borrow() ?? panic("Could not borrow receiver reference")
     }
 
