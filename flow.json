@@ -101,6 +101,9 @@
     },
     "testnet-dapp-account": {
       "fromFile": "./flow.testnet.json"
+    },
+    "testnet-players-store-account": {
+      "fromFile": "./flow.testnet.json"
     }
   },
   "deployments": {
