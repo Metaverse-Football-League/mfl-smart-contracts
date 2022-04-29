@@ -1,4 +1,4 @@
-import NFTStorefront from "../../../contracts/_libs/NFTStorefront.cdc"
+import NFTStorefront from "../../contracts/_libs/NFTStorefront.cdc"
 
 /* 
   This transaction removes a NFT listing from the user's storefront.

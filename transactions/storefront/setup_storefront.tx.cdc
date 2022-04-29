@@ -1,4 +1,4 @@
-import NFTStorefront from "../../../contracts/_libs/NFTStorefront.cdc"
+import NFTStorefront from "../../contracts/_libs/NFTStorefront.cdc"
 
 /** 
   This transaction installs the Storefront ressource in an account.

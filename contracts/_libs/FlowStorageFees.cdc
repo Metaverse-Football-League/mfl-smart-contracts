@@ -14,7 +14,7 @@
  * 
  */
 
-import FungibleToken from "../lib/FungibleToken.cdc"
+import FungibleToken from "./FungibleToken.cdc"
 import FlowToken from "./FlowToken.cdc"
 
 pub contract FlowStorageFees {
