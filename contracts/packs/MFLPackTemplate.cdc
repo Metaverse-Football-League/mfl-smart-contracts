@@ -142,7 +142,7 @@ pub contract MFLPackTemplate {
     // Get a specif packTemplate ref (in particular for calling admin methods)
     access(contract) fun getPackTemplateRef(id: UInt64): &MFLPackTemplate.PackTemplate? {
         if self.packTemplates[id] != nil {
-            let ref = &self.packTemplates[id] as auth &MFLPackTemplate.PackTemplate
+            let ref = &self.packTemplates[id] as auth &MFLPackTemplate.PackTemplate?
             return ref
         } else {
             return nil
