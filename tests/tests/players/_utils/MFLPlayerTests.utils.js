@@ -58,6 +58,7 @@ export const MFLPlayerTestsUtils = {
     const args = [
       id, MFLPlayerTestsUtils.PLAYER_DATA.season, MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
       ...Object.values(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY),
+      adminAccountAddress
     ];
     return await testsUtils.shallPass({name: 'mfl/players/mint_player.tx', args, signers});
   },
