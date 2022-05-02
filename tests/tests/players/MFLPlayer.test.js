@@ -488,7 +488,7 @@ describe('MFLPlayer', () => {
         // execute
         const signers = [aliceAdminAccountAddress];
         const playerID = 1201;
-        const args = [playerID, 1, 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm', ...Object.values(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY)];
+        const args = [playerID, 1, 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm', ...Object.values(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY), aliceAdminAccountAddress];
         const result = await testsUtils.shallPass({name: 'mfl/players/mint_player.tx', args, signers});
 
         // assert
@@ -540,7 +540,7 @@ describe('MFLPlayer', () => {
         // execute
         const signers = [aliceAdminAccountAddress];
         const playerID = 1201;
-        const args = [playerID, 1, 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm', ...Object.values(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY)];
+        const args = [playerID, 1, 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm', ...Object.values(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY), aliceAdminAccountAddress];
         await testsUtils.shallPass({name: 'mfl/players/mint_player.tx', args, signers});
         const error = await testsUtils.shallRevert({name: 'mfl/players/mint_player.tx', args, signers});
 
