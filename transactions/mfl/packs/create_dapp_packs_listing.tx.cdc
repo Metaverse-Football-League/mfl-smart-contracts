@@ -31,22 +31,6 @@ transaction(saleItemIDs: [UInt64], saleItemPrice: UFix64) {
 
         self.storefront = acct.borrow<&NFTStorefront.Storefront>(from: NFTStorefront.StorefrontStoragePath)
             ?? panic("Missing or mis-typed NFTStorefront Storefront")
-
-        // Make sure these NFTs are not already listed for sale in this storefront.
-        let existingOffers = self.storefront.getListingIDs()
-        if existingOffers.length > 0 {
-            for listingResourceID in existingOffers {
-                let listing: &NFTStorefront.Listing{NFTStorefront.ListingPublic}? = self.storefront.borrowListing(listingResourceID: listingResourceID)
-                if listing != nil {
-                    for saleItemID in saleItemIDs {
-                        if listing!.getDetails().nftID == saleItemID && listing!.getDetails().nftType == Type<@MFLPack.NFT>(){
-                            self.storefront.removeListing(listingResourceID: listingResourceID)
-                            break
-                        }
-                    }
-                }
-            }
-        }
     }
 
     execute {
