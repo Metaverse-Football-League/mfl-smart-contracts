@@ -29,7 +29,7 @@ pub contract MFLPackTemplate {
         pub let isOpenable: Bool
         pub let imageUrl: String
         pub let type: String
-        pub let slots: [Slot]
+        access(contract) let slots: [Slot]
 
         init(
             id: UInt64,
@@ -56,7 +56,7 @@ pub contract MFLPackTemplate {
 
     pub struct Slot {
         pub let type: String
-        pub let chances: {String: String}
+        access(contract) let chances: {String: String}
         pub let count: UInt32
 
         init(type: String, chances: {String: String}, count: UInt32) {

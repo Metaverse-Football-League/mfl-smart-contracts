@@ -2,6 +2,7 @@ import {emulator, getAccountAddress} from 'flow-js-testing';
 import {MFLPlayerTestsUtils} from './_utils/MFLPlayerTests.utils';
 import {testsUtils} from '../_utils/tests.utils';
 import { BORROW_VIEW_RESOLVER } from './_scripts/borrow_view_resolver.script';
+import { ERROR_UPDATE_PLAYER_METADATA } from './_transactions/error_update_player_metadata.tx';
 import * as matchers from 'jest-extended';
 
 expect.extend(matchers);
@@ -476,6 +477,21 @@ describe('MFLPlayer', () => {
 
       // assert
       expect(playerData).toBeNull();
+    });
+
+    test('should throw an error when updating player metadata', async () => {
+      // prepare
+      await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+      await MFLPlayerTestsUtils.createPlayerNFT(1);
+
+      // execute
+      const error = await testsUtils.shallRevert({
+        code: ERROR_UPDATE_PLAYER_METADATA,
+        args: [1],
+      });
+
+      // assert
+      expect(error).toContain("cannot access `metadata`: field has contract access");
     });
   });
 

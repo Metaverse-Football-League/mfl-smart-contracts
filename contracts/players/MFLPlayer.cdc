@@ -32,7 +32,7 @@ pub contract MFLPlayer: NonFungibleToken {
     // Data stored in playersdatas. Updatable by an admin
     pub struct PlayerData {
         pub let id: UInt64
-        pub let metadata: {String: AnyStruct}
+        access(contract) let metadata: {String: AnyStruct}
         pub let season: UInt32
         pub let image: {MetadataViews.File}
 

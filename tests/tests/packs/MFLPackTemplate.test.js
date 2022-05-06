@@ -3,6 +3,8 @@ import {MFLPackTemplateTestsUtils} from './_utils/MFLPackTemplateTests.utils';
 import {testsUtils} from '../_utils/tests.utils';
 import * as matchers from 'jest-extended';
 import _ from 'lodash';
+import { ERROR_UPDATE_PACK_TEMPLATE_SLOTS } from './_transactions/error_update_pack_template_slots.tx';
+import { ERROR_ACCESS_PACK_TEMPLATES_DICTIONARY } from './_transactions/error_access_pack_templates_dictionary.tx';
 
 expect.extend(matchers);
 jest.setTimeout(40000);
@@ -406,6 +408,50 @@ describe('MFLPackTemplate', () => {
         // assert
         expect(packTemplate).toEqual(null);
       });
+    });
+
+    test('should throw an error when slots are updated in a tx', async () => {
+      // prepare
+      await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
+      const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
+      const signers = [aliceAdminAccountAddress];
+      await testsUtils.shallPass({
+        name: 'mfl/packs/create_pack_template.tx',
+        args: args1Tx,
+        signers
+      });
+      
+      // execute
+      const error = await testsUtils.shallRevert({
+        code: ERROR_UPDATE_PACK_TEMPLATE_SLOTS,
+        args: [1],
+        signers: [aliceAdminAccountAddress],
+      });
+
+      // assert
+      expect(error).toContain("cannot access `slots`: field has contract access");
+    });
+
+    test('should throw an error when get packTemplates dictionary in a tx', async () => {
+      // prepare
+      await MFLPackTemplateTestsUtils.createPackTemplateAdmin('AliceAdminAccount', 'AliceAdminAccount');
+      const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
+      const signers = [aliceAdminAccountAddress];
+      await testsUtils.shallPass({
+        name: 'mfl/packs/create_pack_template.tx',
+        args: args1Tx,
+        signers
+      });
+      
+      // execute
+      const error = await testsUtils.shallRevert({
+        code: ERROR_ACCESS_PACK_TEMPLATES_DICTIONARY,
+        args: [1],
+        signers: [aliceAdminAccountAddress],
+      });
+
+      // assert
+      expect(error).toContain("cannot access `packTemplates`: field has private access");
     });
 
   });
