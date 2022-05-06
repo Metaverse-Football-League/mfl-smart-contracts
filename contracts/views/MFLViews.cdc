@@ -23,8 +23,8 @@ pub contract MFLViews {
 
     pub struct PlayerMetadataViewV1 {
         pub let name: String?
-        pub let nationalities: [String]?
-        pub let positions: [String]?
+        access(contract) let nationalities: [String]?
+        access(contract) let positions: [String]?
         pub let preferredFoot: String?
         pub let ageAtMint: UInt32?
         pub let height: UInt32?
