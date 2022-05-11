@@ -1,4 +1,4 @@
-import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
+import MFLAdmin from 0x8ebcbfd516b1da27
 
 /** 
   This tx creates an admin proxy which will allow 

@@ -1,7 +1,7 @@
-import NonFungibleToken from "../../../contracts/_libs/NonFungibleToken.cdc"
-import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
-import MFLPack from "../../../contracts/packs/MFLPack.cdc"
-import MFLPackTemplate from "../../../contracts/packs/MFLPackTemplate.cdc"
+import NonFungibleToken from 0x1d7e57aa55817448
+import MFLAdmin from 0x8ebcbfd516b1da27
+import MFLPack from 0x8ebcbfd516b1da27
+import MFLPackTemplate from 0x8ebcbfd516b1da27
 
 /** 
   This tx mints an arbitray number of packs. 

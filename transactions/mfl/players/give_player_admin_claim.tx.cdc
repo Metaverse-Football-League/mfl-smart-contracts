@@ -1,5 +1,5 @@
-import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
-import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
+import MFLAdmin from 0x8ebcbfd516b1da27
+import MFLPlayer from 0x8ebcbfd516b1da27
 
 /** 
   This tx gives a player admin claim capability to an admin proxy.

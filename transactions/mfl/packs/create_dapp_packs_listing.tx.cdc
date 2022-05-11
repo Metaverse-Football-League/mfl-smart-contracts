@@ -1,8 +1,8 @@
-import FungibleToken from "../../../contracts/_libs/FungibleToken.cdc"
-import NonFungibleToken from "../../../contracts/_libs/NonFungibleToken.cdc"
-import DapperUtilityCoin from "../../../contracts/_libs/DapperUtilityCoin.cdc"
-import MFLPack from "../../../contracts/packs/MFLPack.cdc"
-import NFTStorefront from "../../../contracts/_libs/NFTStorefront.cdc"
+import FungibleToken from 0xf233dcee88fe0abe
+import NonFungibleToken from 0x1d7e57aa55817448
+import DapperUtilityCoin from 0xead892083b3e2c6c
+import MFLPack from 0x8ebcbfd516b1da27
+import NFTStorefront from 0x4eb8a10cb9f87357
 
 /** 
   For a Dapper user to be able to purchase a Pack NFT,  the transaction that creates the Listing transaction 

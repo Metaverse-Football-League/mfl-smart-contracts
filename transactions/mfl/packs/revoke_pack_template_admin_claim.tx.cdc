@@ -1,4 +1,4 @@
-import MFLPackTemplate from "../../../contracts/packs/MFLPackTemplate.cdc"
+import MFLPackTemplate from 0x8ebcbfd516b1da27
 
 /** 
   This tx revokes a pack template admin claim capability by

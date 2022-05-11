@@ -1,5 +1,5 @@
-import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
-import MFLPackTemplate from "../../../contracts/packs/MFLPackTemplate.cdc"
+import MFLAdmin from 0x8ebcbfd516b1da27
+import MFLPackTemplate from 0x8ebcbfd516b1da27
 
 /** 
   This tx allows packs to be opened for a specific pack template id. 

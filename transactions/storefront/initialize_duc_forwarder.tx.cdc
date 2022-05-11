@@ -1,6 +1,6 @@
-import FungibleToken from "../../contracts/_libs/FungibleToken.cdc"
-import TokenForwarding from "../../contracts/_libs/TokenForwarding.cdc"
-import DapperUtilityCoin from "../../contracts/_libs/DapperUtilityCoin.cdc"
+import FungibleToken from 0xf233dcee88fe0abe
+import TokenForwarding from 0xe544175ee0461c4b
+import DapperUtilityCoin from 0xead892083b3e2c6c
 
 /** 
   To receive the payment on-chain in DUC, the Storefront account must create a special resource called a Forwarder. 

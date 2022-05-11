@@ -1,5 +1,5 @@
 export const BATCH_WITHDRAW_PACK = `
-    import NonFungibleToken from "../../../contracts/_libs/NonFungibleToken.cdc"
+    import NonFungibleToken from 0x1d7e57aa55817448
     import MFLPack from "../../../contracts/packs/MFLPack.cdc"
 
     transaction(receiverAddr: Address, ids: [UInt64]) {

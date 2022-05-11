@@ -1,10 +1,10 @@
-import FungibleToken from "../../../contracts/_libs/FungibleToken.cdc"
-import NonFungibleToken from "../../../contracts/_libs/NonFungibleToken.cdc"
-import MetadataViews from "../../../contracts/_libs/MetadataViews.cdc"
-import NFTStorefront from "../../../contracts/_libs/NFTStorefront.cdc"
-import DapperUtilityCoin from "../../../contracts/_libs/DapperUtilityCoin.cdc"
-import MFLPack from "../../../contracts/packs/MFLPack.cdc"
-import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
+import FungibleToken from 0xf233dcee88fe0abe
+import NonFungibleToken from 0x1d7e57aa55817448
+import MetadataViews from 0x1d7e57aa55817448
+import NFTStorefront from 0x4eb8a10cb9f87357
+import DapperUtilityCoin from 0xead892083b3e2c6c
+import MFLPack from 0x8ebcbfd516b1da27
+import MFLPlayer from 0x8ebcbfd516b1da27
 
 /** 
   This transaction purchases a pack on from a dapp. This transaction will also initialize the buyer's account with a Pack NFT

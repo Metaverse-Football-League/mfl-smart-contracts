@@ -1,5 +1,5 @@
-import FungibleToken from "../../contracts/_libs/FungibleToken.cdc"
-import FUSD from "../../contracts/_libs/FUSD.cdc"
+import FungibleToken from 0xf233dcee88fe0abe
+import FUSD from 0x3c5959b568896393
 
 /** 
   This tx sends an arbitray amount of FUSD

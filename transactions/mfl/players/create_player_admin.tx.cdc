@@ -1,4 +1,4 @@
-import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
+import MFLPlayer from 0x8ebcbfd516b1da27
 
 /** 
   This multi-sig tx creates a player admin resource and

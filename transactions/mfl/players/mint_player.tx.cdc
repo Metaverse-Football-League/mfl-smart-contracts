@@ -1,7 +1,7 @@
-import NonFungibleToken from "../../../contracts/_libs/NonFungibleToken.cdc"
-import MetadataViews from "../../../contracts/_libs/MetadataViews.cdc"
-import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
-import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
+import NonFungibleToken from 0x1d7e57aa55817448
+import MetadataViews from 0x1d7e57aa55817448
+import MFLPlayer from 0x8ebcbfd516b1da27
+import MFLAdmin from 0x8ebcbfd516b1da27
 
 /**
   This tx mints a new player NFT given a certain number of parameters,

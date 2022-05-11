@@ -1,4 +1,4 @@
-import MFLPackTemplate from "../../../contracts/packs/MFLPackTemplate.cdc"
+import MFLPackTemplate from 0x8ebcbfd516b1da27
 
 /** 
   This script returns a data representation of a specific pack template.

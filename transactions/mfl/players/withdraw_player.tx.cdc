@@ -1,5 +1,5 @@
-import NonFungibleToken from "../../../contracts/_libs/NonFungibleToken.cdc"
-import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
+import NonFungibleToken from 0x1d7e57aa55817448
+import MFLPlayer from 0x8ebcbfd516b1da27
 
 /** 
   This tx withdraws a specific player NFT and deposits it

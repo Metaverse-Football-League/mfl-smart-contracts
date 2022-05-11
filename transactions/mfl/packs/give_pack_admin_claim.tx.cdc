@@ -1,5 +1,5 @@
-import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
-import MFLPack from "../../../contracts/packs/MFLPack.cdc"
+import MFLAdmin from 0x8ebcbfd516b1da27
+import MFLPack from 0x8ebcbfd516b1da27
 
 /** 
   This tx gives a pack admin claim capability to an admin proxy.

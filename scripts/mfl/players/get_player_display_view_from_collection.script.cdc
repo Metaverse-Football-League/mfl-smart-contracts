@@ -1,5 +1,5 @@
-import MetadataViews from "../../../contracts/_libs/MetadataViews.cdc"
-import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
+import MetadataViews from 0x1d7e57aa55817448
+import MFLPlayer from 0x8ebcbfd516b1da27
 
 /** 
   This script returns a data representation of a player

@@ -1,4 +1,4 @@
-import MFLPack from "../../../contracts/packs/MFLPack.cdc"
+import MFLPack from 0x8ebcbfd516b1da27
 
 /** 
   This tx revokes a pack admin claim capability by

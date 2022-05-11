@@ -1,7 +1,7 @@
-import NonFungibleToken from "../_libs/NonFungibleToken.cdc"
-import MetadataViews from "../_libs/MetadataViews.cdc"
-import MFLViews from "../views/MFLViews.cdc"
-import MFLAdmin from "../core/MFLAdmin.cdc"
+import NonFungibleToken from 0x1d7e57aa55817448
+import MetadataViews from 0x1d7e57aa55817448
+import MFLViews from 0x8ebcbfd516b1da27
+import MFLAdmin from 0x8ebcbfd516b1da27
 
 /**
   This contract is based on the NonFungibleToken standard on Flow.
