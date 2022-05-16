@@ -22,6 +22,7 @@ transaction(
     physical: UInt32,
     goalkeeping: UInt32,
     potential: String,
+    longevity: String,
     resistance: UInt32,
 ) {
     let playerAdminProxyRef: &MFLAdmin.AdminProxy
@@ -52,6 +53,7 @@ transaction(
         metadata.insert(key: "physical", physical)
         metadata.insert(key: "goalkeeping", goalkeeping)
         metadata.insert(key: "potential", potential)
+        metadata.insert(key: "longevity", longevity)
         metadata.insert(key: "resistance", resistance)
 
         playerAdminClaimRef.updatePlayerMetadata(
