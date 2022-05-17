@@ -63,7 +63,7 @@ transaction(
         metadata.insert(key: "longevity", longevity)
         metadata.insert(key: "resistance", resistance)
 
-        let image = MetadataViews.IPFSFile(cid: folderCID, path: id.toString().concat(".svg"))
+        let image = MetadataViews.IPFSFile(cid: folderCID, path: nil)
         let playerNFT <- playerAdminClaimRef.mintPlayer(
             id: id,
             metadata: metadata,
