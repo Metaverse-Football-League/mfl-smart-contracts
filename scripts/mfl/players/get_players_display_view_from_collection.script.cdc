@@ -3,7 +3,7 @@ import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 
 /** 
   This script returns a data representation array of players
-  given a collection address and following the Display view defined in the MedataViews contract.
+  given a collection address, a list of players ids and following the Display view defined in the MedataViews contract.
 **/
 
 pub struct PlayerNFT {
@@ -28,7 +28,7 @@ pub struct PlayerNFT {
     }
 }
 
-pub fun main(address: Address): [PlayerNFT] {
+pub fun main(address: Address, playersIds: [UInt64]): [PlayerNFT] {
 
     let collection = getAccount(address)
         .getCapability(MFLPlayer.CollectionPublicPath)
@@ -37,9 +37,7 @@ pub fun main(address: Address): [PlayerNFT] {
 
     let players: [PlayerNFT] = []
     
-    let ids = collection.getIDs()
-    
-    for id in ids {
+    for id in playersIds {
         let nft = collection.borrowViewResolver(id: id)
         // Get the basic display information for this NFT
         let view = nft.resolveView(Type<MetadataViews.Display>())!
