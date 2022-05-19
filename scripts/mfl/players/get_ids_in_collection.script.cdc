@@ -8,6 +8,6 @@ import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 
 pub fun main(address: Address): [UInt64] {
     let playerCollectionRef = getAccount(address).getCapability<&{NonFungibleToken.CollectionPublic}>(MFLPlayer.CollectionPublicPath).borrow()
-        ?? panic("Could not borrow the collection reference")
+        ?? panic("Could not borrow a reference to MFLPlayer collection")
     return playerCollectionRef.getIDs()
 }
