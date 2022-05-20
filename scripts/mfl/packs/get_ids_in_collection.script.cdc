@@ -8,6 +8,6 @@ import MFLPack from "../../../contracts/packs/MFLPack.cdc"
 
 pub fun main(address: Address): [UInt64] {
     let packCollectionRef = getAccount(address).getCapability<&{NonFungibleToken.CollectionPublic}>(MFLPack.CollectionPublicPath).borrow()
-        ?? panic("Could not borrow the collection reference")
+        ?? panic("Could not borrow a reference to MFLPack collection")
     return packCollectionRef.getIDs()
 }

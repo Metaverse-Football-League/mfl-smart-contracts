@@ -12,7 +12,7 @@ pub fun main(address: Address): [MFLViews.PackDataViewV1] {
     let collection = getAccount(address)
       .getCapability(MFLPack.CollectionPublicPath)
       .borrow<&{MetadataViews.ResolverCollection}>()
-      ?? panic("Could not borrow a reference to the collection")
+      ?? panic("Could not borrow a reference to MFLPack collection")
 
     let ids = collection.getIDs()
 
