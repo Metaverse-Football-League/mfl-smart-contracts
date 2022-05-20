@@ -1,8 +1,9 @@
-import {emulator, getAccountAddress} from 'flow-js-testing';
-import {MFLPlayerTestsUtils} from './_utils/MFLPlayerTests.utils';
-import {testsUtils} from '../_utils/tests.utils';
+import { emulator, getAccountAddress } from 'flow-js-testing';
+import { MFLPlayerTestsUtils } from './_utils/MFLPlayerTests.utils';
+import { testsUtils } from '../_utils/tests.utils';
 import { BORROW_VIEW_RESOLVER } from './_scripts/borrow_view_resolver.script';
 import { ERROR_UPDATE_PLAYER_METADATA } from './_transactions/error_update_player_metadata.tx';
+import { omit } from "lodash"; 
 import * as matchers from 'jest-extended';
 
 expect.extend(matchers);
@@ -374,7 +375,7 @@ describe('MFLPlayer', () => {
             cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
             path: `${playerID}.svg`
           },
-          metadata: MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY,
+          metadata: omit(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY, "longevity"),
         });
       });
 
@@ -401,7 +402,7 @@ describe('MFLPlayer', () => {
               cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
               path: `${playerID1}.svg`
             },
-            metadata: MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY,
+            metadata: omit(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY, "longevity"),
           },
           {
             id: playerID2,
@@ -410,7 +411,7 @@ describe('MFLPlayer', () => {
               cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
               path: `${playerID2}.svg`
             },
-            metadata: MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY,
+            metadata: omit(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY, "longevity"),
           },
         ])); 
       });

@@ -17,6 +17,7 @@ const PLAYER_METADATA_DICTIONARY = {
   physical: 59,
   goalkeeping: 1,
   potential: 'someHash',
+  longevity: 'someHash',
   resistance: 65,
 };
 

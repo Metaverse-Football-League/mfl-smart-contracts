@@ -12,7 +12,7 @@ pub fun main(address: Address, id: UInt64): MFLViews.PlayerDataViewV1 {
     let collection = getAccount(address)
         .getCapability(MFLPlayer.CollectionPublicPath)
         .borrow<&{MetadataViews.ResolverCollection}>()
-        ?? panic("Could not borrow a reference to the collection")
+        ?? panic("Could not borrow a reference to MFLPlayer collection")
 
     let nft = collection.borrowViewResolver(id: id)
 

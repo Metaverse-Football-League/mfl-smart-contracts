@@ -27,6 +27,7 @@ transaction(
     physical: UInt32,
     goalkeeping: UInt32,
     potential: String,
+    longevity: String,
     resistance: UInt32,
     receiverAddress: Address
 ) {
@@ -59,9 +60,10 @@ transaction(
         metadata.insert(key: "physical", physical)
         metadata.insert(key: "goalkeeping", goalkeeping)
         metadata.insert(key: "potential", potential)
+        metadata.insert(key: "longevity", longevity)
         metadata.insert(key: "resistance", resistance)
 
-        let image = MetadataViews.IPFSFile(cid: folderCID, path: id.toString().concat(".svg"))
+        let image = MetadataViews.IPFSFile(cid: folderCID, path: nil)
         let playerNFT <- playerAdminClaimRef.mintPlayer(
             id: id,
             metadata: metadata,

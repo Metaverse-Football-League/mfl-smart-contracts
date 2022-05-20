@@ -34,7 +34,7 @@ pub fun main(address: Address, id: UInt64): PackNFT {
     let collection = getAccount(address)
         .getCapability(MFLPack.CollectionPublicPath)
         .borrow<&{MetadataViews.ResolverCollection}>()
-        ?? panic("Could not borrow a reference to the collection")
+        ?? panic("Could not borrow a reference to MFLPack collection")
 
     let nft = collection.borrowViewResolver(id: id)
 
