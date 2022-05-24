@@ -22,6 +22,7 @@ pub contract MFLPlayer: NonFungibleToken {
     // Named Paths
     pub let CollectionStoragePath: StoragePath
     pub let CollectionPublicPath: PublicPath
+    pub let CollectionPrivatePath: PrivatePath
     pub let PlayerAdminStoragePath: StoragePath
 
     // The total number of Players that have been minted
@@ -67,6 +68,10 @@ pub contract MFLPlayer: NonFungibleToken {
         pub fun getViews(): [Type] {
             return [
                 Type<MetadataViews.Display>(),
+                Type<MetadataViews.Serial>(),
+                Type<MetadataViews.Royalties>(),
+                Type<MetadataViews.ExternalURL>(),
+                Type<MetadataViews.NFTCollectionData>(),
                 Type<MFLViews.PlayerDataViewV1>()
             ]
         }
@@ -80,6 +85,22 @@ pub contract MFLPlayer: NonFungibleToken {
                         name: playerData.metadata["name"] as! String? ?? "",
                         description: "MFL Player #".concat(playerData.id.toString()),
                         thumbnail: playerData.image
+                    )
+                case Type<MetadataViews.Serial>():
+                    return MetadataViews.Serial(playerData.id)
+                case Type<MetadataViews.Royalties>():
+                    return MetadataViews.Royalties(playerData.metadata["royalties"] as! [MetadataViews.Royalty]? ?? [])
+                case Type<MetadataViews.ExternalURL>():
+                    return MetadataViews.ExternalURL(playerData.metadata["externalUrl"] as! String? ?? "")
+                case Type<MetadataViews.NFTCollectionData>():
+                    return MetadataViews.NFTCollectionData(
+                        storagePath: MFLPlayer.CollectionStoragePath,
+                        publicPath: MFLPlayer.CollectionPublicPath,
+                        providerPath: MFLPlayer.CollectionPrivatePath,
+                        publicCollection: Type<&MFLPlayer.Collection{NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(),
+                        publicLinkedType: Type<&MFLPlayer.Collection{NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(),
+                        providerLinkedType: Type<&MFLPlayer.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(),
+                        createEmptyCollectionFunction: fun(): @NonFungibleToken.Collection {return <- MFLPlayer.createEmptyCollection()}
                     )
                 case Type<MFLViews.PlayerDataViewV1>():
                     return MFLViews.PlayerDataViewV1(
@@ -231,6 +252,7 @@ pub contract MFLPlayer: NonFungibleToken {
         // Set our named paths
         self.CollectionStoragePath = /storage/MFLPlayerCollection
         self.CollectionPublicPath = /public/MFLPlayerCollection
+        self.CollectionPrivatePath = /private/MFLPlayerCollection
         self.PlayerAdminStoragePath = /storage/MFLPlayerAdmin
 
         // Initialize contract fields
