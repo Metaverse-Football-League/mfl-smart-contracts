@@ -452,11 +452,7 @@ pub contract NFTStorefront {
         // Returns a read-only view of the SaleItem for the given listingID if it is contained by this collection.
         //
         pub fun borrowListing(listingResourceID: UInt64): &Listing{ListingPublic}? {
-            if self.listings[listingResourceID] != nil {
-                return &self.listings[listingResourceID] as! &Listing{ListingPublic}?
-            } else {
-                return nil
-            }
+            return &self.listings[listingResourceID] as! &Listing{ListingPublic}?
         }
 
         // cleanup
