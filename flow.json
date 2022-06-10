@@ -125,10 +125,10 @@
     "testnet": {
       "testnet-deploy-account": [
         "MFLAdmin",
-        "MFLPlayer",
         "MFLPackTemplate",
-        "MFLPack",
-        "MFLViews"
+        "MFLViews",
+        "MFLPlayer",
+        "MFLPack"
       ]
     }
   }

@@ -132,7 +132,7 @@ pub contract MFLPack: NonFungibleToken {
         }
 
         pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
-            let nft = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT?
+            let nft = (&self.ownedNFTs[id] as auth &NonFungibleToken.NFT?)!
             let packNFT = nft as! &MFLPack.NFT
             return packNFT as &AnyResource{MetadataViews.Resolver}
         }
