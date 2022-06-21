@@ -1,17 +1,17 @@
 import FungibleToken from "../../../contracts/_libs/FungibleToken.cdc"
 import NonFungibleToken from "../../../contracts/_libs/NonFungibleToken.cdc"
 import DapperUtilityCoin from "../../../contracts/_libs/DapperUtilityCoin.cdc"
-import MFLPack from "../../../contracts/packs/MFLPack.cdc"
+import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 import NFTStorefront from "../../../contracts/_libs/NFTStorefront.cdc"
 
 /** 
-  This transaction can be used to place a Pack NFT for sale on a marketplace such that a specified percentage of the proceeds of the sale
+  This transaction can be used to place a Player NFT for sale on a marketplace such that a specified percentage of the proceeds of the sale
   go to the dapp as a royalty.
 **/
 
 transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
     let sellerPaymentReceiver: Capability<&{FungibleToken.Receiver}>
-    let nftProvider: Capability<&MFLPack.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
+    let nftProvider: Capability<&MFLPlayer.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
     let storefront: &NFTStorefront.Storefront
     let dappAddress: Address
 
@@ -35,17 +35,17 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         assert(self.sellerPaymentReceiver.borrow() != nil, message: "Missing or mis-typed DapperUtilityCoin receiver")
 
         // If the user does not have their collection linked to their account, link it.
-        let nftProviderPrivatePath = /private/MFLPackCollectionProviderForNFTStorefront
-        let hasLinkedCollection = seller.getCapability<&MFLPack.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(nftProviderPrivatePath)!.check()
+        let nftProviderPrivatePath = /private/MFLPlayerCollectionProviderForNFTStorefront
+        let hasLinkedCollection = seller.getCapability<&MFLPlayer.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(nftProviderPrivatePath)!.check()
         if !hasLinkedCollection {
-            seller.link<&MFLPack.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(
+            seller.link<&MFLPlayer.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(
                 nftProviderPrivatePath,
-                target: MFLPack.CollectionStoragePath
+                target: MFLPlayer.CollectionStoragePath
             )
         }
 
         // Get a capability to access the user's NFT collection.
-        self.nftProvider = seller.getCapability<&MFLPack.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(nftProviderPrivatePath)!
+        self.nftProvider = seller.getCapability<&MFLPlayer.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(nftProviderPrivatePath)!
         assert(self.nftProvider.borrow() != nil, message: "Missing or mis-typed collection provider")
 
         // Get a reference to the user's NFT storefront
@@ -57,7 +57,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
         if existingOffers.length > 0 {
             for listingResourceID in existingOffers {
                 let listing: &NFTStorefront.Listing{NFTStorefront.ListingPublic}? = self.storefront.borrowListing(listingResourceID: listingResourceID)
-                if listing != nil && listing!.getDetails().nftID == saleItemID && listing!.getDetails().nftType == Type<@MFLPack.NFT>(){
+                if listing != nil && listing!.getDetails().nftID == saleItemID && listing!.getDetails().nftType == Type<@MFLPlayer.NFT>(){
                     self.storefront.removeListing(listingResourceID: listingResourceID)
                 }
             }
@@ -94,7 +94,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
 
         self.storefront.createListing(
             nftProviderCapability: self.nftProvider,
-            nftType: Type<@MFLPack.NFT>(),
+            nftType: Type<@MFLPlayer.NFT>(),
             nftID: saleItemID,
             salePaymentVaultType: Type<@DapperUtilityCoin.Vault>(),
             saleCuts: [saleCutSeller, saleCutRoyalty]
