@@ -37,8 +37,6 @@ transaction(
 
         let metadata: {String: AnyStruct} = {}
         metadata.insert(key: "name", name)
-        metadata.insert(key: "overall", overall)
-        metadata.insert(key: "name", name)
         metadata.insert(key: "nationalities", nationalities)
         metadata.insert(key: "positions", positions)
         metadata.insert(key: "preferredFoot", preferredFoot)
