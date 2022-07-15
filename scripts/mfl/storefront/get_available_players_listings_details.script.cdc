@@ -3,7 +3,7 @@ import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 
 /**
   This script returns an array of all the MFL players nfts for sale in a Storefront.
-  If the storefront does not exist, return an empty array
+  If the storefront does not exist, it returns an empty array.
 **/
 
 pub struct ListingDetails {
