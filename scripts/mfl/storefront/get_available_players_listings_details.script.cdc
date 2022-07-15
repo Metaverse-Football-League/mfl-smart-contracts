@@ -2,7 +2,8 @@ import NFTStorefront from "../../../contracts/_libs/NFTStorefront.cdc"
 import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 
 /**
-  This script returns an array of all the MFL players nfts for sale in a Storefront
+  This script returns an array of all the MFL players nfts for sale in a Storefront.
+  If the storefront does not exist, it returns an empty array.
 **/
 
 pub struct ListingDetails {
@@ -33,13 +34,16 @@ pub fun main(account: Address): [ListingDetails] {
             NFTStorefront.StorefrontPublicPath
         )
         .borrow()
-        ?? panic("Could not borrow public storefront from address")
 
-    let listingsIDs = storefrontRef.getListingIDs()
+    if storefrontRef == nil {
+        return []
+    }
+
+    let listingsIDs = storefrontRef!.getListingIDs()
     let playersListings: [ListingDetails] = []
 
     for listingsID in listingsIDs {
-        if let listing = storefrontRef.borrowListing(listingResourceID: listingsID) {
+        if let listing = storefrontRef!.borrowListing(listingResourceID: listingsID) {
             let storefrontListingDetails = listing.getDetails()
             if storefrontListingDetails.nftType == Type<@MFLPlayer.NFT>() && !storefrontListingDetails.purchased {
                 playersListings.append(ListingDetails(storefrontListingDetails, listingsID))
