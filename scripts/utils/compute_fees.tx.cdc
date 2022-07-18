@@ -1,4 +1,4 @@
-import FlowFees from "../../../contracts/_libs/FlowStorageFees.cdc"
+import FlowFees from "../../contracts/_libs/FlowFees.cdc"
 
 pub fun main(
   inclusionEffort: UFix64,

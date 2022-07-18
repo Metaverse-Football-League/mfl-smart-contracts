@@ -1,6 +1,6 @@
 import MetadataViews from "../../../contracts/_libs/MetadataViews.cdc"
 import NFTStorefront from "../../../contracts/_libs/NFTStorefront.cdc"
-import MFLPack from "../../../contracts/players/MFLPlayer.cdc"
+import MFLPack from "../../../contracts/packs/MFLPack.cdc"
 
 pub struct PurchaseData {
     pub let id: UInt64
