@@ -7,7 +7,7 @@ import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 
 // This transaction purchases a Player on a peer-to-peer marketplace (i.e. **not** directly from a dapp). This transaction
 // will also initialize the buyer's Player collection on their account if it has not already been initialized.
-transaction(merchantAccountAddress: Address, listingResourceID: UInt64, storefrontAddress: Address, expectedPrice: UFix64) {
+transaction(storefrontAddress: Address, merchantAccountAddress: Address, listingResourceID: UInt64, expectedPrice: UFix64) {
     let paymentVault: @FungibleToken.Vault
     let nftCollection: &AnyResource{NonFungibleToken.CollectionPublic}
     let storefront: &NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}
