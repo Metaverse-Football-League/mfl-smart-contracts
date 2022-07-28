@@ -104,6 +104,9 @@
     },
     "testnet-players-store-account": {
       "fromFile": "./flow.testnet.json"
+    },
+    "testnet-clubs-store-account": {
+      "fromFile": "./flow.testnet.json"
     }
   },
   "deployments": {
