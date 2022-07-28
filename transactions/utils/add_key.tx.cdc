@@ -8,7 +8,7 @@ transaction(publicKey: String) {
         let bytes = publicKey.decodeHex()
         let key = PublicKey(
             publicKey: bytes,
-            signatureAlgorithm: SignatureAlgorithm.ECDSA_secp256k1
+            signatureAlgorithm: SignatureAlgorithm.ECDSA_P256
         )
         acct.keys.add(
             publicKey: key,
@@ -18,5 +18,6 @@ transaction(publicKey: String) {
     }
 
     execute {
+
     }
 }
