@@ -1,5 +1,6 @@
 import MetadataViews from "../_libs/MetadataViews.cdc"
 import MFLPackTemplate from "../packs/MFLPackTemplate.cdc"
+import MFLClub from "../clubs/MFLClub.cdc"
 
 /**
   This contract defines MFL customised views. They are used to represent NFTs data.
@@ -73,8 +74,49 @@ pub contract MFLViews {
         }
     }
 
+    pub struct ClubMetadataTeamsViewV1 {
+        pub let teams: [MFLClub.Team]
+
+        init(metadata: [{String: AnyStruct}]) {
+            var teams = [] as [MFLClub.Team] 
+            for team in metadata {
+                teams.append(team as! MFLClub.Team)
+            }
+            self.teams = teams
+        }
+    }
+
+    pub struct ClubMetadataMainViewV1 {
+        pub let status: MFLClub.Status?
+        pub let name: String?
+        pub let description: String?
+        pub let city: String?
+        pub let country: String?
+
+        init(
+            metadata: {String: AnyStruct}
+        ) {
+            self.status = metadata["status"] as! MFLClub.Status?
+            self.name = metadata["name"] as! String?
+            self.description = metadata["description"] as! String?
+            self.city = metadata["city"] as! String?
+            self.country = metadata["country"] as! String?
+        }
+    }
+
+    pub struct ClubDataViewV1 {
+        pub let id: UInt64
+        pub let metadataMain: ClubMetadataMainViewV1
+        pub let metadataTeams: ClubMetadataTeamsViewV1
+
+        init(id: UInt64, metadataMain: {String: AnyStruct}, metadataTeams: [{String: AnyStruct}]) {
+            self.id = id
+            self.metadataMain = ClubMetadataMainViewV1(metadata: metadataMain)
+            self.metadataTeams = ClubMetadataTeamsViewV1(metadata: metadataTeams)
+        }
+    }
+
     init() {
         emit ContractInitialized()
     }
-
 }
