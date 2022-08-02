@@ -32,8 +32,6 @@ pub contract MFLClub: NonFungibleToken {
     pub var totalSupply: UInt64
     // All clubs datas are stored in this dictionary
     access(self) let clubsDatas: {UInt64: ClubData}
-     // All squads datas are stored in this dictionary
-    // access(self) let squadsDatas: {UInt64: SquadData}
 
     pub enum Status: UInt8 {
         pub case NOT_FOUNDED
@@ -44,38 +42,16 @@ pub contract MFLClub: NonFungibleToken {
     pub struct ClubData {
         pub let id: UInt64
         pub let status: Status
-        access(contract) let squadsIDs: [UInt64]
-        access(contract) let metadata: {String: AnyStruct}
+        access(contract) var squadsIDs: [UInt64]
+        access(contract) var metadata: {String: AnyStruct}
 
         init(id: UInt64, status: Status, squadsIDs: [UInt64], metadata: {String: AnyStruct}) {
             self.id = id
+            self.status = status
             self.squadsIDs = squadsIDs
             self.metadata = metadata
-            self.status = status
         }
     }
-
-    // pub struct SquadData {
-    //     pub let id: UInt64
-    //     pub let clubID : UInt64
-    //     access(contract) let metadata: {String: AnyStruct}
-
-    //     init(id: UInt64, clubID : UInt64, metadata: {String: AnyStruct}) {
-    //         self.id = id
-    //         self.metadata = metadata
-    //         self.clubID = clubID
-    //     }
-    // }
-
-    // pub struct LeagueMembership { // LFP -> L1, L2
-    //     pub let name: String
-    //     pub let division: Number
-
-    //     init(name: String, division: Number) {
-    //         self.name = name
-    //         self.division = division
-    //     }
-    // }
 
     pub struct FoundationLicense {
         pub let serialNumber: UInt64
@@ -117,7 +93,10 @@ pub contract MFLClub: NonFungibleToken {
             }
             destroy squads
             MFLClub.totalSupply = MFLClub.totalSupply + (1 as UInt64)
-            MFLClub.clubsDatas[id] = ClubData(id: id, status: Status.NOT_FOUNDED, squadsIDs: squadsIDs, metadata: metadata)
+
+            // Set club data
+            MFLClub.clubsDatas[id] = ClubData(id: self.id, status: self.status, squadsIDs: squadsIDs, metadata: metadata)
+
             emit Minted(id: self.id)
         }
 
@@ -228,32 +207,49 @@ pub contract MFLClub: NonFungibleToken {
             return clubNFT as &AnyResource{MetadataViews.Resolver}
         }
 
-        access(contract) fun getClubRef(id: UInt64): &MFLClub.NFT? {
-            if let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT? {
-                return ref as! &MFLClub.NFT?
-            }
-            return nil
+        access(contract) fun borrowClubRef(id: UInt64): &MFLClub.NFT? {
+            let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT?
+            return ref as! &MFLClub.NFT?  
         }
 
-        pub fun setName(id: UInt64, name: String) {
-            emit NameUpdated(id: id, name: name)
-        }
-
-        pub fun setDescription(id: UInt64, description: String) {
-            emit DescriptionUpdated(id: id, description: description)
-        }
-
-        pub fun foundClub(id: UInt64) {
-            // // let club = self.borrowNFT(id: id) as! &MFLClub.NFT
-            if let nftRef = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT? {
-                let clubRef = nftRef as! &MFLClub.NFT
+        pub fun foundClub(id: UInt64, name: String, description: String) {
+            if let clubRef = self.borrowClubRef(id: id) {
+                if clubRef.status == Status.FOUNDED {
+                    panic("Club already founded")
+                }
+                let clubData = MFLClub.clubsDatas[id] ?? panic("Data not found")
+                let metadata = clubData.metadata
+                metadata.insert(key: "name", name)
+                metadata.insert(key: "description", description)
+                metadata.insert(key: "city", clubRef.foundationLicense.city)
+                metadata.insert(key: "country", clubRef.foundationLicense.country)
+                let updatedClubData = MFLClub.ClubData(
+                    id: clubData.id,
+                    status: Status.FOUNDED,
+                    squadsIDs: clubData.squadsIDs,
+                    metadata: clubData.metadata
+                )
+                MFLClub.clubsDatas[id] = updatedClubData
                 clubRef.foundClub()
-                //...update
+                emit Founded(
+                    id: id,
+                    name: name,
+                    description: description,
+                    license: clubRef.foundationLicense
+                )
             }
+        }
 
-            // TODO update metadata
-            // let clubMetadata = self.ownedNFTs[]
-            // emit Founded(id: club.id, name: club.name, description: club.description, license: club.license)
+        pub fun setClubName(id: UInt64, name: String) {
+            if self.getIDs().contains(id) {
+                emit NameUpdated(id: id, name: name)
+            }
+        }
+
+        pub fun setClubDescription(id: UInt64, description: String) {
+            if self.getIDs().contains(id) {
+                emit DescriptionUpdated(id: id, description: description)
+            }
         }
 
         destroy() {
@@ -279,7 +275,8 @@ pub contract MFLClub: NonFungibleToken {
     pub resource interface ClubAdminClaim {
         pub let name: String
         pub fun mintClub(id: UInt64, foundationLicense: FoundationLicense, squads: @[MFLSquad.Squad], metadata: {String: AnyStruct}): @MFLClub.NFT
-        // pub fun updateClubMetadata()// TODO how to update club metadata
+        pub fun updateClubMetadata(id: UInt64, metadata: {String: AnyStruct})
+        pub fun updateClubSquadsIDs(id: UInt64, squadsIDs: [UInt64])
     }
 
     pub resource ClubAdmin: ClubAdminClaim {
@@ -301,6 +298,32 @@ pub contract MFLClub: NonFungibleToken {
             )
             return <- club
         }
+
+        pub fun updateClubMetadata(id: UInt64, metadata: {String: AnyStruct}) {
+            // TODO add / patch / remove ??
+            let clubData = MFLClub.clubsDatas[id] ?? panic("Data not found")
+            let updatedClubData = MFLClub.ClubData(
+                id: clubData.id,
+                status: clubData.status,
+                squadsIDs: clubData.squadsIDs,
+                metadata: metadata
+            )
+        }
+
+        pub fun updateClubSquadsIDs(id: UInt64, squadsIDs: [UInt64]) {
+            // TODO add / patch / remove ??
+            let clubData = MFLClub.clubsDatas[id] ?? panic("Data not found")
+             let updatedClubData = MFLClub.ClubData(
+                id: clubData.id,
+                status: clubData.status,
+                squadsIDs: squadsIDs,
+                metadata: clubData.metadata
+            )
+        }
+
+        pub fun createClubAdmin(): @ClubAdmin {
+            return <- create ClubAdmin()
+        }
     }
 
     init() {
@@ -319,6 +342,30 @@ pub contract MFLClub: NonFungibleToken {
         // Initialize contract fields
         self.totalSupply = 0
         self.clubsDatas = {}
+
+        emit ContractInitialized()
     }
 
 }
+
+// pub struct SquadData {
+//     pub let id: UInt64
+//     pub let clubID : UInt64
+//     access(contract) let metadata: {String: AnyStruct}
+
+//     init(id: UInt64, clubID : UInt64, metadata: {String: AnyStruct}) {
+//         self.id = id
+//         self.metadata = metadata
+//         self.clubID = clubID
+//     }
+// }
+
+// pub struct LeagueMembership { // LFP -> L1, L2
+//     pub let name: String
+//     pub let division: Number
+
+//     init(name: String, division: Number) {
+//         self.name = name
+//         self.division = division
+//     }
+// }
