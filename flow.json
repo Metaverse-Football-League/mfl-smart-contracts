@@ -72,11 +72,41 @@
         "mainnet": "4eb8a10cb9f87357"
       }
     },
-    "MFLAdmin": "./contracts/core/MFLAdmin.cdc",
-    "MFLPlayer": "./contracts/players/MFLPlayer.cdc",
-    "MFLPack": "./contracts/packs/MFLPack.cdc",
-    "MFLPackTemplate": "./contracts/packs/MFLPackTemplate.cdc",
-    "MFLViews": "./contracts/views/MFLViews.cdc"
+    "MFLAdmin": {
+      "source": "./contracts/core/MFLAdmin.cdc",
+      "aliases": {
+        "testnet": "683564e46977788a",
+        "mainnet": "8ebcbfd516b1da27"
+      }
+    },
+    "MFLPlayer": {
+      "source": "./contracts/players/MFLPlayer.cdc",
+      "aliases": {
+        "testnet": "683564e46977788a",
+        "mainnet": "8ebcbfd516b1da27"
+      }
+    },
+    "MFLPack": {
+      "source": "./contracts/packs/MFLPack.cdc",
+      "aliases": {
+        "testnet": "683564e46977788a",
+        "mainnet": "8ebcbfd516b1da27"
+      }
+    },
+    "MFLPackTemplate": {
+      "source": "./contracts/packs/MFLPackTemplate.cdc",
+      "aliases": {
+        "testnet": "683564e46977788a",
+        "mainnet": "8ebcbfd516b1da27"
+      }
+    },
+    "MFLViews": {
+      "source": "./contracts/views/MFLViews.cdc",
+      "aliases": {
+        "testnet": "683564e46977788a",
+        "mainnet": "8ebcbfd516b1da27"
+      }
+    }
   },
   "networks": {
     "emulator": "127.0.0.1:3569",
@@ -99,7 +129,7 @@
     "testnet-deploy-account": {
       "fromFile": "./flow.testnet.json"
     },
-    "testnet-dapp-account": {
+    "testnet-storefront-account": {
       "fromFile": "./flow.testnet.json"
     },
     "testnet-players-store-account": {

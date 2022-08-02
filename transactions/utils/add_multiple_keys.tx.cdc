@@ -3,9 +3,9 @@
   with the same public key.
 **/
 
-transaction(numProposalKeys: UInt16) {  
+transaction(numProposalKeys: UInt16, keyIndex: Int) {  
   prepare(account: AuthAccount) {
-    let key = account.keys.get(keyIndex: 0)!
+    let key = account.keys.get(keyIndex: keyIndex)!
     var count: UInt16 = 0
     while count < numProposalKeys {
       account.keys.add(
