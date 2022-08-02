@@ -20,6 +20,9 @@ pub contract MFLClub: NonFungibleToken {
     pub event Destroyed(id: UInt64)
     pub event Founded(id: UInt64, name: String, description: String, license: FoundationLicense)
 
+    pub event NameUpdated(id: UInt64, name: String)
+    pub event DescriptionUpdated(id: UInt64, description: String)
+
     // Named Paths
     pub let CollectionStoragePath: StoragePath
     pub let CollectionPublicPath: PublicPath
@@ -40,13 +43,15 @@ pub contract MFLClub: NonFungibleToken {
     // Data stored in clubsDatas. Updatable by an admin
     pub struct ClubData {
         pub let id: UInt64
+        pub let status: Status
         access(contract) let squadsIDs: [UInt64]
         access(contract) let metadata: {String: AnyStruct}
 
-        init(id: UInt64, squadsIDs: [UInt64], metadata: {String: AnyStruct}) {
+        init(id: UInt64, status: Status, squadsIDs: [UInt64], metadata: {String: AnyStruct}) {
             self.id = id
             self.squadsIDs = squadsIDs
             self.metadata = metadata
+            self.status = status
         }
     }
 
@@ -78,15 +83,14 @@ pub contract MFLClub: NonFungibleToken {
         pub let country: String
         pub let season: UInt32
         pub let image: MetadataViews.IPFSFile
-        pub let squads: [MFLSquad.Squad] //? just ids (squadsIDs)
+        // pub let squads: [MFLSquad.Squad] //TODO squads (but not resources here)
 
-        init(serialNumber: UInt64, city: String, country: String, season: UInt32, image: MetadataViews.IPFSFile, squads: [MFLSquad.Squad]) {
+        init(serialNumber: UInt64, city: String, country: String, season: UInt32, image: MetadataViews.IPFSFile) {
             self.serialNumber = serialNumber
             self.city = city
             self.country = country
             self.season = season
             self.image = image
-            self.squads = squads
         }
     }
 
@@ -113,7 +117,7 @@ pub contract MFLClub: NonFungibleToken {
             }
             destroy squads
             MFLClub.totalSupply = MFLClub.totalSupply + (1 as UInt64)
-            MFLClub.clubsDatas[id] = ClubData(id: id, squadsIDs: squadsIDs, metadata: metadata)
+            MFLClub.clubsDatas[id] = ClubData(id: id, status: Status.NOT_FOUNDED, squadsIDs: squadsIDs, metadata: metadata)
             emit Minted(id: self.id)
         }
 
@@ -159,6 +163,12 @@ pub contract MFLClub: NonFungibleToken {
             emit Destroyed(id: self.id)
         }
     }
+
+    // ? we can create interfaces to manage authorization . add them to resource Collection
+    // pub resource interface Manager {
+    //     pub fun setName(id: UInt64, name: String)
+    //     pub fun setDescription(id: UInt64, description: String)
+    // }
 
     // A collection of Club NFTs owned by an account
     pub resource Collection: NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
@@ -218,8 +228,28 @@ pub contract MFLClub: NonFungibleToken {
             return clubNFT as &AnyResource{MetadataViews.Resolver}
         }
 
+        access(contract) fun getClubRef(id: UInt64): &MFLClub.NFT? {
+            if let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT? {
+                return ref as! &MFLClub.NFT?
+            }
+            return nil
+        }
+
+        pub fun setName(id: UInt64, name: String) {
+            emit NameUpdated(id: id, name: name)
+        }
+
+        pub fun setDescription(id: UInt64, description: String) {
+            emit DescriptionUpdated(id: id, description: description)
+        }
+
         pub fun foundClub(id: UInt64) {
-            // let club = self.borrowNFT(id: id) as! &MFLClub.NFT
+            // // let club = self.borrowNFT(id: id) as! &MFLClub.NFT
+            if let nftRef = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT? {
+                let clubRef = nftRef as! &MFLClub.NFT
+                clubRef.foundClub()
+                //...update
+            }
 
             // TODO update metadata
             // let clubMetadata = self.ownedNFTs[]
