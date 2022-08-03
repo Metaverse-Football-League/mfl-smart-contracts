@@ -1,6 +1,6 @@
 //TODO comments
 
-pub contract MFLContracts {
+pub contract MFLContract {
     // Events
     pub event ContractInitialized()
     pub event Minted(id: UInt64)
