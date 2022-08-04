@@ -145,13 +145,19 @@ pub contract MFLClub: NonFungibleToken {
     }
 
     // ? we can create interfaces to manage authorization . add them to resource Collection
+   
+
     pub resource interface Manager {
-        pub fun setName(id: UInt64, name: String)
-        pub fun setDescription(id: UInt64, description: String)
+        pub fun setClubInfos(id: UInt64, infos: {String: String})
+    }
+
+     pub resource interface Owner {
+        pub fun foundClub(id: UInt64, name: String, description: String)
+        pub fun setClubInfos(id: UInt64, infos: {String: String})
     }
 
     // A collection of Club NFTs owned by an account
-    pub resource Collection: NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
+    pub resource Collection: NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection, Owner, Manager {
 
         // Dictionary of NFT conforming tokens
         pub var ownedNFTs: @{UInt64: NonFungibleToken.NFT}
@@ -244,7 +250,6 @@ pub contract MFLClub: NonFungibleToken {
         }
 
         //TODO one function set for name, desc, city, county ?
-
         pub fun setClubInfos(id: UInt64, infos: {String: String}) {
             if self.getIDs().contains(id) {
                 let clubData = MFLClub.clubsDatas[id] ?? panic("Data not found")
