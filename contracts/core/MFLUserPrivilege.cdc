@@ -6,8 +6,12 @@ pub contract MFLUserPrivilege {
 
     // Events
     pub event ContractInitialized()
+    pub event SetClaim(from: Address?, to: Address, id: UInt64, typeRawValue: UInt16)
 
     // Named Paths
+    pub let UserPrivilegeRootStoragePath: StoragePath
+    pub let UserPrivilegeProxyStoragePath: StoragePath
+    pub let UserPrivilegeProxyPublicPath: PublicPath
 
 
     pub enum UserPrivilegeType: UInt16 {
@@ -43,7 +47,6 @@ pub contract MFLUserPrivilege {
                     panic("type not found") 
             }
             self.claimsCapabilities[type] = claimsCapabalitiesType
-            //event ?
         }
 
         pub fun getClaimCapability(type: UserPrivilegeType, id: UInt64): Capability? {
@@ -110,6 +113,7 @@ pub contract MFLUserPrivilege {
             claimsCapabalitiesType[id] = claimsCapabalitiesTypeResourceId
             self.claimsCapabilitiesPath[type] = claimsCapabalitiesType
             //event ?
+            emit SetClaim(from: self.owner?.address, to: address, id: id, typeRawValue: type.rawValue)
         }
 
         // This method should be called inside a revoke claim transaction
@@ -132,6 +136,11 @@ pub contract MFLUserPrivilege {
     }
 
     init() {
+        // Set our named paths
+        self.UserPrivilegeRootStoragePath = /storage/MFLUserPrivilegeRoot
+        self.UserPrivilegeProxyStoragePath = /storage/MFLUserPrivilegeProxy
+        self.UserPrivilegeProxyPublicPath = /public/MFLUserPrivilegeProxy
+
         emit ContractInitialized()
     }
 
