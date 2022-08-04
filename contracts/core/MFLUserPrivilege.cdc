@@ -87,9 +87,10 @@ pub contract MFLUserPrivilege {
     // Resource that a user owns to be able to create setClaims and keep track of them
 	pub resource UserPrivilegeRoot { // ? maybe we can sell this functionality ? if user pays he can share permissions ?
 
-        // dictionary that contains the list of claim paths. These may not be valid anymore if the target resource
+        // dictionary that contains the list of claim paths linked to a type, resourceId and address.
+        // These may not be valid anymore if the target resource
         // has been moved, destroyed or revoked for example
-        access(self) let claimsCapabilitiesPath : { UserPrivilegeType: {UInt64: CapabilityPath} }
+        access(self) let claimsCapabilitiesPath : { UserPrivilegeType: {UInt64: {Address: CapabilityPath} } }
         
         // Set a Claim capabability for a given UserPrivilegeProxy
         pub fun setUserPrivilegeProxyClaimCapability(
@@ -97,21 +98,26 @@ pub contract MFLUserPrivilege {
             type: UserPrivilegeType,
             userPrivilegeProxyRef: &{MFLUserPrivilege.UserPrivilegeProxyPublic},
             newCapability: Capability,
-            path: CapabilityPath
+            path: CapabilityPath,
+            address: Address
         ) 
         {
             userPrivilegeProxyRef.setClaimCapability(id: id, type: type, capability: newCapability)
             // Save the new path
             let claimsCapabalitiesType = self.claimsCapabilitiesPath[type] ?? {}
-            claimsCapabalitiesType[id] = path
+            let claimsCapabalitiesTypeResourceId = claimsCapabalitiesType[id] ?? {}
+            claimsCapabalitiesTypeResourceId[address] = path
+            claimsCapabalitiesType[id] = claimsCapabalitiesTypeResourceId
             self.claimsCapabilitiesPath[type] = claimsCapabalitiesType
             //event ?
         }
 
         // This method should be called inside a revoke claim transaction
-        pub fun removeClaimsCapabilities(id: UInt64, type: UserPrivilegeType) {
+        pub fun removeClaimCapabilityPath(type: UserPrivilegeType, id: UInt64, address: Address) {
             let claimsCapabalitiesType = self.claimsCapabilitiesPath[type] ?? {}
-            claimsCapabalitiesType.remove(key: id)
+            let claimsCapabalitiesTypeResourceId = claimsCapabalitiesType[id] ?? {}
+            claimsCapabalitiesTypeResourceId.remove(key: address)
+            claimsCapabalitiesType[id] = claimsCapabalitiesTypeResourceId
             self.claimsCapabilitiesPath[type] = claimsCapabalitiesType
         }
 
