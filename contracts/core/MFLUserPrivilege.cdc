@@ -41,8 +41,8 @@ pub contract MFLUserPrivilege {
             switch type {
                 case UserPrivilegeType.CLUB_OWNER:
                     claimsCapabalitiesType[id]= capability as! Capability<&MFLClub.Collection{MFLClub.Owner}>
-                case UserPrivilegeType.CLUB_MANAGER:
-                    claimsCapabalitiesType[id] = capability as! Capability<&MFLClub.Collection{MFLClub.Manager}>
+                // case UserPrivilegeType.CLUB_MANAGER:
+                //     claimsCapabalitiesType[id] = capability as! Capability<&MFLClub.Collection{MFLClub.Manager}>
                 default:
                     panic("type not found") 
             }
@@ -68,8 +68,8 @@ pub contract MFLUserPrivilege {
             switch type {
                 case UserPrivilegeType.CLUB_OWNER:
                     return capability.check<&MFLClub.Collection{MFLClub.Owner}>()
-                case UserPrivilegeType.CLUB_MANAGER:
-                    return capability.check<&MFLClub.Collection{MFLClub.Manager}>()
+                // case UserPrivilegeType.CLUB_MANAGER:
+                //     return capability.check<&MFLClub.Collection{MFLClub.Manager}>()
                 default:
                     return false
             }
@@ -88,7 +88,7 @@ pub contract MFLUserPrivilege {
     }
 
     // Resource that a user owns to be able to create setClaims and keep track of them
-	pub resource UserPrivilegeRoot { // ? maybe we can sell this functionality ? if user pays he can share permissions ?
+	pub resource UserPrivilegeRoot {
 
         // dictionary that contains the list of claim paths linked to a type, resourceId and address.
         // These may not be valid anymore if the target resource
@@ -123,6 +123,8 @@ pub contract MFLUserPrivilege {
             claimsCapabalitiesTypeResourceId.remove(key: address)
             claimsCapabalitiesType[id] = claimsCapabalitiesTypeResourceId
             self.claimsCapabilitiesPath[type] = claimsCapabalitiesType
+
+            // emit event
         }
 
         init() {
@@ -130,7 +132,6 @@ pub contract MFLUserPrivilege {
         }
 	}
 
-    // ? anyone can create userPrivilegeRoot ?
     pub fun createUserPrivilegeRoot(): @UserPrivilegeRoot {
         return <- create UserPrivilegeRoot()
     }
@@ -143,5 +144,4 @@ pub contract MFLUserPrivilege {
 
         emit ContractInitialized()
     }
-
 }

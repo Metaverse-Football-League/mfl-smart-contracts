@@ -12,9 +12,23 @@ pub contract MFLCompetition {
 
     access(self) let competitions: @{UInt64: Competition}
     access(self) let competitionsDatas: {UInt64: CompetitionData}
+    access(self) let competitionsMembershipsByCompetitionId: {UInt64: CompetitionMembership}
+    access(self) let competitionsMembershipsBySquadId: {UInt64: CompetitionMembership}
 
     // The total number of Competitions that have been minted
     pub var totalSupply: UInt64
+
+    pub struct CompetitionMembership {
+        pub let competitionID: UInt64
+        pub let squadID: UInt64
+        pub let metadata: {String: AnyStruct}
+
+        init(competitionID: UInt64, squadID: UInt64, metadata: {String: AnyStruct}) {
+            self.competitionID = competitionID
+            self.squadID = squadID
+            self.metadata = metadata
+        }
+    }
 
     pub struct CompetitionData {
         pub let id: UInt64
@@ -49,8 +63,8 @@ pub contract MFLCompetition {
     pub resource interface CompetitionAdminClaim {
         pub let name: String
         pub fun mintCompetition(id: UInt64, type: String, name: String, metadata: {String: AnyStruct})
+        pub fun createCompetitionMembership()
     }
-
     pub resource CompetitionAdmin: CompetitionAdminClaim {
         pub let name: String
     
@@ -66,8 +80,13 @@ pub contract MFLCompetition {
                 name: name,
                 metadata: metadata
             )
-            let oldCompetition <- MFLCompetition.competitions[id] <- competition
+            let oldCompetition <- MFLCompetition.competitions[id] <- competition // TODO juste return competiton for the future if user can create his own competition ?
             destroy oldCompetition
+        }
+
+        pub fun createCompetitionMembership() {
+        // check squad ?
+            
         }
     }
 
@@ -82,6 +101,8 @@ pub contract MFLCompetition {
         self.totalSupply = 0
         self.competitions <- {}
         self.competitionsDatas = {}
+        self.competitionsMembershipsByCompetitionId = {}
+        self.competitionsMembershipsBySquadId = {}
         
         emit ContractInitialized()
     }

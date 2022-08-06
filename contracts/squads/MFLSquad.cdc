@@ -11,6 +11,7 @@ pub contract MFLSquad {
     pub let SquadAdminStoragePath: StoragePath
 
     access(self) let squadsDatas: {UInt64: SquadData}
+    // TODO dict squads resources
 
     // The total number of Squads that have been minted
     pub var totalSupply: UInt64
@@ -19,7 +20,8 @@ pub contract MFLSquad {
         pub case PRIMARY
     }
 
-    pub struct CompetitionMembership {
+    pub struct 
+    \ {
         pub let competitionID: UInt64
         pub let squadID: UInt64
         pub let metadata: {String: AnyStruct}
