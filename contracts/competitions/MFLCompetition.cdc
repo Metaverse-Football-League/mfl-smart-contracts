@@ -5,15 +5,18 @@ pub contract MFLCompetition {
     // Events
     pub event ContractInitialized()
     pub event Minted(id: UInt64)
+    pub event Updated(id: UInt64)
     pub event Destroyed(id: UInt64)
+    pub event CompetitionMembershipCreatedOrUpdated(competitionID: UInt64, squadID: UInt64)
+    pub event CompetitionMembershipRemoved(competitionID: UInt64, squadID: UInt64)
 
     // Named Paths
     pub let CompetitionAdminStoragePath: StoragePath
 
     access(self) let competitions: @{UInt64: Competition}
     access(self) let competitionsDatas: {UInt64: CompetitionData}
-    access(self) let competitionsMembershipsByCompetitionId: {UInt64: CompetitionMembership}
-    access(self) let competitionsMembershipsBySquadId: {UInt64: CompetitionMembership}
+    access(self) let competitionsMembershipsByCompetitionId: {UInt64: {UInt64: CompetitionMembership}}
+    access(self) let competitionsMembershipsBySquadId: {UInt64: {UInt64: CompetitionMembership}}
 
     // The total number of Competitions that have been minted
     pub var totalSupply: UInt64
@@ -63,14 +66,17 @@ pub contract MFLCompetition {
     pub resource interface CompetitionAdminClaim {
         pub let name: String
         pub fun mintCompetition(id: UInt64, type: String, name: String, metadata: {String: AnyStruct})
-        pub fun createCompetitionMembership()
+        pub fun createOrUpdateCompetitionMembership(competitionID: UInt64, squadID: UInt64, metadata: {String: AnyStruct})
     }
+
     pub resource CompetitionAdmin: CompetitionAdminClaim {
         pub let name: String
     
         init() {
             self.name = "CompetitionAdminClaim"
         }
+
+        // Competition
 
         pub fun mintCompetition(id: UInt64, type: String, name: String, metadata: {String: AnyStruct}) {
             let competition <- create Competition(id: id)
@@ -80,13 +86,56 @@ pub contract MFLCompetition {
                 name: name,
                 metadata: metadata
             )
-            let oldCompetition <- MFLCompetition.competitions[id] <- competition // TODO juste return competiton for the future if user can create his own competition ?
+            let oldCompetition <- MFLCompetition.competitions[id] <- competition
             destroy oldCompetition
         }
 
-        pub fun createCompetitionMembership() {
-        // check squad ?
-            
+        pub fun updateCompetition(id: UInt64, type: String, name: String, metadata: {String: AnyStruct}) {
+            pre {
+                MFLCompetition.competitionsDatas[id] != nil : "Data not found"
+            }
+            let updatedCompetitionData = MFLCompetition.CompetitionData(
+                id: id,
+                type: type,
+                name: name,
+                metadata: metadata
+            )
+            MFLCompetition.competitionsDatas[id] = updatedCompetitionData
+            emit Updated(id: id)
+        }
+
+        // CompetitionMembership
+
+        // TODO separate create and update
+        pub fun createOrUpdateCompetitionMembership(competitionID: UInt64, squadID: UInt64, metadata: {String: AnyStruct}) {
+            // TODO check if squad exists ? dep to MFLClub ?
+            let newCompetitionMembership = CompetitionMembership(competitionID: competitionID, squadID: squadID, metadata: metadata)
+
+            // Update dict competitionsMembershipsByCompetitionId
+            let toUpdateCompetitionMembershipCompetition = MFLCompetition.competitionsMembershipsByCompetitionId[competitionID] ?? {}
+            toUpdateCompetitionMembershipCompetition.insert(key: squadID,newCompetitionMembership)
+            MFLCompetition.competitionsMembershipsByCompetitionId[competitionID] = toUpdateCompetitionMembershipCompetition
+
+            // Update dict competitionsMembershipsBySquadId
+            let toUpdateCompetitionMembershipSquad = MFLCompetition.competitionsMembershipsBySquadId[squadID] ?? {}
+            toUpdateCompetitionMembershipSquad.insert(key: competitionID,newCompetitionMembership)
+            MFLCompetition.competitionsMembershipsBySquadId[squadID] = toUpdateCompetitionMembershipSquad
+
+            emit CompetitionMembershipCreatedOrUpdated(competitionID: competitionID, squadID: squadID)
+        }
+
+        pub fun removeCompetitionMembershipSquad(competitionID: UInt64, squadID: UInt64) {
+            // Remove squadID from competitionsMembershipsByCompetitionId dict
+            let toUpdateCompetitionMembershipCompetition = MFLCompetition.competitionsMembershipsByCompetitionId[competitionID] ?? {}
+            toUpdateCompetitionMembershipCompetition.remove(key: squadID)
+            MFLCompetition.competitionsMembershipsByCompetitionId[competitionID] = toUpdateCompetitionMembershipCompetition
+
+            // Remove squadID from competitionsMembershipsBySquadId dict
+            let toUpdateCompetitionMembershipSquad = MFLCompetition.competitionsMembershipsBySquadId[squadID] ?? {}
+            toUpdateCompetitionMembershipSquad.remove(key: competitionID)
+            MFLCompetition.competitionsMembershipsBySquadId[squadID] = toUpdateCompetitionMembershipSquad
+
+            emit CompetitionMembershipRemoved(competitionID: competitionID, squadID:squadID)
         }
     }
 
