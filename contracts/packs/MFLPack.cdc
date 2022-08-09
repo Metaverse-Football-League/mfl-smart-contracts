@@ -70,7 +70,8 @@ pub contract MFLPack: NonFungibleToken {
                 case Type<MetadataViews.NFTCollectionDisplay>():
                     let socials = {
                         "twitter": MetadataViews.ExternalURL("https://twitter.com/playMFL"),
-                        "discord":  MetadataViews.ExternalURL("https://discord.gg/pEDTR4wSPr")
+                        "discord":  MetadataViews.ExternalURL("https://discord.gg/pEDTR4wSPr"),
+                        "linkedin": MetadataViews.ExternalURL("https://www.linkedin.com/company/playmfl")
                     }
                     return MetadataViews.NFTCollectionDisplay(
                         name: "MFL Pack Collection",
