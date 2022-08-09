@@ -21,6 +21,7 @@ pub contract MFLPlayer: NonFungibleToken {
 
     // Named Paths
     pub let CollectionStoragePath: StoragePath
+    pub let CollectionPrivatePath: PrivatePath
     pub let CollectionPublicPath: PublicPath
     pub let PlayerAdminStoragePath: StoragePath
 
@@ -67,6 +68,10 @@ pub contract MFLPlayer: NonFungibleToken {
         pub fun getViews(): [Type] {
             return [
                 Type<MetadataViews.Display>(),
+                Type<MetadataViews.Royalties>(),
+                Type<MetadataViews.NFTCollectionDisplay>(),
+                Type<MetadataViews.NFTCollectionData>(),
+                Type<MetadataViews.ExternalURL>(),
                 Type<MFLViews.PlayerDataViewV1>()
             ]
         }
@@ -81,6 +86,35 @@ pub contract MFLPlayer: NonFungibleToken {
                         description: "MFL Player #".concat(playerData.id.toString()),
                         thumbnail: playerData.image
                     )
+                case Type<MetadataViews.Royalties>():
+                    return MetadataViews.Royalties([]) // TODO ?
+                case Type<MetadataViews.NFTCollectionDisplay>():
+                    let socials = {
+                        "twitter": MetadataViews.ExternalURL("https://twitter.com/playMFL"),
+                        "discord":  MetadataViews.ExternalURL("https://discord.gg/pEDTR4wSPr")
+                    }
+                    return MetadataViews.NFTCollectionDisplay(
+                        name: "MFL Player Collection",
+                        description: "",
+                        externalURL: MetadataViews.ExternalURL(""), // TODO
+                        squareImage: MetadataViews.Media(file: MetadataViews.HTTPFile(url: ""), mediaType: "image/png"), // TODO Square-sized image to represent this collection.
+                        bannerImage: MetadataViews.Media(file: MetadataViews.HTTPFile(url: ""), mediaType: "image/png"), // TODO Banner-sized image for this collection, recommended to have a size near 1200x630.
+                        socials: socials
+                    )
+                case Type<MetadataViews.NFTCollectionData>():
+                    return MetadataViews.NFTCollectionData(
+                        storagePath: MFLPlayer.CollectionStoragePath,
+                        publicPath: MFLPlayer.CollectionPublicPath,
+                        providerPath: MFLPlayer.CollectionPrivatePath,
+                        publicCollection: Type<&MFLPlayer.Collection{NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(),
+                        publicLinked: Type<&MFLPlayer.Collection{NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(),
+                        providerLinkedType: Type<&MFLPlayer.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(),
+                        createEmptyCollectionFunction: (fun (): @NonFungibleToken.Collection {
+                            return <-MFLPlayer.createEmptyCollection()
+                        })
+                    )
+                case Type<MetadataViews.ExternalURL>():
+                    return MetadataViews.ExternalURL("") //TODO View to expose a URL to this item on an external site.
                 case Type<MFLViews.PlayerDataViewV1>():
                     return MFLViews.PlayerDataViewV1(
                        id: playerData.id,
@@ -230,6 +264,7 @@ pub contract MFLPlayer: NonFungibleToken {
     init() {
         // Set our named paths
         self.CollectionStoragePath = /storage/MFLPlayerCollection
+        self.CollectionPrivatePath = /private/MFLPlayerCollection
         self.CollectionPublicPath = /public/MFLPlayerCollection
         self.PlayerAdminStoragePath = /storage/MFLPlayerAdmin
 
