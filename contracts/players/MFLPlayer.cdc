@@ -92,7 +92,8 @@ pub contract MFLPlayer: NonFungibleToken {
                     let socials = {
                         "twitter": MetadataViews.ExternalURL("https://twitter.com/playMFL"),
                         "discord":  MetadataViews.ExternalURL("https://discord.gg/pEDTR4wSPr"),
-                        "linkedin": MetadataViews.ExternalURL("https://www.linkedin.com/company/playmfl")
+                        "linkedin": MetadataViews.ExternalURL("https://www.linkedin.com/company/playmfl"),
+                        "medium": MetadataViews.ExternalURL("https://medium.com/playmfl")
                     }
                     return MetadataViews.NFTCollectionDisplay(
                         name: "MFL Player Collection",
@@ -115,7 +116,7 @@ pub contract MFLPlayer: NonFungibleToken {
                         })
                     )
                 case Type<MetadataViews.ExternalURL>():
-                    return MetadataViews.ExternalURL("") //TODO View to expose a URL to this item on an external site.
+                    return MetadataViews.ExternalURL("https://playmfl.com")
                 case Type<MFLViews.PlayerDataViewV1>():
                     return MFLViews.PlayerDataViewV1(
                        id: playerData.id,
