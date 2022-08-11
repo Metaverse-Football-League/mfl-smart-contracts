@@ -74,7 +74,55 @@ pub contract MFLViews {
         }
     }
 
+    pub struct SquadDataViewV1 {
+        pub let id: UInt64
+
+        init(id: UInt64) {
+            self.id = id
+        }
+    }
+
+    pub struct ClubMetadataViewV1 {
+        pub let name: String?
+        pub let description: String?
+        pub let country: String?
+        pub let city: String?
+        pub let foundationDate: UFix64?
+
+        init(metadata: {String: AnyStruct}) {
+            self.name = metadata["name"] as! String?
+            self.description = metadata["description"] as! String?
+            self.country = metadata["country"] as! String?
+            self.city = metadata["city"] as! String?
+            self.foundationDate = metadata["foundationDate"] as! UFix64?
+        }
+    }
+
+    pub struct ClubDataViewV1 {
+        pub let id: UInt64
+        pub let foundationLicense: MFLClub.FoundationLicense?
+        pub let status: MFLClub.Status
+        pub let squadsIDs: [UInt64]
+        pub let metadata: ClubMetadataViewV1
+        
+        init(
+            id: UInt64,
+            foundationLicense: MFLClub.FoundationLicense?,
+            status: MFLClub.Status,
+            squadsIDs: [UInt64],
+            metadata: {String: AnyStruct}
+        ) {
+            self.id = id
+            self.foundationLicense = foundationLicense
+            self.status = status
+            self.squadsIDs = squadsIDs
+            self.metadata = ClubMetadataViewV1(metadata: metadata)
+        }
+    }
+
     init() {
         emit ContractInitialized()
     }
+
+
 }

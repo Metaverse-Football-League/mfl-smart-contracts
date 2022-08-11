@@ -32,18 +32,20 @@ pub contract MFLClub: NonFungibleToken {
     pub let CollectionStoragePath: StoragePath
     pub let CollectionPublicPath: PublicPath
     pub let ClubAdminStoragePath: StoragePath
-    pub let SquadAdminStoragePath: StoragePath //TODO just one storage for admin ??
+    pub let SquadAdminStoragePath: StoragePath
 
     // The total number of Clubs that have been minted
     pub var totalSupply: UInt64
-    // The total number of Squads that have been minted
-    pub var squadsTotalSupply: UInt64
-    
+
     // All clubs datas are stored in this dictionary
     access(self) let clubsDatas: {UInt64: ClubData}
 
-    // All squads resources are stored in this dictionary
+    // The total number of Squads that have been minted
+    pub var squadsTotalSupply: UInt64
+
+    // Squads resources can be stored in this dictionary if needed
     access(self) let squads: @{UInt64: Squad}
+
     // All squads data are stored in this dictionary
     access(self) let squadsDatas: {UInt64: SquadData}
 
@@ -57,7 +59,7 @@ pub contract MFLClub: NonFungibleToken {
             self.id = id
             self.clubID = clubID
             self.type = type
-            self.metadata = metadata
+            self.metadata = metadata // {leagueID, competitionID, {""} }
         }
     }
 
@@ -143,6 +145,7 @@ pub contract MFLClub: NonFungibleToken {
                 squadsIDs.append(squads[i].id)
                 let oldSquad <- self.squads[squads[i].id] <- squads.remove(at: i)
                 destroy oldSquad
+                i = i + 1
             }
             destroy squads
             MFLClub.totalSupply = MFLClub.totalSupply + (1 as UInt64)
@@ -160,9 +163,11 @@ pub contract MFLClub: NonFungibleToken {
 
         // Get all supported views for this NFT
         pub fun getViews(): [Type] {
+            //TODO add views for nft-catalogue
             return [
                 Type<MetadataViews.Display>(),
-                Type<MFLViews.ClubDataViewV1>()
+                Type<MFLViews.ClubDataViewV1>(),
+                Type<MFLViews.SquadDataViewV1>()
             ]
         }
 
@@ -178,12 +183,24 @@ pub contract MFLClub: NonFungibleToken {
                             url: "https://d11e2517uhbeau.cloudfront.net/clubs/".concat(self.id.toString()).concat("/thumbnail.png") //TODO change path staging / prod
                         ),
                     )
-                // case Type<MFLViews.ClubDataViewV1>():
-                //     return MFLViews.ClubDataViewV1(
-                //         id: clubData.id,
-                //         metadataMain: clubData.metadataMain,
-                //         metadataTeams: clubData.metadataTeams
-                //     )
+                case Type<MFLViews.ClubDataViewV1>():
+                    return MFLViews.ClubDataViewV1(
+                        id: clubData.id,
+                        foundationLicense: self.foundationLicense,
+                        status: clubData.status,
+                        squadsIDs: clubData.squadsIDs,
+                        metadata: clubData.metadata
+                    )
+                case Type<MFLViews.SquadDataViewV1>():
+                    let squadsDatasView: [MFLViews.SquadDataViewV1] = []
+                    var i: UInt64 = 0
+                    var squadsLength: UInt64 = UInt64(self.squads.length)
+                    while i < squadsLength {
+                        // let squadData = MFLClub.getSquadData(id: self.squads[i]!.id)
+                        // squadsDatasView.append(MFLViews.SquadDataViewV1(id: 1))
+                        // i = i + 1
+                    }
+                    return squadsDatasView
             }
             return nil
         }
@@ -267,6 +284,8 @@ pub contract MFLClub: NonFungibleToken {
             return ref as! &MFLClub.NFT?
         }
 
+        // TODO contract borrowSquadRef ?
+
         pub fun foundClub(id: UInt64, name: String, description: String) {
             let clubRef = self.borrowClubRef(id: id) ?? panic("Club not found")
             let clubData = MFLClub.clubsDatas[id] ?? panic("Data not found")
@@ -296,17 +315,20 @@ pub contract MFLClub: NonFungibleToken {
             )
         }
 
+        // ? restrict this method nb of times ? double sign ?
         pub fun setClubInfos(id: UInt64, infos: {String: String}) {
-            if self.getIDs().contains(id) {
-                let clubData = MFLClub.clubsDatas[id] ?? panic("Data not found")
-                if clubData.status == Status.NOT_FOUNDED {
-                    panic("Club not founded")
-                }
-                if clubData.status == Status.PENDING_VALIDATION {
-                    panic("Waiting for validation")
-                }
-                emit ClubInfosUpdated(id: id, infos: infos)
+            pre {
+                self.getIDs().contains(id) == true : "Club not found"
             }
+            let clubData = MFLClub.clubsDatas[id] ?? panic("Data not found")
+            if clubData.status == Status.NOT_FOUNDED {
+                panic("Club not founded")
+            }
+            if clubData.status == Status.PENDING_VALIDATION {
+                panic("Waiting for validation")
+            }
+            // TODO update club infos here on check backend ?
+            emit ClubInfosUpdated(id: id, infos: infos)
         }
 
         //TODO
@@ -338,6 +360,11 @@ pub contract MFLClub: NonFungibleToken {
     // Get data for a specific club ID
     pub fun getClubData(id: UInt64): ClubData? {
         return self.clubsDatas[id];
+    }
+
+    // Get data for a specific squad ID
+    pub fun getSquadData(id: UInt64): SquadData? {
+        return self.squadsDatas[id]
     }
 
     // This interface allows any account that has a private capability to a ClubAdminClaim to call the methods below
@@ -418,7 +445,7 @@ pub contract MFLClub: NonFungibleToken {
             clubID: UInt64,
             type: String,
             nftMetadata: {String: AnyStruct},
-            centralMetadata: {String: AnyStruct}
+            metadata: {String: AnyStruct}
         ): @Squad
     }
 
@@ -434,7 +461,7 @@ pub contract MFLClub: NonFungibleToken {
             clubID: UInt64,
             type: String,
             nftMetadata: {String: AnyStruct},
-            centralMetadata: {String: AnyStruct}
+            metadata: {String: AnyStruct}
         ): @Squad {
             let squad <- create Squad(
                 id: id,
@@ -446,7 +473,7 @@ pub contract MFLClub: NonFungibleToken {
                 id: id,
                 clubID:clubID,
                 type: type,
-                metadata: centralMetadata
+                metadata: metadata
             ) 
             return <- squad
         }
