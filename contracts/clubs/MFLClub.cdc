@@ -59,7 +59,7 @@ pub contract MFLClub: NonFungibleToken {
             self.id = id
             self.clubID = clubID
             self.type = type
-            self.metadata = metadata // {leagueID, competitionID, {""} }
+            self.metadata = metadata //? { competitionsMemberships: {leagueID: 1, division: 5}
         }
     }
 
@@ -67,7 +67,7 @@ pub contract MFLClub: NonFungibleToken {
         pub let id: UInt64
         pub let clubID: UInt64
         pub let type: String
-        access(self) let metadata: {String: AnyStruct} 
+        access(self) let metadata: {String: AnyStruct}
 
         init(id: UInt64, clubID: UInt64, type: String, metadata: {String: AnyStruct}) {
             self.id = id
@@ -193,12 +193,15 @@ pub contract MFLClub: NonFungibleToken {
                     )
                 case Type<MFLViews.SquadDataViewV1>():
                     let squadsDatasView: [MFLViews.SquadDataViewV1] = []
-                    var i: UInt64 = 0
-                    var squadsLength: UInt64 = UInt64(self.squads.length)
-                    while i < squadsLength {
-                        // let squadData = MFLClub.getSquadData(id: self.squads[i]!.id)
-                        // squadsDatasView.append(MFLViews.SquadDataViewV1(id: 1))
-                        // i = i + 1
+                    for id in clubData.squadsIDs {
+                        if let squadData = MFLClub.getSquadData(id: id) {
+                            squadsDatasView.append(MFLViews.SquadDataViewV1(
+                                id: squadData.id,
+                                clubID: squadData.clubID,
+                                type: squadData.type,
+                                metadata: squadData.metadata
+                            ))
+                        }
                     }
                     return squadsDatasView
             }

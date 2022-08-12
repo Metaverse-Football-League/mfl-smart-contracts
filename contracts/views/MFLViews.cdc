@@ -74,11 +74,27 @@ pub contract MFLViews {
         }
     }
 
+    pub struct CompetitionsMembershipV1 {
+        pub let leagueID: UInt64
+        pub let division: UInt16
+
+        init(leagueID: UInt64, division: UInt16) {
+            self.leagueID = leagueID
+            self.division = division
+        }
+    }
+
     pub struct SquadDataViewV1 {
         pub let id: UInt64
+        pub let clubID: UInt64
+        pub let type: String
+        pub let metadata: [CompetitionsMembershipV1]
 
-        init(id: UInt64) {
+        init(id: UInt64, clubID: UInt64, type: String, metadata: {String: AnyStruct}) {
             self.id = id
+            self.clubID = clubID
+            self.type = type
+            self.metadata = metadata["competitionsMemberships"] as! [CompetitionsMembershipV1]
         }
     }
 
