@@ -21,7 +21,6 @@ pub contract MFLPack: NonFungibleToken {
 
     // Named Paths
     pub let CollectionStoragePath: StoragePath
-    pub let CollectionPrivatePath: PrivatePath
     pub let CollectionPublicPath: PublicPath
     pub let PackAdminStoragePath: StoragePath
 
@@ -86,7 +85,7 @@ pub contract MFLPack: NonFungibleToken {
                     return MetadataViews.NFTCollectionData(
                         storagePath: MFLPack.CollectionStoragePath,
                         publicPath: MFLPack.CollectionPublicPath,
-                        providerPath: MFLPack.CollectionPrivatePath,
+                        providerPath: /private/MFLPackCollection,
                         publicCollection: Type<&MFLPack.Collection{NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(),
                         publicLinked: Type<&MFLPack.Collection{NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(),
                         providerLinkedType: Type<&MFLPack.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(),
@@ -232,7 +231,6 @@ pub contract MFLPack: NonFungibleToken {
     init() {
         // Set our named paths
         self.CollectionStoragePath = /storage/MFLPackCollection
-        self.CollectionPrivatePath = /private/MFLPackCollection
         self.CollectionPublicPath = /public/MFLPackCollection
         self.PackAdminStoragePath = /storage/MFLPackAdmin
 
