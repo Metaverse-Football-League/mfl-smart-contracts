@@ -87,7 +87,7 @@ pub contract MFLPlayer: NonFungibleToken {
                         thumbnail: playerData.image
                     )
                 case Type<MetadataViews.Royalties>():
-                    return MetadataViews.Royalties([]) // TODO ?
+                    return MetadataViews.Royalties([])
                 case Type<MetadataViews.NFTCollectionDisplay>():
                     let socials = {
                         "twitter": MetadataViews.ExternalURL("https://twitter.com/playMFL"),
@@ -97,10 +97,10 @@ pub contract MFLPlayer: NonFungibleToken {
                     }
                     return MetadataViews.NFTCollectionDisplay(
                         name: "MFL Player Collection",
-                        description: "",
-                        externalURL: MetadataViews.ExternalURL(""), // TODO
-                        squareImage: MetadataViews.Media(file: MetadataViews.HTTPFile(url: ""), mediaType: "image/png"), // TODO Square-sized image to represent this collection.
-                        bannerImage: MetadataViews.Media(file: MetadataViews.HTTPFile(url: ""), mediaType: "image/png"), // TODO Banner-sized image for this collection, recommended to have a size near 1200x630.
+                        description: "MFL is a unique Web3 Football (Soccer) Management game & ecosystem where you’ll be able to own and develop your football players as well as build a club from the ground up. As in real football, you’ll be able to : Be a recruiter (Scout, find, and trade players…), be an agent (Find the best clubs for your players, negotiate contracts with club owners…), be a club owner (Develop your club, recruit players, compete in leagues and tournaments…) and be a coach (Train and develop your players, play matches, and define your match tactics...). This collection allows you to collect Players.",
+                        externalURL: MetadataViews.ExternalURL("https://playmfl.com"),
+                        squareImage: MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://d13e14gtps4iwl.cloudfront.net/branding/logos/mfl_logo_black_square_small.svg"), mediaType: "image/svg+xml"),
+                        bannerImage: MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://d13e14gtps4iwl.cloudfront.net/branding/players/banner.png"), mediaType: "image/png"),
                         socials: socials
                     )
                 case Type<MetadataViews.NFTCollectionData>():
