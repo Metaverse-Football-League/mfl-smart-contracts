@@ -78,7 +78,7 @@ pub contract MFLPack: NonFungibleToken {
                         description: "MFL is a unique Web3 Football (Soccer) Management game & ecosystem where you’ll be able to own and develop your football players as well as build a club from the ground up. As in real football, you’ll be able to : Be a recruiter (Scout, find, and trade players…), be an agent (Find the best clubs for your players, negotiate contracts with club owners…), be a club owner (Develop your club, recruit players, compete in leagues and tournaments…) and be a coach (Train and develop your players, play matches, and define your match tactics...). This collection allows you to collect Packs.",
                         externalURL: MetadataViews.ExternalURL("https://playmfl.com"),
                         squareImage: MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://d13e14gtps4iwl.cloudfront.net/branding/logos/mfl_logo_black_square_small.svg"), mediaType: "image/svg+xml"),
-                        bannerImage: MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://d13e14gtps4iwl.cloudfront.net/branding/players/banner.png"), mediaType: "image/png"),
+                        bannerImage: MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://d13e14gtps4iwl.cloudfront.net/branding/players/banner_1900_X_600.png"), mediaType: "image/png"),
                         socials: socials
                     )
                 case Type<MetadataViews.NFTCollectionData>():
