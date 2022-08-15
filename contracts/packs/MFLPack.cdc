@@ -21,6 +21,7 @@ pub contract MFLPack: NonFungibleToken {
 
     // Named Paths
     pub let CollectionStoragePath: StoragePath
+    pub let CollectionPrivatePath: PrivatePath
     pub let CollectionPublicPath: PublicPath
     pub let PackAdminStoragePath: StoragePath
 
@@ -46,6 +47,10 @@ pub contract MFLPack: NonFungibleToken {
         pub fun getViews(): [Type] {
             return [
                 Type<MetadataViews.Display>(),
+                Type<MetadataViews.Royalties>(),
+                Type<MetadataViews.NFTCollectionDisplay>(),
+                Type<MetadataViews.NFTCollectionData>(),
+                Type<MetadataViews.ExternalURL>(),
                 Type<MFLViews.PackDataViewV1>()
             ]
         }
@@ -60,6 +65,37 @@ pub contract MFLPack: NonFungibleToken {
                         description: "MFL Pack #".concat(self.id.toString()),
                         thumbnail: MetadataViews.HTTPFile(url: packTemplateData.imageUrl)
                     )
+                case Type<MetadataViews.Royalties>():
+                    return MetadataViews.Royalties([])
+                case Type<MetadataViews.NFTCollectionDisplay>():
+                    let socials = {
+                        "twitter": MetadataViews.ExternalURL("https://twitter.com/playMFL"),
+                        "discord":  MetadataViews.ExternalURL("https://discord.gg/pEDTR4wSPr"),
+                        "linkedin": MetadataViews.ExternalURL("https://www.linkedin.com/company/playmfl"),
+                        "medium": MetadataViews.ExternalURL("https://medium.com/playmfl")
+                    }
+                    return MetadataViews.NFTCollectionDisplay(
+                        name: "MFL Pack Collection",
+                        description: "MFL is a unique Web3 Football (Soccer) Management game & ecosystem where you’ll be able to own and develop your football players as well as build a club from the ground up. As in real football, you’ll be able to : Be a recruiter (Scout, find, and trade players…), be an agent (Find the best clubs for your players, negotiate contracts with club owners…), be a club owner (Develop your club, recruit players, compete in leagues and tournaments…) and be a coach (Train and develop your players, play matches, and define your match tactics...). This collection allows you to collect Packs.",
+                        externalURL: MetadataViews.ExternalURL("https://playmfl.com"),
+                        squareImage: MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://d13e14gtps4iwl.cloudfront.net/branding/logos/mfl_logo_black_square_small.svg"), mediaType: "image/svg+xml"),
+                        bannerImage: MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://d13e14gtps4iwl.cloudfront.net/branding/players/banner.png"), mediaType: "image/png"),
+                        socials: socials
+                    )
+                case Type<MetadataViews.NFTCollectionData>():
+                    return MetadataViews.NFTCollectionData(
+                        storagePath: MFLPack.CollectionStoragePath,
+                        publicPath: MFLPack.CollectionPublicPath,
+                        providerPath: MFLPack.CollectionPrivatePath,
+                        publicCollection: Type<&MFLPack.Collection{NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(),
+                        publicLinked: Type<&MFLPack.Collection{NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(),
+                        providerLinkedType: Type<&MFLPack.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(),
+                        createEmptyCollectionFunction: (fun (): @NonFungibleToken.Collection {
+                            return <-MFLPack.createEmptyCollection()
+                        })
+                    )
+                case Type<MetadataViews.ExternalURL>():
+                    return MetadataViews.ExternalURL("https://playmfl.com")
                 case Type<MFLViews.PackDataViewV1>():
                     return MFLViews.PackDataViewV1(
                        id: self.id,
@@ -196,6 +232,7 @@ pub contract MFLPack: NonFungibleToken {
     init() {
         // Set our named paths
         self.CollectionStoragePath = /storage/MFLPackCollection
+        self.CollectionPrivatePath = /private/MFLPackCollection
         self.CollectionPublicPath = /public/MFLPackCollection
         self.PackAdminStoragePath = /storage/MFLPackAdmin
 
