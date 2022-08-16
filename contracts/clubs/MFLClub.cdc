@@ -142,7 +142,7 @@ pub contract MFLClub: NonFungibleToken {
         pub let id: UInt64
         pub let foundationLicense: FoundationLicense?
         access(self) var squads: @{UInt64: Squad}
-        access(self) var metadata: {String: AnyStruct}
+        access(self) var metadata: {String: AnyStruct} // ? Is this really needed (if yes admin function to update NFT metadata) ? can we just add new key to metadata central ledger ?
 
         init(
             id: UInt64,
@@ -350,7 +350,7 @@ pub contract MFLClub: NonFungibleToken {
             emit ClubInfosUpdated(id: id, infos: infos)
         }
 
-        //? addSquad here (mutli sig)?
+        //? addSquad here (mutli sig)? Can be public because Squad minting is restricted to admin ?
         pub fun addSquad(clubID: UInt64, squad: @Squad) {
             // Add Squad id to central metadata
             let squadID = squad.id
@@ -452,6 +452,7 @@ pub contract MFLClub: NonFungibleToken {
                 metadata: clubData.metadata
             )
             MFLClub.clubsDatas[id] = updatedClubData
+            
             emit ClubUpdated(id: id) // TODO different event to diff with update metadata
         }
 
