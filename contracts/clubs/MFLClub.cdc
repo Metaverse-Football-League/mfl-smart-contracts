@@ -17,9 +17,11 @@ pub contract MFLClub: NonFungibleToken {
     pub event Withdraw(id: UInt64, from: Address?)
     pub event Deposit(id: UInt64, to: Address?)
     pub event ClubMinted(id: UInt64)
-    pub event ClubUpdated(id: UInt64)
+    pub event ClubStatusUpdated(id: UInt64)
+    pub event ClubMetadataUpdated(id: UInt64)
+    pub event ClubSquadsIDsUpdated(id: UInt64)
     pub event ClubDestroyed(id: UInt64)
-    pub event ClubFounded(id: UInt64, name: String, description: String, license: FoundationLicense?)
+    pub event ClubFounded(id: UInt64, from: Address?, name: String, description: String, license: FoundationLicense?)
     pub event ClubInfosUpdated(id: UInt64, infos: {String: String})
 
     // Squads Events
@@ -61,6 +63,10 @@ pub contract MFLClub: NonFungibleToken {
             self.type = type
             self.metadata = metadata //? { competitionsMemberships: {leagueID: 1, division: 5}
         }
+
+        access(contract) fun setMetadata(metadata: {String: AnyStruct}) {
+            self.metadata = metadata
+        }
     }
 
     pub resource Squad {
@@ -75,6 +81,14 @@ pub contract MFLClub: NonFungibleToken {
             self.type = type
             self.metadata = metadata
             MFLClub.squadsTotalSupply = MFLClub.squadsTotalSupply + (1 as UInt64)
+
+            // Set squad data
+            MFLClub.squadsDatas[id] = MFLClub.SquadData(
+                id: id,
+                clubID:clubID,
+                type: type,
+                metadata: metadata
+            ) 
             emit SquadMinted(id: self.id)
         }
 
@@ -93,7 +107,7 @@ pub contract MFLClub: NonFungibleToken {
     // Data stored in clubsDatas. Updatable by an admin
     pub struct ClubData {
         pub let id: UInt64
-        pub var status: Status
+        access(contract) var status: Status
         access(contract) var squadsIDs: [UInt64]
         access(contract) var metadata: {String: AnyStruct}
 
@@ -104,8 +118,8 @@ pub contract MFLClub: NonFungibleToken {
             self.metadata = metadata
         }
 
-        access(contract) fun getSquadsIDs(): [UInt64] {
-            return self.squadsIDs
+        access(contract) fun setStatus(status: Status) {
+            self.status = status
         }
 
         access(contract) fun setSquadsIDs(squadsIDs: [UInt64]) {
@@ -114,10 +128,6 @@ pub contract MFLClub: NonFungibleToken {
 
         access(contract) fun setMetadata(metadata: {String: AnyStruct}) {
             self.metadata = metadata
-        }
-
-        access(contract) fun getMetadata(): {String: AnyStruct}{
-            return self.metadata
         }
     }
 
@@ -173,7 +183,6 @@ pub contract MFLClub: NonFungibleToken {
                 squadsIDs: squadsIDs,
                 metadata: metadata
             )
-
             emit ClubMinted(id: self.id)
         }
 
@@ -307,7 +316,7 @@ pub contract MFLClub: NonFungibleToken {
 
         pub fun foundClub(id: UInt64, name: String, description: String) {
             let clubRef = self.borrowClubRef(id: id) ?? panic("Club not found")
-            let clubData = MFLClub.clubsDatas[id] ?? panic("Data not found")
+            let clubData = MFLClub.getClubData(id: id) ?? panic("Data not found")
             if clubData.status == Status.FOUNDED {
                 panic("Club already founded")
             }
@@ -320,26 +329,23 @@ pub contract MFLClub: NonFungibleToken {
             updatedMetadata.insert(key: "city", clubRef.foundationLicense?.city ?? "")
             updatedMetadata.insert(key: "country", clubRef.foundationLicense?.country ?? "")
             updatedMetadata.insert(key: "foundationDate", getCurrentBlock().timestamp)
-            MFLClub.clubsDatas[id] = MFLClub.ClubData(
-                id: clubData.id,
-                status: Status.PENDING_VALIDATION,
-                squadsIDs: clubData.squadsIDs,
-                metadata: updatedMetadata
-            )
+            MFLClub.clubsDatas[id]!.setMetadata(metadata: updatedMetadata)
+            MFLClub.clubsDatas[id]!.setStatus(status: Status.PENDING_VALIDATION)
             emit ClubFounded(
                 id: id,
+                from: self.owner?.address,
                 name: name,
                 description: description,
                 license:clubRef.foundationLicense
             )
         }
 
-        // ? restrict this method nb of times ? multi sign ?
+        // ? restrict this method nb of times ? multi sign ? no because it s just an event and we can check this on the backend ?
         pub fun setClubInfos(id: UInt64, infos: {String: String}) {
             pre {
                 self.getIDs().contains(id) == true : "Club not found"
             }
-            let clubData = MFLClub.clubsDatas[id] ?? panic("Data not found")
+            let clubData = MFLClub.getClubData(id: id) ?? panic("Data not found")
             if clubData.status == Status.NOT_FOUNDED {
                 panic("Club not founded")
             }
@@ -431,29 +437,29 @@ pub contract MFLClub: NonFungibleToken {
             return <- club
         }
 
-        pub fun updateClubMetadata(id: UInt64, metadata: {String: AnyStruct}) {
-            let clubData = MFLClub.clubsDatas[id] ?? panic("Data not found")
-            let updatedClubData = MFLClub.ClubData(
-                id: clubData.id,
-                status: clubData.status,
-                squadsIDs: clubData.squadsIDs,
-                metadata: metadata
-            )
-            MFLClub.clubsDatas[id] = updatedClubData
-            emit ClubUpdated(id: id)
+        pub fun updateClubStatus(id: UInt64, status: Status) {
+            pre {
+                MFLClub.getClubData(id: id) != nil : "Data not found"
+            }
+            MFLClub.clubsDatas[id]!.setStatus(status: status)
+            emit ClubStatusUpdated(id: id)
         }
 
+        pub fun updateClubMetadata(id: UInt64, metadata: {String: AnyStruct}) {
+            pre {
+                MFLClub.getClubData(id: id) != nil  : "Data not found"
+            }
+            MFLClub.clubsDatas[id]!.setMetadata(metadata: metadata)
+            emit ClubMetadataUpdated(id: id)
+        }
+
+        //TODO update status / metadata all in one ??
         pub fun updateClubSquadsIDs(id: UInt64, squadsIDs: [UInt64]) {
-            let clubData = MFLClub.clubsDatas[id] ?? panic("Data not found")
-            let updatedClubData = MFLClub.ClubData(
-                id: clubData.id,
-                status: clubData.status,
-                squadsIDs: squadsIDs,
-                metadata: clubData.metadata
-            )
-            MFLClub.clubsDatas[id] = updatedClubData
-            
-            emit ClubUpdated(id: id) // TODO different event to diff with update metadata
+            pre {
+                MFLClub.getClubData(id: id) != nil : "Data not found"
+            }
+            MFLClub.clubsDatas[id]!.setSquadsIDs(squadsIDs: squadsIDs)
+            emit ClubSquadsIDsUpdated(id: id) // TODO different event to diff with update metadata
         }
 
         pub fun createClubAdmin(): @ClubAdmin {
@@ -487,18 +493,15 @@ pub contract MFLClub: NonFungibleToken {
             nftMetadata: {String: AnyStruct},
             metadata: {String: AnyStruct}
         ): @Squad {
+            pre {
+                MFLClub.getSquadData(id: id) == nil : "Squad already exists"
+            }
             let squad <- create Squad(
                 id: id,
                 clubID: clubID,
                 type: type,
                 metadata: nftMetadata
             )
-            MFLClub.squadsDatas[id] = MFLClub.SquadData(
-                id: id,
-                clubID:clubID,
-                type: type,
-                metadata: metadata
-            ) 
             return <- squad
         }
 
