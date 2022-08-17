@@ -33,6 +33,7 @@ pub contract MFLClub: NonFungibleToken {
 
     // Named Paths
     pub let CollectionStoragePath: StoragePath
+    pub let CollectionPrivatePath: PrivatePath
     pub let CollectionPublicPath: PublicPath
     pub let ClubAdminStoragePath: StoragePath
     pub let SquadAdminStoragePath: StoragePath
@@ -214,9 +215,12 @@ pub contract MFLClub: NonFungibleToken {
 
         // Get all supported views for this NFT
         pub fun getViews(): [Type] {
-            //TODO add views for nft-catalogue
             return [
                 Type<MetadataViews.Display>(),
+                Type<MetadataViews.Royalties>(),
+                Type<MetadataViews.NFTCollectionDisplay>(),
+                Type<MetadataViews.NFTCollectionData>(),
+                Type<MetadataViews.ExternalURL>(),
                 Type<MFLViews.ClubDataViewV1>(),
                 Type<MFLViews.SquadDataViewV1>()
             ]
@@ -234,6 +238,37 @@ pub contract MFLClub: NonFungibleToken {
                             url: "https://d11e2517uhbeau.cloudfront.net/clubs/".concat(self.id.toString()).concat("/thumbnail.png") //TODO change path staging / prod
                         ),
                     )
+                case Type<MetadataViews.Royalties>():
+                    return MetadataViews.Royalties([])
+                case Type<MetadataViews.NFTCollectionDisplay>():
+                    let socials = {
+                        "twitter": MetadataViews.ExternalURL("https://twitter.com/playMFL"),
+                        "discord":  MetadataViews.ExternalURL("https://discord.gg/pEDTR4wSPr"),
+                        "linkedin": MetadataViews.ExternalURL("https://www.linkedin.com/company/playmfl"),
+                        "medium": MetadataViews.ExternalURL("https://medium.com/playmfl")
+                    }
+                    return MetadataViews.NFTCollectionDisplay(
+                        name: "MFL Club Collection",
+                        description: "MFL is a unique Web3 Football (Soccer) Management game & ecosystem where you’ll be able to own and develop your football players as well as build a club from the ground up. As in real football, you’ll be able to : Be a recruiter (Scout, find, and trade players…), be an agent (Find the best clubs for your players, negotiate contracts with club owners…), be a club owner (Develop your club, recruit players, compete in leagues and tournaments…) and be a coach (Train and develop your players, play matches, and define your match tactics...). This collection allows you to collect Clubs.",
+                        externalURL: MetadataViews.ExternalURL("https://playmfl.com"),
+                        squareImage: MetadataViews.Media(file: MetadataViews.HTTPFile(url: ""), mediaType: ""), //TODO
+                        bannerImage: MetadataViews.Media(file: MetadataViews.HTTPFile(url: ""), mediaType: ""), // TODO
+                        socials: socials
+                    )
+                 case Type<MetadataViews.NFTCollectionData>():
+                    return MetadataViews.NFTCollectionData(
+                        storagePath: MFLClub.CollectionStoragePath,
+                        publicPath: MFLClub.CollectionPublicPath,
+                        providerPath: MFLClub.CollectionPrivatePath,
+                        publicCollection: Type<&MFLClub.Collection{NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(),
+                        publicLinked: Type<&MFLClub.Collection{NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(),
+                        providerLinkedType: Type<&MFLClub.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(),
+                        createEmptyCollectionFunction: (fun (): @NonFungibleToken.Collection {
+                            return <-MFLClub.createEmptyCollection()
+                        })
+                    )
+                case Type<MetadataViews.ExternalURL>():
+                    return MetadataViews.ExternalURL("https://playmfl.com")
                 case Type<MFLViews.ClubDataViewV1>():
                     return MFLViews.ClubDataViewV1(
                         id: clubData.id,
@@ -549,6 +584,7 @@ pub contract MFLClub: NonFungibleToken {
     init() {
         // Set our named paths
         self.CollectionStoragePath = /storage/MFLClubCollection
+        self.CollectionPrivatePath = /private/MFLClubCollection
         self.CollectionPublicPath = /public/MFLClubCollection
         self.ClubAdminStoragePath = /storage/MFLClubAdmin
         self.SquadAdminStoragePath = /storage/MFLSquadAdmin
