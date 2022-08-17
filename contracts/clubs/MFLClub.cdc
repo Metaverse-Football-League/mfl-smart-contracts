@@ -29,6 +29,7 @@ pub contract MFLClub: NonFungibleToken {
     pub event SquadUpdated(id: UInt64)
     pub event SquadDestroyed(id: UInt64)
     pub event SquadAddedToClub(clubID: UInt64, squadID: UInt64)
+    pub event SquadMetadataUpdated(id: UInt64)
 
     // Named Paths
     pub let CollectionStoragePath: StoragePath
@@ -503,6 +504,7 @@ pub contract MFLClub: NonFungibleToken {
             nftMetadata: {String: AnyStruct},
             metadata: {String: AnyStruct}
         ): @Squad
+        pub fun updateSquadMetadata(id: UInt64, metadata: {String: AnyStruct})
     }
 
     pub resource SquadAdmin: SquadAdminClaim {
@@ -529,6 +531,14 @@ pub contract MFLClub: NonFungibleToken {
                 metadata: nftMetadata
             )
             return <- squad
+        }
+
+        pub fun updateSquadMetadata(id: UInt64, metadata: {String: AnyStruct}) {
+            pre {
+                MFLClub.getSquadData(id: id) != nil  : "Data not found"
+            }
+            MFLClub.getSquadData(id: id)!.setMetadata(metadata: metadata)
+            emit SquadMetadataUpdated(id: id)
         }
 
         pub fun createSquadAdmin(): @SquadAdmin {
