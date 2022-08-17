@@ -61,7 +61,8 @@ pub contract MFLClub: NonFungibleToken {
             self.id = id
             self.clubID = clubID
             self.type = type
-            self.metadata = metadata //? { competitionsMemberships: {leagueID: 1, division: 5}
+            self.metadata = metadata //? { competitionsMemberships: {leagueID: 1, division: 5} 
+            // ? maybe a bool that says if the squad is active or not ? (because we can't remove it from  user storage)
         }
 
         // Getter for metadata
@@ -352,7 +353,7 @@ pub contract MFLClub: NonFungibleToken {
             updatedMetadata.insert(key: "description", description)
             updatedMetadata.insert(key: "city", clubRef.foundationLicense?.city ?? "")
             updatedMetadata.insert(key: "country", clubRef.foundationLicense?.country ?? "")
-            updatedMetadata.insert(key: "foundationDate", getCurrentBlock().timestamp)
+            updatedMetadata.insert(key: "foundationDate", getCurrentBlock().timestamp) // TODO  maybe in backend ?
             MFLClub.clubsDatas[id]!.setMetadata(metadata: updatedMetadata)
             MFLClub.clubsDatas[id]!.setStatus(status: Status.PENDING_VALIDATION)
             emit ClubFounded(
@@ -560,5 +561,4 @@ pub contract MFLClub: NonFungibleToken {
 
         emit ContractInitialized()
     }
-
 }
