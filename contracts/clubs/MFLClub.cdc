@@ -21,7 +21,7 @@ pub contract MFLClub: NonFungibleToken {
     pub event ClubMetadataUpdated(id: UInt64)
     pub event ClubSquadsIDsUpdated(id: UInt64)
     pub event ClubDestroyed(id: UInt64)
-    pub event ClubFounded(id: UInt64, from: Address?, name: String, description: String, license: FoundationLicense?)
+    pub event ClubFounded(id: UInt64, from: Address?, name: String, description: String, license: FoundationLicense?, foundationDate: UFix64)
     pub event ClubInfosUpdated(id: UInt64, infos: {String: String})
 
     // Squads Events
@@ -385,11 +385,13 @@ pub contract MFLClub: NonFungibleToken {
                 panic("Waiting for validation")
             }
             let updatedMetadata = clubData.getMetadata()
+            // TODO maybe update only in backend ?
+            let currentTimestamp = getCurrentBlock().timestamp
             updatedMetadata.insert(key: "name", name)
             updatedMetadata.insert(key: "description", description)
             updatedMetadata.insert(key: "city", clubRef.foundationLicense?.city ?? "")
             updatedMetadata.insert(key: "country", clubRef.foundationLicense?.country ?? "")
-            updatedMetadata.insert(key: "foundationDate", getCurrentBlock().timestamp) // TODO  maybe in backend ?
+            updatedMetadata.insert(key: "foundationDate", currentTimestamp) // TODO  maybe in backend ?
             MFLClub.clubsDatas[id]!.setMetadata(metadata: updatedMetadata)
             MFLClub.clubsDatas[id]!.setStatus(status: Status.PENDING_VALIDATION)
             emit ClubFounded(
@@ -397,7 +399,8 @@ pub contract MFLClub: NonFungibleToken {
                 from: self.owner?.address,
                 name: name,
                 description: description,
-                license:clubRef.foundationLicense
+                license:clubRef.foundationLicense,
+                foundationDate: currentTimestamp
             )
         }
 
