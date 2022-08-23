@@ -26,9 +26,7 @@ pub contract MFLClub: NonFungibleToken {
 
     // Squads Events
     pub event SquadMinted(id: UInt64)
-    pub event SquadUpdated(id: UInt64)
     pub event SquadDestroyed(id: UInt64)
-    pub event SquadAddedToClub(clubID: UInt64, squadID: UInt64)
     pub event SquadMetadataUpdated(id: UInt64)
     pub event SquadCompetitionAdded(id: UInt64, competitionID: UInt64)
     pub event SquadCompetitionRemoved(id: UInt64, competitionID: UInt64)
@@ -118,7 +116,7 @@ pub contract MFLClub: NonFungibleToken {
         access(self) var metadata: {String: AnyStruct}
 
         init(id: UInt64, clubID: UInt64, type: String, metadata: {String: AnyStruct}, competitions: {UInt64: AnyStruct}) {
-            pre { //TODO test pre init
+            pre {
                 MFLClub.getSquadData(id: id) == nil : "Squad already exists"
             }
             self.id = id
@@ -227,7 +225,7 @@ pub contract MFLClub: NonFungibleToken {
             nftMetadata: {String: AnyStruct},
             metadata: {String: AnyStruct}
         ) {
-            pre { //TODO test pre init
+            pre {
                 MFLClub.getClubData(id: id) == nil: "Club already exists"
             }
             self.id = id
@@ -293,8 +291,8 @@ pub contract MFLClub: NonFungibleToken {
                         name: "MFL Club Collection",
                         description: "MFL is a unique Web3 Football (Soccer) Management game & ecosystem where you’ll be able to own and develop your football players as well as build a club from the ground up. As in real football, you’ll be able to : Be a recruiter (Scout, find, and trade players…), be an agent (Find the best clubs for your players, negotiate contracts with club owners…), be a club owner (Develop your club, recruit players, compete in leagues and tournaments…) and be a coach (Train and develop your players, play matches, and define your match tactics...). This collection allows you to collect Clubs.",
                         externalURL: MetadataViews.ExternalURL("https://playmfl.com"),
-                        squareImage: MetadataViews.Media(file: MetadataViews.HTTPFile(url: ""), mediaType: ""), //TODO
-                        bannerImage: MetadataViews.Media(file: MetadataViews.HTTPFile(url: ""), mediaType: ""), // TODO
+                        squareImage: MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://d13e14gtps4iwl.cloudfront.net/branding/logos/mfl_logo_black_square_small.svg"), mediaType: "image/svg+xml"),
+                        bannerImage: MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://d13e14gtps4iwl.cloudfront.net/branding/players/banner_1900_X_600.png"), mediaType: "image/png"),
                         socials: socials
                     )
                  case Type<MetadataViews.NFTCollectionData>():
@@ -404,8 +402,6 @@ pub contract MFLClub: NonFungibleToken {
             let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT?
             return ref as! &MFLClub.NFT?
         }
-
-        // TODO contract borrowSquadRef ?
 
         pub fun foundClub(id: UInt64, name: String, description: String) {
             let clubRef = self.borrowClubRef(id: id) ?? panic("Club not found")
