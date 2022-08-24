@@ -582,7 +582,7 @@ describe('MFLPack', () => {
           args: [bobAccountAddress],
         });
         // Bob should no longer have a collection
-        expect(error.message).toContain('Could not borrow the collection reference');
+        expect(error.message).toContain('Could not borrow a reference to MFLPack collection');
       });
     });
 
@@ -628,7 +628,7 @@ describe('MFLPack', () => {
 
         // assert
         expect(viewsTypes).toHaveLength(2);
-        expect(viewsTypes).toEqual(expect.arrayContaining([
+        expect(viewsTypes.map(viewType => viewType.typeID)).toEqual(expect.arrayContaining([
           `A.${testsUtils.sansPrefix(addressMap.MetadataViews)}.MetadataViews.Display`,
           `A.${testsUtils.sansPrefix(addressMap.MFLViews)}.MFLViews.PackDataViewV1`,
         ]));

@@ -114,38 +114,65 @@ describe('MFLPlayer', () => {
 
         // assert
         expect(result.events).toHaveLength(8);
-        expect(result.events[0]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Withdraw`,
-          data: {id: 1, from: aliceAdminAccountAddress},
-        }));
-        expect(result.events[1]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Deposit`,
-          data: {id: 1, to: null},
-        }));
-        expect(result.events[2]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Withdraw`,
-          data: {id: 31, from: aliceAdminAccountAddress},
-        }));
-        expect(result.events[3]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Deposit`,
-          data: {id: 31, to: null},
-        }));
-        expect(result.events[4]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Withdraw`,
-          data: {id: 1, from: null},
-        }));
-        expect(result.events[5]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Deposit`,
-          data: {id: 1, to: bobAccountAddress},
-        }));
-        expect(result.events[6]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Withdraw`,
-          data: {id: 31, from: null},
-        }));
-        expect(result.events[7]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Deposit`,
-          data: {id: 31, to: bobAccountAddress},
-        }));
+        expect(result.events).toEqual(expect.arrayContaining([
+          {
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Withdraw`,
+            data: {id: 1, from: aliceAdminAccountAddress},
+            eventIndex: expect.any(Number),
+            transactionId: expect.any(String),
+            transactionIndex: expect.any(Number)
+          },
+          { 
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Withdraw`,
+            data: {id: 31, from: aliceAdminAccountAddress},
+            eventIndex: expect.any(Number),
+            transactionId: expect.any(String),
+            transactionIndex: expect.any(Number)
+          },
+          { 
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Deposit`,
+            data: {id: 1, to: null},
+            eventIndex: expect.any(Number),
+            transactionId: expect.any(String),
+            transactionIndex: expect.any(Number)
+          },
+          { 
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Deposit`,
+            data: {id: 31, to: null},
+            eventIndex: expect.any(Number),
+            transactionId: expect.any(String),
+            transactionIndex: expect.any(Number)
+          },
+          { 
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Withdraw`,
+            data: {id: 1, from: null},
+            eventIndex: expect.any(Number),
+            transactionId: expect.any(String),
+            transactionIndex: expect.any(Number)
+          },
+          { 
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Deposit`,
+            data: {id: 1, to: bobAccountAddress},
+            eventIndex: expect.any(Number),
+            transactionId: expect.any(String),
+            transactionIndex: expect.any(Number)
+          },
+          { 
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Withdraw`,
+            data: {id: 31, from: null},
+            eventIndex: expect.any(Number),
+            transactionId: expect.any(String),
+            transactionIndex: expect.any(Number)
+          },
+          { 
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Deposit`,
+            data: {id: 31, to: bobAccountAddress},
+            eventIndex: expect.any(Number),
+            transactionId: expect.any(String),
+            transactionIndex: expect.any(Number)
+          }
+        ]));
+
         const alicePlayersIds = await testsUtils.executeValidScript({
           name: 'mfl/players/get_ids_in_collection.script',
           args: [aliceAdminAccountAddress],
@@ -209,7 +236,7 @@ describe('MFLPlayer', () => {
           season: MFLPlayerTestsUtils.PLAYER_DATA.season,
           image: {
             cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
-            path: `${playerID}.svg`
+            path: null
           },
           uuid: expect.toBeNumber(),
         });
@@ -291,7 +318,7 @@ describe('MFLPlayer', () => {
         });
 
         // assert
-        expect(viewsTypes).toEqual(expect.arrayContaining([
+        expect(viewsTypes.map(viewType => viewType.typeID)).toEqual(expect.arrayContaining([
           `A.${testsUtils.sansPrefix(addressMap.MetadataViews)}.MetadataViews.Display`,
           `A.${testsUtils.sansPrefix(addressMap.MFLViews)}.MFLViews.PlayerDataViewV1`,
         ]));
@@ -315,7 +342,7 @@ describe('MFLPlayer', () => {
           {
             name: 'some name',
             description: 'MFL Player #100022',
-            thumbnail: 'ipfs://QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm/100022.svg',
+            thumbnail: 'ipfs://QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
             owner: aliceAdminAccountAddress,
             type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.NFT`,
           }
@@ -331,7 +358,7 @@ describe('MFLPlayer', () => {
         // execute
         const playersDisplayView = await testsUtils.executeValidScript({
           name: 'mfl/players/get_players_display_view_from_collection.script',
-          args: [aliceAdminAccountAddress],
+          args: [aliceAdminAccountAddress, [100022, 100023]],
         });
 
         // assert
@@ -340,14 +367,14 @@ describe('MFLPlayer', () => {
             {
               name: 'some name',
               description: 'MFL Player #100022',
-              thumbnail: 'ipfs://QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm/100022.svg',
+              thumbnail: 'ipfs://QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
               owner: aliceAdminAccountAddress,
               type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.NFT`
             },
             {
               name: 'some name',
               description: 'MFL Player #100023',
-              thumbnail: 'ipfs://QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm/100023.svg',
+              thumbnail: 'ipfs://QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
               owner: aliceAdminAccountAddress,
               type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.NFT`
             }
@@ -373,7 +400,7 @@ describe('MFLPlayer', () => {
           season: 1,
           thumbnail: {
             cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
-            path: `${playerID}.svg`
+            path: null
           },
           metadata: omit(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY, "longevity"),
         });
@@ -390,7 +417,7 @@ describe('MFLPlayer', () => {
         // execute
         const playersDataView = await testsUtils.executeValidScript({
           name: 'mfl/players/get_players_data_view_from_collection.script',
-          args: [aliceAdminAccountAddress],
+          args: [aliceAdminAccountAddress, [100022, 100023]],
         });
 
         // assert
@@ -400,7 +427,7 @@ describe('MFLPlayer', () => {
             season: 1,
             thumbnail: {
               cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
-              path: `${playerID1}.svg`
+              path: null
             },
             metadata: omit(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY, "longevity"),
           },
@@ -409,7 +436,7 @@ describe('MFLPlayer', () => {
             season: 1,
             thumbnail: {
               cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
-              path: `${playerID2}.svg`
+              path: null
             },
             metadata: omit(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY, "longevity"),
           },
@@ -437,7 +464,7 @@ describe('MFLPlayer', () => {
           name: 'mfl/players/get_player_data_view_from_collection.script',
           args: [aliceAdminAccountAddress, 100022],
         });
-        expect(error.message).toContain("dereference failed")
+        expect(error.message).toContain("unexpectedly found nil while forcing an Optional value")
       });
     });
   });
@@ -462,7 +489,7 @@ describe('MFLPlayer', () => {
         season: 1,
         image: {
           cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
-          path: `${playerID}.svg`
+          path: null
         },
       });
     });
@@ -528,7 +555,7 @@ describe('MFLPlayer', () => {
           season: 1,
           image: {
             cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
-            path: `${playerID}.svg`
+            path: null
           },
         });
         const totalSupply = await testsUtils.executeValidScript({
@@ -544,7 +571,7 @@ describe('MFLPlayer', () => {
           season: 1,
           image: {
             cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
-            path: `${playerID}.svg`
+            path: null
           },
           uuid: expect.toBeNumber(),
         });
@@ -595,7 +622,7 @@ describe('MFLPlayer', () => {
           season: 1,
           image: {
             cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
-            path: `${playerID}.svg`
+            path: null
           },
         });
         expect(result.events).toHaveLength(1);
