@@ -1,6 +1,5 @@
 import MetadataViews from "../_libs/MetadataViews.cdc"
 import MFLPackTemplate from "../packs/MFLPackTemplate.cdc"
-import MFLClub from "../clubs/MFLClub.cdc"
 
 /**
   This contract defines MFL customised views. They are used to represent NFTs data.
@@ -74,71 +73,7 @@ pub contract MFLViews {
         }
     }
 
-    pub struct CompetitionsMembershipV1 {
-        pub let leagueID: UInt64
-        pub let division: UInt16
-
-        init(leagueID: UInt64, division: UInt16) {
-            self.leagueID = leagueID
-            self.division = division
-        }
-    }
-
-    pub struct SquadDataViewV1 {
-        pub let id: UInt64
-        pub let clubID: UInt64
-        pub let type: String
-        pub let metadata: [CompetitionsMembershipV1]
-
-        init(id: UInt64, clubID: UInt64, type: String, metadata: {String: AnyStruct}) {
-            self.id = id
-            self.clubID = clubID
-            self.type = type
-            self.metadata = metadata["competitionsMemberships"] as! [CompetitionsMembershipV1]
-        }
-    }
-
-    pub struct ClubMetadataViewV1 {
-        pub let name: String?
-        pub let description: String?
-        pub let country: String?
-        pub let city: String?
-        pub let foundationDate: UFix64?
-
-        init(metadata: {String: AnyStruct}) {
-            self.name = metadata["name"] as! String?
-            self.description = metadata["description"] as! String?
-            self.country = metadata["country"] as! String?
-            self.city = metadata["city"] as! String?
-            self.foundationDate = metadata["foundationDate"] as! UFix64?
-        }
-    }
-
-    pub struct ClubDataViewV1 {
-        pub let id: UInt64
-        pub let foundationLicense: MFLClub.FoundationLicense?
-        pub let status: MFLClub.Status
-        pub let squadsIDs: [UInt64]
-        pub let metadata: ClubMetadataViewV1
-        
-        init(
-            id: UInt64,
-            foundationLicense: MFLClub.FoundationLicense?,
-            status: MFLClub.Status,
-            squadsIDs: [UInt64],
-            metadata: {String: AnyStruct}
-        ) {
-            self.id = id
-            self.foundationLicense = foundationLicense
-            self.status = status
-            self.squadsIDs = squadsIDs
-            self.metadata = ClubMetadataViewV1(metadata: metadata)
-        }
-    }
-
     init() {
         emit ContractInitialized()
     }
-
-
 }

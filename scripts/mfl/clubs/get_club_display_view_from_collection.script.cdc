@@ -29,14 +29,14 @@ pub struct ClubNFT {
     }
 }
 
-pub fun main(address: Address, id: UInt64): ClubNFT {
+pub fun main(address: Address, clubID: UInt64): ClubNFT {
 
     let collection = getAccount(address)
         .getCapability(MFLClub.CollectionPublicPath)
         .borrow<&{MetadataViews.ResolverCollection}>()
         ?? panic("Could not borrow a reference to MFLClub collection")
 
-    let nft = collection.borrowViewResolver(id: id)!
+    let nft = collection.borrowViewResolver(id: clubID)!
 
     // Get the basic display information for this NFT
     let view = nft.resolveView(Type<MetadataViews.Display>())!

@@ -6,7 +6,7 @@ import MFLClub from "../../../contracts/clubs/MFLClub.cdc"
   in another collection.
 **/
 
-transaction(receiverAddr: Address, ids: [UInt64]) {
+transaction(receiverAddr: Address, clubsIds: [UInt64]) {
 
     let receiverRef: &{NonFungibleToken.CollectionPublic}
     let senderRef: &MFLClub.Collection
@@ -17,7 +17,7 @@ transaction(receiverAddr: Address, ids: [UInt64]) {
     }
 
     execute {
-        let tokens <- self.senderRef.batchWithdraw(ids: ids)
+        let tokens <- self.senderRef.batchWithdraw(ids: clubsIds)
 
         let ids = tokens.getIDs()
 

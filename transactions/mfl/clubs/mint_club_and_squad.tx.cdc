@@ -3,6 +3,12 @@ import MetadataViews from "../../../contracts/_libs/MetadataViews.cdc"
 import MFLClub from "../../../contracts/clubs/MFLClub.cdc"
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 
+/** 
+  This tx creates a Squad resource and a Club NFT
+  and deposit it in the receiver collection.
+  The Squad resource lives inside the Club NFT.
+**/
+
 transaction(
     clubID: UInt64,
     foundationLicenseSerialNumber: UInt64,
@@ -30,39 +36,34 @@ transaction(
         let clubAdminClaimRef = clubAdminClaimCap.borrow<&{MFLClub.ClubAdminClaim}>() ?? panic("Could not borrow ClubAdminClaim")
         let squadAdminClaimRef = squadAdminClaimCap.borrow<&{MFLClub.SquadAdminClaim}>() ?? panic("Could not borrow SquadAdminClaim")
 
-        // let metadata: {String: AnyStruct} = {}
-        //TODO insert metadata for clubNFT + central ledger club + squadNFT + central ledger squad
-
-
         let squadNFT <- squadAdminClaimRef.mintSquad(
             id: squadID,
             clubID: clubID,
             type: squadType,
-            nftMetadata: {}, //nftMetadata,
-            metadata: {}, //squadCentralMetadata
+            nftMetadata: {},
+            metadata: {}, // TODO empty for now ?
+            competitionsMemberships: {} // TODO empty for now ?
         )
 
-        let foundationLicense = MFLClub.FoundationLicense(
-            serialNumber: foundationLicenseSerialNumber,
-            city: foundationLicenseCity,
-            country: foundationLicenseCountry,
-            season: foundationLicenseSeason,
-            image: MetadataViews.IPFSFile(cid: foundationLicenseCID, path: nil)
-        )
+        let nftMetadata: {String: AnyStruct} = {}
+        nftMetadata.insert(key: "foundationLicenseSerialNumber", foundationLicenseSerialNumber)
+        nftMetadata.insert(key: "foundationLicenseCity", foundationLicenseCity)
+        nftMetadata.insert(key: "foundationLicenseCountry", foundationLicenseCountry)
+        nftMetadata.insert(key: "foundationLicenseSeason", foundationLicenseSeason)
+        nftMetadata.insert(key: "foundationLicenseImage", MetadataViews.IPFSFile(cid: foundationLicenseCID, path: nil))
 
         let clubNFT <- clubAdminClaimRef.mintClub(
             id: clubID,
-            foundationLicense: foundationLicense,
             squads: <- [<-squadNFT],
-            nftMetadata: {}, //nftMetadata,
-            metadata: {}, //clubCentralMetad
+            nftMetadata: nftMetadata,
+            metadata: {} // TODO empty for now ?
         )
         self.receiverRef.deposit(token: <- clubNFT)
     }
 
     post {
-        MFLClub.getClubData(id: clubID) != nil : "Could not find club metadata in post"
         self.receiverRef.getIDs().contains(clubID) : "Could not find club in post"
-        MFLClub.getSquadData(id: squadID) != nil : "Could not find squad metadata in post"
+        MFLClub.getClubData(id: clubID) != nil : "Could not find club data in post"
+        MFLClub.getSquadData(id: squadID) != nil : "Could not find squad data in post"
     }
 }

@@ -5,14 +5,14 @@ import MFLClub from "../../../contracts/clubs/MFLClub.cdc"
   This script returns an array of view types.
 **/
 
-pub fun main(address: Address, id: UInt64): [Type] {
+pub fun main(address: Address, clubID: UInt64): [Type] {
 
     let collection = getAccount(address)
         .getCapability(MFLClub.CollectionPublicPath)
         .borrow<&{MetadataViews.ResolverCollection}>()
         ?? panic("Could not borrow a reference to MFLClub collection")
 
-    let nft = collection.borrowViewResolver(id: id)
+    let nft = collection.borrowViewResolver(id: clubID)
 
     let viewTypes = nft.getViews()
 

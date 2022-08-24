@@ -4,7 +4,7 @@ import MFLViews from "../views/MFLViews.cdc"
 
 /**
   This contract is based on the NonFungibleToken standard on Flow.
-  It allows an admin to mint clubs (NFTs) and squads. Club and Squad have metadata
+  It allows an admin to mint clubs (NFTs) and squads. Clubs and Squads have metadata
   that can be updated by an admin.
 **/
 
@@ -21,15 +21,26 @@ pub contract MFLClub: NonFungibleToken {
     pub event ClubMetadataUpdated(id: UInt64)
     pub event ClubSquadsIDsUpdated(id: UInt64, squadsIDs: [UInt64])
     pub event ClubDestroyed(id: UInt64)
-    pub event ClubFounded(id: UInt64, from: Address?, name: String, description: String, foundationLicense: FoundationLicense?, foundationDate: UFix64)
     pub event ClubInfoUpdateRequested(id: UInt64, info: {String: String})
+    pub event ClubFounded(
+        id: UInt64,
+        from: Address?,
+        name: String,
+        description: String,
+        foundationDate: UFix64,
+        foundationLicenseSerialNumber: UInt64?,
+        foundationLicenseCity: String?,
+        foundationLicenseCountry: String?,
+        foundationLicenseSeason: UInt32?,
+        foundationLicenseImage: MetadataViews.IPFSFile?
+    )
 
     // Squads Events
     pub event SquadMinted(id: UInt64)
     pub event SquadDestroyed(id: UInt64)
     pub event SquadMetadataUpdated(id: UInt64)
-    pub event SquadCompetitionAdded(id: UInt64, competitionID: UInt64)
-    pub event SquadCompetitionRemoved(id: UInt64, competitionID: UInt64)
+    pub event SquadCompetitionMembershipAdded(id: UInt64, competitionID: UInt64)
+    pub event SquadCompetitionMembershipRemoved(id: UInt64, competitionID: UInt64)
 
     // Named Paths
     pub let CollectionStoragePath: StoragePath
@@ -60,18 +71,18 @@ pub contract MFLClub: NonFungibleToken {
         pub let type: String
         access(self) var status: SquadStatus
         access(self) var metadata: {String: AnyStruct}
-        access(self) var competitions: {UInt64: AnyStruct} // {competitionID: AnyStruct}
+        access(self) var competitionsMemberships: {UInt64: AnyStruct} // {competitionID: AnyStruct}
 
-        init(id: UInt64, clubID: UInt64, type: String, metadata: {String: AnyStruct}, competitions: {UInt64: AnyStruct}) {
+        init(id: UInt64, clubID: UInt64, type: String, metadata: {String: AnyStruct}, competitionsMemberships: {UInt64: AnyStruct}) {
             self.id = id
             self.clubID = clubID
             self.type = type
             self.status = SquadStatus.ACTIVE
             self.metadata = metadata
-            self.competitions = {}
+            self.competitionsMemberships = {}
 
-            for competitionID in competitions.keys {
-                self.addCompetition(competitionID: competitionID, competitionData: competitions[competitionID])
+            for competitionID in competitionsMemberships.keys {
+                self.addCompetitionMembership(competitionID: competitionID, competitionMembershipData: competitionsMemberships[competitionID])
             }
         }
 
@@ -86,21 +97,21 @@ pub contract MFLClub: NonFungibleToken {
             emit SquadMetadataUpdated(id: self.id)
         }
 
-        // Getter for competitions
-         pub fun getCompetitions(): {UInt64: AnyStruct} {
-            return self.competitions
+        // Getter for competitionsMemberships
+         pub fun getCompetitionsMemberships(): {UInt64: AnyStruct} {
+            return self.competitionsMemberships
         }
 
-        // Add competition
-        access(contract) fun addCompetition(competitionID: UInt64, competitionData: AnyStruct) {
-            self.competitions.insert(key: competitionID, competitionData)
-            emit SquadCompetitionAdded(id: self.id, competitionID: competitionID)
+        // Add competitionMembership
+        access(contract) fun addCompetitionMembership(competitionID: UInt64, competitionMembershipData: AnyStruct) {
+            self.competitionsMemberships.insert(key: competitionID, competitionMembershipData)
+            emit SquadCompetitionMembershipAdded(id: self.id, competitionID: competitionID)
         }
 
-        // remove competition
-        access(contract) fun removeCompetition(competitionID: UInt64) {
-            self.competitions.remove(key: competitionID)
-            emit SquadCompetitionRemoved(id: self.id, competitionID: competitionID)
+        // remove competitionMembership
+        access(contract) fun removeCompetitionMembership(competitionID: UInt64) {
+            self.competitionsMemberships.remove(key: competitionID)
+            emit SquadCompetitionMembershipRemoved(id: self.id, competitionID: competitionID)
         }
 
         // Getter for status
@@ -115,7 +126,7 @@ pub contract MFLClub: NonFungibleToken {
         pub let type: String
         access(self) var metadata: {String: AnyStruct}
 
-        init(id: UInt64, clubID: UInt64, type: String, metadata: {String: AnyStruct}, competitions: {UInt64: AnyStruct}) {
+        init(id: UInt64, clubID: UInt64, type: String, metadata: {String: AnyStruct}, competitionsMemberships: {UInt64: AnyStruct}) {
             pre {
                 MFLClub.getSquadData(id: id) == nil : "Squad already exists"
             }
@@ -131,7 +142,7 @@ pub contract MFLClub: NonFungibleToken {
                 clubID:clubID,
                 type: type,
                 metadata: metadata,
-                competitions: competitions
+                competitionsMemberships: competitionsMemberships,
             ) 
             emit SquadMinted(id: self.id)
         }
@@ -195,32 +206,14 @@ pub contract MFLClub: NonFungibleToken {
         }
     }
 
-    pub struct FoundationLicense {
-        pub let serialNumber: UInt64
-        pub let city: String?
-        pub let country: String?
-        pub let season: UInt32
-        pub let image: MetadataViews.IPFSFile
-
-        init(serialNumber: UInt64, city: String?, country: String?, season: UInt32, image: MetadataViews.IPFSFile) {
-            self.serialNumber = serialNumber
-            self.city = city
-            self.country = country
-            self.season = season
-            self.image = image
-        }
-    }
-
     // The resource that represents the Club NFT
     pub resource NFT: NonFungibleToken.INFT, MetadataViews.Resolver {
         pub let id: UInt64
-        pub let foundationLicense: FoundationLicense?
         access(self) let squads: @{UInt64: Squad}
         access(self) let metadata: {String: AnyStruct}
 
         init(
             id: UInt64,
-            foundationLicense: FoundationLicense?,
             squads: @[Squad],
             nftMetadata: {String: AnyStruct},
             metadata: {String: AnyStruct}
@@ -229,7 +222,6 @@ pub contract MFLClub: NonFungibleToken {
                 MFLClub.getClubData(id: id) == nil: "Club already exists"
             }
             self.id = id
-            self.foundationLicense = foundationLicense
             self.squads <- {}
             self.metadata = nftMetadata
             let squadsIDs: [UInt64] = []
@@ -260,9 +252,7 @@ pub contract MFLClub: NonFungibleToken {
                 Type<MetadataViews.Royalties>(),
                 Type<MetadataViews.NFTCollectionDisplay>(),
                 Type<MetadataViews.NFTCollectionData>(),
-                Type<MetadataViews.ExternalURL>(),
-                Type<MFLViews.ClubDataViewV1>(),
-                Type<MFLViews.SquadDataViewV1>()
+                Type<MetadataViews.ExternalURL>()
             ]
         }
 
@@ -309,29 +299,13 @@ pub contract MFLClub: NonFungibleToken {
                     )
                 case Type<MetadataViews.ExternalURL>():
                     return MetadataViews.ExternalURL("https://playmfl.com")
-                case Type<MFLViews.ClubDataViewV1>():
-                    return MFLViews.ClubDataViewV1(
-                        id: clubData.id,
-                        foundationLicense: self.foundationLicense,
-                        status: clubData.getStatus(),
-                        squadsIDs: clubData.getSquadIDs(),
-                        metadata: clubData.getMetadata()
-                    )
-                case Type<MFLViews.SquadDataViewV1>():
-                    let squadsDatasView: [MFLViews.SquadDataViewV1] = []
-                    for id in clubData.getSquadIDs() {
-                        if let squadData = MFLClub.getSquadData(id: id) {
-                            squadsDatasView.append(MFLViews.SquadDataViewV1(
-                                id: squadData.id,
-                                clubID: squadData.clubID,
-                                type: squadData.type,
-                                metadata: squadData.getMetadata()
-                            ))
-                        }
-                    }
-                    return squadsDatasView
             }
             return nil
+        }
+
+        // Getter for squadsIDs
+        access(contract) fun getMetadata(): {String: AnyStruct} {
+            return self.metadata
         }
 
         destroy() {
@@ -408,12 +382,20 @@ pub contract MFLClub: NonFungibleToken {
             let clubData = MFLClub.getClubData(id: id) ?? panic("Club data not found")
             assert(clubData.getStatus() == ClubStatus.NOT_FOUNDED, message: "Club already founded")
             let updatedMetadata = clubData.getMetadata()
-            let currentTimestamp = getCurrentBlock().timestamp
+            let foundationDate = getCurrentBlock().timestamp
+            let foundationLicenseSerialNumber = clubRef.getMetadata()["foundationLicenseSerialNumber"] as! UInt64?
+            let foundationLicenseCity = clubRef.getMetadata()["foundationLicenseCity"] as! String?
+            let foundationLicenseCountry = clubRef.getMetadata()["foundationLicenseCountry"] as! String?
+            let foundationLicenseSeason = clubRef.getMetadata()["foundationLicenseSeason"] as! UInt32?
+            let foundationLicenseImage = clubRef.getMetadata()["foundationLicenseImage"] as! MetadataViews.IPFSFile?
             updatedMetadata.insert(key: "name", name)
             updatedMetadata.insert(key: "description", description)
-            updatedMetadata.insert(key: "city", clubRef.foundationLicense?.city ?? "")
-            updatedMetadata.insert(key: "country", clubRef.foundationLicense?.country ?? "")
-            updatedMetadata.insert(key: "foundationDate", currentTimestamp)
+            updatedMetadata.insert(key: "foundationDate", foundationDate)
+            updatedMetadata.insert(key: "foundationLicenseSerialNumber", foundationLicenseSerialNumber)
+            updatedMetadata.insert(key: "foundationLicenseCity", foundationLicenseCity)
+            updatedMetadata.insert(key: "foundationLicenseCountry", foundationLicenseCountry)
+            updatedMetadata.insert(key: "foundationLicenseSeason", foundationLicenseSeason)
+            updatedMetadata.insert(key: "foundationLicenseImage", foundationLicenseImage)
             MFLClub.clubsDatas[id]!.setMetadata(metadata: updatedMetadata)
             MFLClub.clubsDatas[id]!.setStatus(status: ClubStatus.PENDING_VALIDATION)
             emit ClubFounded(
@@ -421,8 +403,12 @@ pub contract MFLClub: NonFungibleToken {
                 from: self.owner?.address,
                 name: name,
                 description: description,
-                foundationLicense: clubRef.foundationLicense,
-                foundationDate: currentTimestamp
+                foundationDate: foundationDate,
+                foundationLicenseSerialNumber: foundationLicenseSerialNumber,
+                foundationLicenseCity: foundationLicenseCity,
+                foundationLicenseCountry: foundationLicenseCountry,
+                foundationLicenseSeason: foundationLicenseSeason,
+                foundationLicenseImage: foundationLicenseImage,
             )
         }
 
@@ -464,7 +450,6 @@ pub contract MFLClub: NonFungibleToken {
         pub let name: String
         pub fun mintClub(
             id: UInt64,
-            foundationLicense: FoundationLicense,
             squads: @[Squad],
             nftMetadata: {String: AnyStruct},
             metadata: {String: AnyStruct},
@@ -483,14 +468,12 @@ pub contract MFLClub: NonFungibleToken {
 
         pub fun mintClub(
             id: UInt64,
-            foundationLicense: FoundationLicense,
             squads: @[Squad],
             nftMetadata: {String: AnyStruct},
             metadata: {String: AnyStruct}
         ): @MFLClub.NFT {
             let club <- create MFLClub.NFT(
                 id: id,
-                foundationLicense: foundationLicense,
                 squads: <- squads,
                 nftMetadata: nftMetadata,
                 metadata: metadata
@@ -533,11 +516,11 @@ pub contract MFLClub: NonFungibleToken {
             type: String,
             nftMetadata: {String: AnyStruct},
             metadata: {String: AnyStruct},
-            competitions: {UInt64: AnyStruct}
+            competitionsMemberships: {UInt64: AnyStruct}
         ): @Squad
         pub fun updateSquadMetadata(id: UInt64, metadata: {String: AnyStruct})
-        pub fun addSquadCompetition(id: UInt64, competitionID: UInt64, competitionData: AnyStruct)
-        pub fun removeSquadCompetition(id: UInt64, competitionID: UInt64)
+        pub fun addSquadCompetitionMembership(id: UInt64, competitionID: UInt64, competitionMembershipData: AnyStruct)
+        pub fun removeSquadCompetitionMembership(id: UInt64, competitionID: UInt64)
     }
 
     pub resource SquadAdmin: SquadAdminClaim {
@@ -553,14 +536,14 @@ pub contract MFLClub: NonFungibleToken {
             type: String,
             nftMetadata: {String: AnyStruct},
             metadata: {String: AnyStruct},
-            competitions: {UInt64: AnyStruct}
+            competitionsMemberships: {UInt64: AnyStruct}
         ): @Squad {
             let squad <- create Squad(
                 id: id,
                 clubID: clubID,
                 type: type,
                 metadata: nftMetadata,
-                competitions: competitions
+                competitionsMemberships: competitionsMemberships
             )
             return <- squad
         }
@@ -572,23 +555,23 @@ pub contract MFLClub: NonFungibleToken {
             MFLClub.getSquadData(id: id)!.setMetadata(metadata: metadata)
         }
 
-        pub fun addSquadCompetition(id: UInt64, competitionID: UInt64, competitionData: AnyStruct) {
+        pub fun addSquadCompetitionMembership(id: UInt64, competitionID: UInt64, competitionMembershipData: AnyStruct) {
             pre {
                 MFLClub.getSquadData(id: id) != nil  : "Squad data not found"
             }
-            MFLClub.getSquadData(id: id)!.addCompetition(competitionID: competitionID, competitionData: competitionData)
+            MFLClub.getSquadData(id: id)!.addCompetitionMembership(competitionID: competitionID, competitionMembershipData: competitionMembershipData)
         }
 
-        pub fun removeSquadCompetition(id: UInt64, competitionID: UInt64) {
+        pub fun removeSquadCompetitionMembership(id: UInt64, competitionID: UInt64) {
             pre {
                 MFLClub.getSquadData(id: id) != nil  : "Squad data not found"
             }
-            MFLClub.getSquadData(id: id)!.removeCompetition(competitionID: competitionID)
+            MFLClub.getSquadData(id: id)!.removeCompetitionMembership(competitionID: competitionID)
         }
 
         pub fun createSquadAdmin(): @SquadAdmin {
             return <- create SquadAdmin()
-        } 
+        }
     }
 
     init() {

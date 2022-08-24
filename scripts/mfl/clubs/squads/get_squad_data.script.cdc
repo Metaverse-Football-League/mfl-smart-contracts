@@ -8,3 +8,4 @@ import MFLClub from "../../../../contracts/clubs/MFLClub.cdc"
 pub fun main(squadID: UInt64): MFLClub.SquadData? {
     return MFLClub.getSquadData(id: squadID)
 }
+ 
