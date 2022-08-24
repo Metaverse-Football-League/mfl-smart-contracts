@@ -15,6 +15,7 @@ export const MFLAdminTestsUtils = {
     await testsUtils.deployContract('MFLViews', to, 'views/MFLViews', addressMap);
     await testsUtils.deployContract('MFLPlayer', to, 'players/MFLPlayer', addressMap);
     await testsUtils.deployContract('MFLPack', to, 'packs/MFLPack', addressMap);
+    await testsUtils.deployContract('MFLClub', to, 'clubs/MFLClub', addressMap);
     return addressMap;
   },
 

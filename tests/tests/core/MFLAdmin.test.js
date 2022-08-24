@@ -115,6 +115,44 @@ describe('MFLAdmin', () => {
         });
       })
 
+      test('should set a ClubAdminClaim capability in an admin proxy', async () => {
+        // prepare
+        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
+        const bobAccountAddress = await getAccountAddress('BobAccount');
+        const privatePath = `/private/${bobAccountAddress}-clubAdminClaim`
+        await testsUtils.shallPass({name: 'mfl/core/create_admin_proxy.tx', signers: [bobAccountAddress]});
+
+        // execute
+        await testsUtils.shallPass({name: 'mfl/clubs/give_club_admin_claim.tx', args: [bobAccountAddress, privatePath], signers: [aliceAdminAccountAddress]})
+
+        // assert
+        // Bob should have a ClubAdminClaim Capability in his AdminProxy
+        await testsUtils.shallPass({
+          code: adminClaim.CHECK_CLUB_ADMIN_CLAIM,
+          signers: [bobAccountAddress],
+        });
+      })
+
+      test('should set a SquadAdminClaim capability in an admin proxy', async () => {
+        // prepare
+        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
+        const bobAccountAddress = await getAccountAddress('BobAccount');
+        const privatePath = `/private/${bobAccountAddress}-squadAdminClaim`
+        await testsUtils.shallPass({name: 'mfl/core/create_admin_proxy.tx', signers: [bobAccountAddress]});
+
+        // execute
+        await testsUtils.shallPass({name: 'mfl/clubs/squads/give_squad_admin_claim.tx', args: [bobAccountAddress, privatePath], signers: [aliceAdminAccountAddress]})
+
+        // assert
+        // Bob should have a SquadAdminClaim Capability in his AdminProxy
+        await testsUtils.shallPass({
+          code: adminClaim.CHECK_SQUAD_ADMIN_CLAIM,
+          signers: [bobAccountAddress],
+        });
+      })
+    });
+
+    describe('revoke claim capability', () => {
       test('should revoke a PlayerAdminClaim capability', async () => {
         // prepare
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
@@ -181,6 +219,46 @@ describe('MFLAdmin', () => {
           signers: [bobAccountAddress],
         });
         expect(error).toContain('Could not borrow PackTemplateAdminClaim');
+      })
+
+      test('should revoke a ClubAdminClaim capability', async () => {
+        // prepare
+        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
+        const bobAccountAddress = await getAccountAddress('BobAccount');
+        const privatePath = `/private/${bobAccountAddress}-clubAdminClaim`
+        await testsUtils.shallPass({name: 'mfl/core/create_admin_proxy.tx', signers: [bobAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/clubs/give_club_admin_claim.tx', args: [bobAccountAddress, privatePath], signers: [aliceAdminAccountAddress]})
+
+        // execute
+        await testsUtils.shallPass({name: 'mfl/clubs/revoke_club_admin_claim.tx', args: [privatePath], signers: [aliceAdminAccountAddress]})
+
+        // assert
+        // Bob should not have a ClubAdminClaim Capability in his AdminProxy
+        const error = await testsUtils.shallRevert({
+          code: adminClaim.CHECK_CLUB_ADMIN_CLAIM,
+          signers: [bobAccountAddress],
+        });
+        expect(error).toContain('Could not borrow ClubAdminClaim');
+      })
+
+      test('should revoke a SquadAdminClaim capability', async () => {
+        // prepare
+        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
+        const bobAccountAddress = await getAccountAddress('BobAccount');
+        const privatePath = `/private/${bobAccountAddress}-squadAdminClaim`
+        await testsUtils.shallPass({name: 'mfl/core/create_admin_proxy.tx', signers: [bobAccountAddress]});
+        await testsUtils.shallPass({name: 'mfl/clubs/squads/give_squad_admin_claim.tx', args: [bobAccountAddress, privatePath], signers: [aliceAdminAccountAddress]})
+
+        // execute
+        await testsUtils.shallPass({name: 'mfl/clubs/squads/revoke_squad_admin_claim.tx', args: [privatePath], signers: [aliceAdminAccountAddress]})
+
+        // assert
+        // Bob should not have a SquaddminClaim Capability in his AdminProxy
+        const error = await testsUtils.shallRevert({
+          code: adminClaim.CHECK_SQUAD_ADMIN_CLAIM,
+          signers: [bobAccountAddress],
+        });
+        expect(error).toContain('Could not borrow SquadAdminClaim');
       })
 
       test('should panic if revoke capability path does not exist', async () => {

@@ -11,14 +11,14 @@ transaction(receiverAddress: Address, privatePath: Path) {
 
     let adminRootRef: &MFLAdmin.AdminRoot
     let receveiverAdminProxyRef: &{MFLAdmin.AdminProxyPublic}
-    let packAdminClaimCapability: Capability<&{MFLPack.PackAdminClaim}>
+    let packAdminClaimCapability: Capability<&MFLPack.PackAdmin{MFLPack.PackAdminClaim}>
 
     prepare(acct: AuthAccount) {
         self.adminRootRef = acct.borrow<&MFLAdmin.AdminRoot>(from: MFLAdmin.AdminRootStoragePath) ?? panic("Could not borrow AdminRoot ref")
         let receiverAccount = getAccount(receiverAddress)
         self.receveiverAdminProxyRef = receiverAccount.getCapability<&{MFLAdmin.AdminProxyPublic}>(MFLAdmin.AdminProxyPublicPath).borrow() ?? panic("Could not borrow AdminProxyPublic ref")
         let privateCapabilityPath = privatePath as? PrivatePath
-        self.packAdminClaimCapability = acct.link<&{MFLPack.PackAdminClaim}>(privateCapabilityPath!, target: MFLPack.PackAdminStoragePath) ?? panic("path already exists")
+        self.packAdminClaimCapability = acct.link<&MFLPack.PackAdmin{MFLPack.PackAdminClaim}>(privateCapabilityPath!, target: MFLPack.PackAdminStoragePath) ?? panic("path already exists")
     }
 
     execute {

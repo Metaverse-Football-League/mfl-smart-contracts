@@ -12,7 +12,7 @@ transaction() {
             acct.save(<-MFLAdmin.createAdminProxy(), to: MFLAdmin.AdminProxyStoragePath)
         }
         acct.unlink(MFLAdmin.AdminProxyPublicPath)
-        acct.link<&{MFLAdmin.AdminProxyPublic}>(MFLAdmin.AdminProxyPublicPath, target: MFLAdmin.AdminProxyStoragePath)
+        acct.link<&MFLAdmin.AdminProxy{MFLAdmin.AdminProxyPublic}>(MFLAdmin.AdminProxyPublicPath, target: MFLAdmin.AdminProxyStoragePath)
     }
 
     execute {

@@ -11,14 +11,14 @@ transaction(receiverAddress: Address, privatePath: Path) {
 
   let adminRootRef: &MFLAdmin.AdminRoot
   let receveiverAdminProxyRef: &{MFLAdmin.AdminProxyPublic}
-  let playerAdminClaimCapability: Capability<&{MFLPlayer.PlayerAdminClaim}>
+  let playerAdminClaimCapability: Capability<&MFLPlayer.PlayerAdmin{MFLPlayer.PlayerAdminClaim}>
 
   prepare(acct: AuthAccount) {
     self.adminRootRef = acct.borrow<&MFLAdmin.AdminRoot>(from: MFLAdmin.AdminRootStoragePath) ?? panic("Could not borrow AdminRoot ref")
     let receiverAccount = getAccount(receiverAddress)
     self.receveiverAdminProxyRef = receiverAccount.getCapability<&{MFLAdmin.AdminProxyPublic}>(MFLAdmin.AdminProxyPublicPath).borrow() ?? panic("Could not borrow AdminProxyPublic ref")
     let privateCapabilityPath = privatePath as? PrivatePath
-    self.playerAdminClaimCapability = acct.link<&{MFLPlayer.PlayerAdminClaim}>(privateCapabilityPath!, target: MFLPlayer.PlayerAdminStoragePath) ?? panic("path already exists")
+    self.playerAdminClaimCapability = acct.link<&MFLPlayer.PlayerAdmin{MFLPlayer.PlayerAdminClaim}>(privateCapabilityPath!, target: MFLPlayer.PlayerAdminStoragePath) ?? panic("path already exists")
   }
 
   execute {
