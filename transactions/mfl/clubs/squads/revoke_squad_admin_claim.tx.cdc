@@ -1,7 +1,7 @@
 import MFLClub from "../../../../contracts/clubs/MFLClub.cdc"
 
 /** 
-  This tx revokes a club admin claim capability by
+  This tx revokes a squad admin claim capability by
   providing a private path identifying the capability that should be removed.
 **/
 
