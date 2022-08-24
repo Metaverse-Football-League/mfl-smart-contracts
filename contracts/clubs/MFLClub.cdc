@@ -1,11 +1,9 @@
 import NonFungibleToken from "../_libs/NonFungibleToken.cdc"
 import MetadataViews from "../_libs/MetadataViews.cdc"
-import MFLViews from "../views/MFLViews.cdc"
 
 /**
   This contract is based on the NonFungibleToken standard on Flow.
-  It allows an admin to mint clubs (NFTs) and squads. Clubs and Squads have metadata
-  that can be updated by an admin.
+  It allows an admin to mint clubs (NFTs) and squads. Clubs and squads have metadata that can be updated by an admin.
 **/
 
 pub contract MFLClub: NonFungibleToken {
@@ -49,13 +47,13 @@ pub contract MFLClub: NonFungibleToken {
     pub let ClubAdminStoragePath: StoragePath
     pub let SquadAdminStoragePath: StoragePath
 
-    // The total number of Clubs that have been minted
+    // The total number of clubs that have been minted
     pub var totalSupply: UInt64
 
     // All clubs datas are stored in this dictionary
     access(self) let clubsDatas: {UInt64: ClubData}
 
-    // The total number of Squads that have been minted
+    // The total number of squads that have been minted
     pub var squadsTotalSupply: UInt64
 
     // All squads data are stored in this dictionary
@@ -108,7 +106,7 @@ pub contract MFLClub: NonFungibleToken {
             emit SquadCompetitionMembershipAdded(id: self.id, competitionID: competitionID)
         }
 
-        // remove competitionMembership
+        // Remove competitionMembership
         access(contract) fun removeCompetitionMembership(competitionID: UInt64) {
             self.competitionsMemberships.remove(key: competitionID)
             emit SquadCompetitionMembershipRemoved(id: self.id, competitionID: competitionID)
@@ -126,14 +124,21 @@ pub contract MFLClub: NonFungibleToken {
         pub let type: String
         access(self) var metadata: {String: AnyStruct}
 
-        init(id: UInt64, clubID: UInt64, type: String, metadata: {String: AnyStruct}, competitionsMemberships: {UInt64: AnyStruct}) {
+        init(
+            id: UInt64,
+            clubID: UInt64,
+            type: String,
+            nftMetadata: {String: AnyStruct},
+            metadata: {String: AnyStruct},
+            competitionsMemberships: {UInt64: AnyStruct}
+         ) {
             pre {
                 MFLClub.getSquadData(id: id) == nil : "Squad already exists"
             }
             self.id = id
             self.clubID = clubID
             self.type = type
-            self.metadata = metadata
+            self.metadata = nftMetadata
             MFLClub.squadsTotalSupply = MFLClub.squadsTotalSupply + (1 as UInt64)
 
             // Set squad data
@@ -542,7 +547,8 @@ pub contract MFLClub: NonFungibleToken {
                 id: id,
                 clubID: clubID,
                 type: type,
-                metadata: nftMetadata,
+                nftMetadata: nftMetadata,
+                metadata: metadata,
                 competitionsMemberships: competitionsMemberships
             )
             return <- squad
