@@ -303,7 +303,7 @@ pub contract MFLClub: NonFungibleToken {
             return nil
         }
 
-        // Getter for squadsIDs
+        // Getter for metadata
         access(contract) fun getMetadata(): {String: AnyStruct} {
             return self.metadata
         }
