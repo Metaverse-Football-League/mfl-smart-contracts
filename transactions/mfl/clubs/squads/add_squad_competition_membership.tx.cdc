@@ -5,6 +5,7 @@ import MFLAdmin from "../../../../contracts/core/MFLAdmin.cdc"
   This tx adds a competitionMembership to a squad.
 **/
 
+ // ! TODO AnyStruct not valid in fcl arg
 transaction(squadID: UInt64, competitionID: UInt64, competitionMembershipData: {String: AnyStruct}) {
     let adminProxyRef: &MFLAdmin.AdminProxy
 

@@ -106,7 +106,8 @@
         "testnet": "683564e46977788a",
         "mainnet": "8ebcbfd516b1da27"
       }
-    }
+    },
+    "MFLClub": "./contracts/clubs/MFLClub.cdc"
   },
   "networks": {
     "emulator": "127.0.0.1:3569",
@@ -152,7 +153,8 @@
         "MFLPlayer",
         "MFLPackTemplate",
         "MFLPack",
-        "MFLViews"
+        "MFLViews",
+        "MFLClub"
       ]
     },
     "testnet": {
@@ -161,7 +163,8 @@
         "MFLPackTemplate",
         "MFLViews",
         "MFLPlayer",
-        "MFLPack"
+        "MFLPack",
+        "MFLClub"
       ]
     }
   }

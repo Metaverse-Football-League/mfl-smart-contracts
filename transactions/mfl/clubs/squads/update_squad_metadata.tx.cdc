@@ -5,6 +5,7 @@ import MFLAdmin from "../../../../contracts/core/MFLAdmin.cdc"
   This tx updates the metadata of a squad.
 **/
 
+ // ! TODO AnyStruct not valid in fcl arg
 transaction(squadID: UInt64, metadata: {String: AnyStruct}) {
     let adminProxyRef: &MFLAdmin.AdminProxy
 
