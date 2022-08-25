@@ -18,4 +18,3 @@ transaction(playerID: UInt64) {
         destroy self.playerNFT
     }
 }
- 

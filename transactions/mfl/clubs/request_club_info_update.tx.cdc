@@ -13,8 +13,12 @@ transaction(clubID: UInt64, name: String, description: String) {
     prepare(acct: AuthAccount) {
         self.clubCollectionRef = acct.borrow<&MFLClub.Collection>(from: MFLClub.CollectionStoragePath) ?? panic("Could not borrow club collection reference")
     }
+    
 
     execute {
-        self.clubCollectionRef.requestClubInfoUpdate(id: clubID, info: {name: name, description: description})
+        let info: {String: String} = {}
+        info.insert(key: "name", name)
+        info.insert(key: "description", description)
+        self.clubCollectionRef.requestClubInfoUpdate(id: clubID, info: info)
     }
 }
