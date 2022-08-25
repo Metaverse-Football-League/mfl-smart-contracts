@@ -5,7 +5,6 @@ import * as matchers from "jest-extended";
 import { ERROR_UPDATE_CLUB_METADATA } from "./_transactions/error_update_club_metadata.tx";
 import { ERROR_UPDATE_SQUAD_METADATA } from "./_transactions/error_update_squad_metadata.tx";
 import { UPDATE_CLUB_METADATA } from "./_transactions/update_club_metadata.tx";
-import { ADD_CLUB_METADATA } from "./_transactions/add_club_metadata.tx";
 import { UPDATE_SQUAD_METADATA } from "./_transactions/update_squad_metadata.tx";
 expect.extend(matchers);
 jest.setTimeout(40000);
@@ -907,146 +906,6 @@ describe("MFLClub", () => {
       });
     });
 
-    describe("addClubMetadata()", () => {
-      test("should add club metadata", async () => {
-        // prepare
-        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
-          "AliceAdminAccount",
-          "AliceAdminAccount",
-          true,
-          true,
-        );
-        const clubId = 1;
-        const squadId = 10;
-        const clubNbSeats = 80000;
-        const clubColor = "purple";
-        await MFLClubTestsUtils.createClubNFT(clubId, squadId);
-        await MFLClubTestsUtils.foundClub(clubId);
-
-        // execute
-        const result = await testsUtils.shallPass({
-          code: ADD_CLUB_METADATA,
-          args: [clubId, clubNbSeats, clubColor],
-          signers: [aliceAdminAccountAddress],
-        });
-
-        // assert
-        expect(result.events).toHaveLength(1);
-        expect(result.events[0]).toEqual({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.ClubMetadataAdded`,
-          data: { id: clubId },
-          eventIndex: expect.any(Number),
-          transactionId: expect.any(String),
-          transactionIndex: expect.any(Number),
-        });
-        const clubData = await testsUtils.executeValidScript({
-          name: "mfl/clubs/get_club_data.script",
-          args: [clubId],
-        });
-        expect(clubData).toEqual({
-          id: clubId,
-          status: { rawValue: 1 },
-          squadsIDs: [squadId],
-          metadata: {
-            ...MFLClubTestsUtils.FOUNDATION_LICENSE,
-            ...MFLClubTestsUtils.CLUB_INFO,
-            foundationDate: expect.any(String),
-            nbSeats: clubNbSeats,
-            color: clubColor,
-          },
-        });
-      });
-
-      test("should throw an error when club does not exist", async () => {
-        // prepare
-        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
-          "AliceAdminAccount",
-          "AliceAdminAccount",
-          true,
-          true,
-        );
-
-        // execute
-        const error = await testsUtils.shallRevert({
-          code: ADD_CLUB_METADATA,
-          args: [208, 120000, "red"],
-          signers: [aliceAdminAccountAddress],
-        });
-
-        // assert
-        expect(error).toContain("Club data not found");
-      });
-    });
-
-    describe("removeClubMetadata()", () => {
-      test("should remove club metadata", async () => {
-        // prepare
-        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
-          "AliceAdminAccount",
-          "AliceAdminAccount",
-          true,
-          true,
-        );
-        const clubId = 1;
-        const squadId = 10;
-        const keysToRemove = ["foundationDate", "description"];
-        await MFLClubTestsUtils.createClubNFT(clubId, squadId);
-        await MFLClubTestsUtils.foundClub(clubId);
-
-        // execute
-        const result = await testsUtils.shallPass({
-          name: "mfl/clubs/remove_club_metadata.tx",
-          args: [clubId, keysToRemove],
-          signers: [aliceAdminAccountAddress],
-        });
-
-        // assert
-        expect(result.events).toHaveLength(1);
-        expect(result.events[0]).toEqual({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.ClubMetadataRemoved`,
-          data: { id: clubId, keysRemoved: keysToRemove },
-          eventIndex: expect.any(Number),
-          transactionId: expect.any(String),
-          transactionIndex: expect.any(Number),
-        });
-        const clubData = await testsUtils.executeValidScript({
-          name: "mfl/clubs/get_club_data.script",
-          args: [clubId],
-        });
-        expect(clubData).toEqual({
-          id: clubId,
-          status: { rawValue: 1 },
-          squadsIDs: [squadId],
-          metadata: {
-            ...MFLClubTestsUtils.FOUNDATION_LICENSE,
-            ...MFLClubTestsUtils.CLUB_INFO,
-            foundationDate: undefined,
-            description: undefined,
-          },
-        });
-      });
-
-      test("should throw an error when club does not exist", async () => {
-        // prepare
-        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
-          "AliceAdminAccount",
-          "AliceAdminAccount",
-          true,
-          true,
-        );
-
-        // execute
-        const error = await testsUtils.shallRevert({
-          name: "mfl/clubs/remove_club_metadata.tx",
-          args: [208, ["foundationDate", "description"]],
-          signers: [aliceAdminAccountAddress],
-        });
-
-        // assert
-        expect(error).toContain("Club data not found");
-      });
-    });
-
     describe("updateClubSquadsIDs()", () => {
       test("should update club squads ids", async () => {
         // prepare
@@ -1195,7 +1054,7 @@ describe("MFLClub", () => {
         });
       });
 
-      test.only("should throw an error when squad does not exist", async () => {
+      test("should throw an error when squad does not exist", async () => {
         // prepare
         const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
           "AliceAdminAccount",
