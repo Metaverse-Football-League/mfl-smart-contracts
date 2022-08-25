@@ -204,7 +204,7 @@ pub contract MFLClub: NonFungibleToken {
             return self.metadata
         }
 
-        // Setter for metadata
+        // Setter to update all metadata
         access(contract) fun setMetadata(metadata: {String: AnyStruct}) {
             self.metadata = metadata
             emit ClubMetadataUpdated(id: self.id)

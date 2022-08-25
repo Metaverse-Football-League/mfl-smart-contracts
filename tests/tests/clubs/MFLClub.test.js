@@ -2,7 +2,11 @@ import { emulator, getAccountAddress } from "flow-js-testing";
 import { MFLClubTestsUtils } from "./_utils/MFLClubTests.utils";
 import { testsUtils } from "../_utils/tests.utils";
 import * as matchers from "jest-extended";
-
+import { ERROR_UPDATE_CLUB_METADATA } from "./_transactions/error_update_club_metadata.tx";
+import { ERROR_UPDATE_SQUAD_METADATA } from "./_transactions/error_update_squad_metadata.tx";
+import { UPDATE_CLUB_METADATA } from "./_transactions/update_club_metadata.tx";
+import { ADD_CLUB_METADATA } from "./_transactions/add_club_metadata.tx";
+import { UPDATE_SQUAD_METADATA } from "./_transactions/update_squad_metadata.tx";
 expect.extend(matchers);
 jest.setTimeout(40000);
 
@@ -300,6 +304,14 @@ describe("MFLClub", () => {
       });
     });
 
+    // describe(() => {
+    //   //TODO foundClub()
+    // });
+
+    // describe(() => {
+    //   //TODO requestClubInfoUpdate()
+    // });
+
     describe("destroy", () => {
       test("should destroy a collection", async () => {
         // prepare
@@ -414,6 +426,832 @@ describe("MFLClub", () => {
             ]),
           );
         });
+      });
+
+      describe("resolveView()", () => {
+        test("should resolve Display view for a specific club", async () => {
+          // prepare
+          const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
+            "AliceAdminAccount",
+            "AliceAdminAccount",
+            true,
+            true,
+          );
+          const clubId = 1000;
+          await MFLClubTestsUtils.createClubNFT(clubId, 1);
+
+          // execute
+          const clubDisplayView = await testsUtils.executeValidScript({
+            name: "mfl/clubs/get_club_display_view_from_collection.script",
+            args: [aliceAdminAccountAddress, clubId],
+          });
+
+          // assert
+          expect(clubDisplayView).toEqual({
+            name: "",
+            description: "",
+            thumbnail: `https://d11e2517uhbeau.cloudfront.net/clubs/${clubId}/thumbnail.png`,
+            owner: aliceAdminAccountAddress,
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.NFT`,
+          });
+        });
+
+        test("should resolve Display view for all clubs", async () => {
+          // prepare
+          const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
+            "AliceAdminAccount",
+            "AliceAdminAccount",
+            true,
+            true,
+          );
+          const clubId1 = 450;
+          const clubId2 = 578;
+          await MFLClubTestsUtils.createClubNFT(clubId1, 1);
+          await MFLClubTestsUtils.createClubNFT(clubId2, 2);
+
+          // execute
+          const clubsDisplayView = await testsUtils.executeValidScript({
+            name: "mfl/clubs/get_clubs_display_view_from_collection.script",
+            args: [aliceAdminAccountAddress, [clubId1, clubId2]],
+          });
+
+          // assert
+          expect(clubsDisplayView).toEqual(
+            expect.arrayContaining([
+              {
+                name: "",
+                description: "",
+                thumbnail: `https://d11e2517uhbeau.cloudfront.net/clubs/${clubId1}/thumbnail.png`,
+                owner: aliceAdminAccountAddress,
+                type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.NFT`,
+              },
+              {
+                name: "",
+                description: "",
+                thumbnail: `https://d11e2517uhbeau.cloudfront.net/clubs/${clubId2}/thumbnail.png`,
+                owner: aliceAdminAccountAddress,
+                type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.NFT`,
+              },
+            ]),
+          );
+        });
+      });
+
+      describe("destroy()", () => {
+        test("should destroy the NFT", async () => {
+          // prepare
+          const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
+            "AliceAdminAccount",
+            "AliceAdminAccount",
+            true,
+            true,
+          );
+          const clubId = 450;
+          const squadId = 1;
+          await MFLClubTestsUtils.createClubNFT(clubId, squadId);
+
+          // execute
+          const signers = [aliceAdminAccountAddress];
+          const args = [clubId];
+          const result = await testsUtils.shallPass({ name: "mfl/clubs/destroy_club.tx", args, signers });
+
+          // assert
+          expect(result.events).toHaveLength(3);
+          expect(result.events).toEqual(
+            expect.arrayContaining([
+              {
+                type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.Withdraw`,
+                data: { id: clubId, from: aliceAdminAccountAddress },
+                eventIndex: expect.any(Number),
+                transactionId: expect.any(String),
+                transactionIndex: expect.any(Number),
+              },
+              {
+                type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.ClubDestroyed`,
+                data: { id: clubId },
+                eventIndex: expect.any(Number),
+                transactionId: expect.any(String),
+                transactionIndex: expect.any(Number),
+              },
+              {
+                type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.SquadDestroyed`,
+                data: { id: squadId },
+                eventIndex: expect.any(Number),
+                transactionId: expect.any(String),
+                transactionIndex: expect.any(Number),
+              },
+            ]),
+          );
+          const error = await testsUtils.executeFailingScript({
+            name: "mfl/clubs/get_club_display_view_from_collection.script",
+            args: [aliceAdminAccountAddress, clubId],
+          });
+          expect(error.message).toContain("unexpectedly found nil while forcing an Optional value");
+        });
+      });
+    });
+  });
+
+  describe("getClubData()", () => {
+    test("should get club data for a not founded club", async () => {
+      // prepare
+      await MFLClubTestsUtils.createClubAndSquadAdmin("AliceAdminAccount", "AliceAdminAccount", true, true);
+      const clubId = 42;
+      const squadId = 101;
+      await MFLClubTestsUtils.createClubNFT(clubId, squadId);
+
+      // execute
+      const clubData = await testsUtils.executeValidScript({
+        name: "mfl/clubs/get_club_data.script",
+        args: [clubId],
+      });
+
+      // assert
+      expect(clubData).toEqual({
+        id: clubId,
+        metadata: {},
+        status: { rawValue: 0 }, // status = NOT_FOUNDED
+        squadsIDs: [squadId],
+      });
+    });
+
+    test("should get club data for a founded club", async () => {
+      // prepare
+      await MFLClubTestsUtils.createClubAndSquadAdmin("AliceAdminAccount", "AliceAdminAccount", true, true);
+      const clubId = 42;
+      const clubName = "Wax FC";
+      const clubDescription = "Hello world";
+      const squadId = 101;
+      await MFLClubTestsUtils.createClubNFT(clubId, squadId);
+      await MFLClubTestsUtils.foundClub(clubId, clubName, clubDescription);
+
+      // execute
+      const clubData = await testsUtils.executeValidScript({
+        name: "mfl/clubs/get_club_data.script",
+        args: [clubId],
+      });
+
+      // assert
+      expect(clubData).toEqual({
+        id: clubId,
+        metadata: {
+          name: clubName,
+          description: clubDescription,
+          foundationDate: expect.any(String),
+          ...MFLClubTestsUtils.FOUNDATION_LICENSE,
+        },
+        status: { rawValue: 1 }, // status = PENDING_VALIDATION
+        squadsIDs: [squadId],
+      });
+    });
+
+    test("should return nil when getting club data for an unknown club", async () => {
+      // prepare
+
+      // execute
+      const clubData = await testsUtils.executeValidScript({
+        name: "mfl/clubs/get_club_data.script",
+        args: [4],
+      });
+
+      // assert
+      expect(clubData).toBeNull();
+    });
+
+    test("should throw an error when updating club metadata", async () => {
+      // prepare
+      await MFLClubTestsUtils.createClubAndSquadAdmin("AliceAdminAccount", "AliceAdminAccount", true, true);
+      const clubId = 1;
+      await MFLClubTestsUtils.createClubNFT(clubId, 1);
+
+      // execute
+      const error = await testsUtils.shallRevert({
+        code: ERROR_UPDATE_CLUB_METADATA,
+        args: [clubId],
+      });
+
+      // assert
+      expect(error).toContain("cannot access `metadata`: field has private access");
+    });
+  });
+
+  describe("getSquadData()", () => {
+    test("should get squad data for a not founded club", async () => {
+      // prepare
+      await MFLClubTestsUtils.createClubAndSquadAdmin("AliceAdminAccount", "AliceAdminAccount", true, true);
+      const clubId = 42;
+      const squadId = 101;
+      await MFLClubTestsUtils.createClubNFT(clubId, squadId);
+
+      // execute
+      const clubData = await testsUtils.executeValidScript({
+        name: "mfl/clubs/squads/get_squad_data.script",
+        args: [squadId],
+      });
+
+      // assert
+      expect(clubData).toEqual({
+        id: squadId,
+        clubID: clubId,
+        type: "squadType",
+        status: { rawValue: 0 }, // status = ACTIVE
+        metadata: {},
+        competitionsMemberships: {},
+      });
+    });
+
+    test("should return nil when getting squad data for an unknown squad", async () => {
+      // prepare
+
+      // execute
+      const squadData = await testsUtils.executeValidScript({
+        name: "mfl/clubs/squads/get_squad_data.script",
+        args: [4],
+      });
+
+      // assert
+      expect(squadData).toBeNull();
+    });
+
+    test("should throw an error when updating squad metadata", async () => {
+      // prepare
+      await MFLClubTestsUtils.createClubAndSquadAdmin("AliceAdminAccount", "AliceAdminAccount", true, true);
+      const squadId = 1;
+      await MFLClubTestsUtils.createClubNFT(1, squadId);
+
+      // execute
+      const error = await testsUtils.shallRevert({
+        code: ERROR_UPDATE_SQUAD_METADATA,
+        args: [squadId],
+      });
+
+      // assert
+      expect(error).toContain("cannot access `metadata`: field has private access");
+    });
+  });
+
+  describe("ClubAdmin", () => {
+    describe("mintClub()", () => {
+      test("should mint a club", async () => {
+        // prepare
+        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+          true,
+          true,
+        );
+        const clubId = 1;
+        const squadId = 1;
+
+        // execute
+        const result = await MFLClubTestsUtils.createClubNFT(clubId, squadId);
+
+        // assert
+        expect(result.events).toHaveLength(3);
+        expect(result.events).toEqual(
+          expect.arrayContaining([
+            {
+              type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.SquadMinted`,
+              data: { id: squadId },
+              eventIndex: expect.any(Number),
+              transactionId: expect.any(String),
+              transactionIndex: expect.any(Number),
+            },
+            {
+              type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.ClubMinted`,
+              data: { id: clubId },
+              eventIndex: expect.any(Number),
+              transactionId: expect.any(String),
+              transactionIndex: expect.any(Number),
+            },
+            {
+              type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.Deposit`,
+              data: { id: clubId, to: aliceAdminAccountAddress },
+              eventIndex: expect.any(Number),
+              transactionId: expect.any(String),
+              transactionIndex: expect.any(Number),
+            },
+          ]),
+        );
+        const clubData = await testsUtils.executeValidScript({
+          name: "mfl/clubs/get_club_data.script",
+          args: [clubId],
+        });
+        const squadData = await testsUtils.executeValidScript({
+          name: "mfl/clubs/squads/get_squad_data.script",
+          args: [squadId],
+        });
+        const totalSupply = await testsUtils.executeValidScript({
+          name: "mfl/clubs/get_clubs_total_supply.script",
+        });
+        const squadsTotalSupply = await testsUtils.executeValidScript({
+          name: "mfl/clubs/squads/get_squads_total_supply.script",
+        });
+        expect(clubData).toEqual({
+          id: clubId,
+          metadata: {},
+          status: { rawValue: 0 }, // status = NOT_FOUNDED
+          squadsIDs: [squadId],
+        });
+        expect(squadData).toEqual({
+          id: squadId,
+          clubID: clubId,
+          type: "squadType",
+          status: { rawValue: 0 }, // status = ACTIVE
+          metadata: {},
+          competitionsMemberships: {},
+        });
+        expect(totalSupply).toBe(1);
+        expect(squadsTotalSupply).toBe(1);
+      });
+
+      test("should panic when minting a club id already minted", async () => {
+        // prepare
+        await MFLClubTestsUtils.createClubAndSquadAdmin("AliceAdminAccount", "AliceAdminAccount", true, true);
+        const clubId = 1;
+
+        // execute
+        await MFLClubTestsUtils.createClubNFT(clubId, 1);
+        const error = await MFLClubTestsUtils.createClubNFT(clubId, 2, false);
+
+        // assert
+        expect(error).toContain("Club already exists");
+      });
+    });
+
+    describe("updateClubStatus()", () => {
+      test("should update club status", async () => {
+        // prepare
+        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+          true,
+          true,
+        );
+        const clubId = 1;
+        const squadId = 10;
+        const statusRawValue = 2; // rawValue 2 = FOUNDED status
+        await MFLClubTestsUtils.createClubNFT(clubId, squadId);
+
+        // execute
+        const result = await testsUtils.shallPass({
+          name: "mfl/clubs/update_club_status.tx",
+          args: [clubId, statusRawValue],
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        expect(result.events).toHaveLength(1);
+        expect(result.events[0]).toEqual({
+          type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.ClubStatusUpdated`,
+          data: { id: clubId, status: statusRawValue },
+          eventIndex: expect.any(Number),
+          transactionId: expect.any(String),
+          transactionIndex: expect.any(Number),
+        });
+        const clubData = await testsUtils.executeValidScript({
+          name: "mfl/clubs/get_club_data.script",
+          args: [clubId],
+        });
+        expect(clubData).toEqual({
+          id: clubId,
+          status: { rawValue: statusRawValue },
+          squadsIDs: [squadId],
+          metadata: {},
+        });
+      });
+
+      test("should throw an error when club does not exist", async () => {
+        // prepare
+        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+          true,
+          true,
+        );
+        const statusRawValue = 2; // rawValue 2 = FOUNDED status
+
+        // execute
+        const error = await testsUtils.shallRevert({
+          name: "mfl/clubs/update_club_status.tx",
+          args: [208, statusRawValue],
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        expect(error).toContain("Club data not found");
+      });
+    });
+
+    describe("updateClubMetadata()", () => {
+      test("should update club metadata", async () => {
+        // prepare
+        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+          true,
+          true,
+        );
+        const clubId = 1;
+        const squadId = 10;
+        const updatedClubName = "New Club Name";
+        const updatedClubDescription = "New Club Description";
+        await MFLClubTestsUtils.createClubNFT(clubId, squadId);
+
+        // execute
+        const result = await testsUtils.shallPass({
+          code: UPDATE_CLUB_METADATA,
+          args: [clubId, updatedClubName, updatedClubDescription],
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        expect(result.events).toHaveLength(1);
+        expect(result.events[0]).toEqual({
+          type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.ClubMetadataUpdated`,
+          data: { id: clubId },
+          eventIndex: expect.any(Number),
+          transactionId: expect.any(String),
+          transactionIndex: expect.any(Number),
+        });
+        const clubData = await testsUtils.executeValidScript({
+          name: "mfl/clubs/get_club_data.script",
+          args: [clubId],
+        });
+        expect(clubData).toEqual({
+          id: clubId,
+          status: { rawValue: 0 },
+          squadsIDs: [squadId],
+          metadata: { name: updatedClubName, description: updatedClubDescription },
+        });
+      });
+
+      test("should throw an error when club does not exist", async () => {
+        // prepare
+        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+          true,
+          true,
+        );
+
+        // execute
+        const error = await testsUtils.shallRevert({
+          code: UPDATE_CLUB_METADATA,
+          args: [208, "New name", "New description"],
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        expect(error).toContain("Club data not found");
+      });
+    });
+
+    describe("addClubMetadata()", () => {
+      test("should add club metadata", async () => {
+        // prepare
+        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+          true,
+          true,
+        );
+        const clubId = 1;
+        const squadId = 10;
+        const clubNbSeats = 80000;
+        const clubColor = "purple";
+        await MFLClubTestsUtils.createClubNFT(clubId, squadId);
+        await MFLClubTestsUtils.foundClub(clubId);
+
+        // execute
+        const result = await testsUtils.shallPass({
+          code: ADD_CLUB_METADATA,
+          args: [clubId, clubNbSeats, clubColor],
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        expect(result.events).toHaveLength(1);
+        expect(result.events[0]).toEqual({
+          type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.ClubMetadataAdded`,
+          data: { id: clubId },
+          eventIndex: expect.any(Number),
+          transactionId: expect.any(String),
+          transactionIndex: expect.any(Number),
+        });
+        const clubData = await testsUtils.executeValidScript({
+          name: "mfl/clubs/get_club_data.script",
+          args: [clubId],
+        });
+        expect(clubData).toEqual({
+          id: clubId,
+          status: { rawValue: 1 },
+          squadsIDs: [squadId],
+          metadata: {
+            ...MFLClubTestsUtils.FOUNDATION_LICENSE,
+            ...MFLClubTestsUtils.CLUB_INFO,
+            foundationDate: expect.any(String),
+            nbSeats: clubNbSeats,
+            color: clubColor,
+          },
+        });
+      });
+
+      test("should throw an error when club does not exist", async () => {
+        // prepare
+        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+          true,
+          true,
+        );
+
+        // execute
+        const error = await testsUtils.shallRevert({
+          code: ADD_CLUB_METADATA,
+          args: [208, 120000, "red"],
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        expect(error).toContain("Club data not found");
+      });
+    });
+
+    describe("removeClubMetadata()", () => {
+      test("should remove club metadata", async () => {
+        // prepare
+        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+          true,
+          true,
+        );
+        const clubId = 1;
+        const squadId = 10;
+        const keysToRemove = ["foundationDate", "description"];
+        await MFLClubTestsUtils.createClubNFT(clubId, squadId);
+        await MFLClubTestsUtils.foundClub(clubId);
+
+        // execute
+        const result = await testsUtils.shallPass({
+          name: "mfl/clubs/remove_club_metadata.tx",
+          args: [clubId, keysToRemove],
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        expect(result.events).toHaveLength(1);
+        expect(result.events[0]).toEqual({
+          type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.ClubMetadataRemoved`,
+          data: { id: clubId, keysRemoved: keysToRemove },
+          eventIndex: expect.any(Number),
+          transactionId: expect.any(String),
+          transactionIndex: expect.any(Number),
+        });
+        const clubData = await testsUtils.executeValidScript({
+          name: "mfl/clubs/get_club_data.script",
+          args: [clubId],
+        });
+        expect(clubData).toEqual({
+          id: clubId,
+          status: { rawValue: 1 },
+          squadsIDs: [squadId],
+          metadata: {
+            ...MFLClubTestsUtils.FOUNDATION_LICENSE,
+            ...MFLClubTestsUtils.CLUB_INFO,
+            foundationDate: undefined,
+            description: undefined,
+          },
+        });
+      });
+
+      test("should throw an error when club does not exist", async () => {
+        // prepare
+        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+          true,
+          true,
+        );
+
+        // execute
+        const error = await testsUtils.shallRevert({
+          name: "mfl/clubs/remove_club_metadata.tx",
+          args: [208, ["foundationDate", "description"]],
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        expect(error).toContain("Club data not found");
+      });
+    });
+
+    describe("updateClubSquadsIDs()", () => {
+      test("should update club squads ids", async () => {
+        // prepare
+        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+          true,
+          true,
+        );
+        const clubId = 1;
+        const squadId = 10;
+        await MFLClubTestsUtils.createClubNFT(clubId, squadId);
+
+        // execute
+        const result = await testsUtils.shallPass({
+          name: "mfl/clubs/update_club_squads_ids.tx",
+          args: [clubId, [squadId, 42]],
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        expect(result.events).toHaveLength(1);
+        expect(result.events[0]).toEqual({
+          type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.ClubSquadsIDsUpdated`,
+          data: { id: clubId, squadsIDs: [squadId, 42] },
+          eventIndex: expect.any(Number),
+          transactionId: expect.any(String),
+          transactionIndex: expect.any(Number),
+        });
+        const clubData = await testsUtils.executeValidScript({
+          name: "mfl/clubs/get_club_data.script",
+          args: [clubId],
+        });
+        expect(clubData).toEqual({
+          id: clubId,
+          status: { rawValue: 0 },
+          squadsIDs: [squadId, 42],
+          metadata: {},
+        });
+      });
+
+      test("should throw an error when club does not exist", async () => {
+        // prepare
+        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+          true,
+          true,
+        );
+
+        // execute
+        const error = await testsUtils.shallRevert({
+          name: "mfl/clubs/update_club_squads_ids.tx",
+          args: [208, [42]],
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        expect(error).toContain("Club data not found");
+      });
+    });
+
+    describe("createClubAdmin()", () => {
+      test("should create a club admin", async () => {
+        // prepare
+        const aliceAdminAccountAddress = await getAccountAddress("AliceAdminAccount");
+        const bobAccountAddress = await getAccountAddress("BobAccount");
+        const jackAccountAddress = await getAccountAddress("JackAccount");
+
+        // execute
+        const signers = [aliceAdminAccountAddress, bobAccountAddress];
+        await testsUtils.shallPass({
+          name: "mfl/clubs/create_club_admin.tx",
+          signers,
+        });
+
+        // assert
+        // bob must now be able to create another club admin
+        await testsUtils.shallPass({
+          name: "mfl/clubs/create_club_admin.tx",
+          signers: [bobAccountAddress, jackAccountAddress],
+        });
+      });
+
+      test("should panic when trying to create a club admin with a non admin account", async () => {
+        // prepare
+        const bobAccountAddress = await getAccountAddress("BobAccount");
+        const jackAccountAddress = await getAccountAddress("JackAccount");
+
+        // execute
+        const signers = [bobAccountAddress, jackAccountAddress];
+        const error = await testsUtils.shallRevert({
+          name: "mfl/clubs/create_club_admin.tx",
+          signers,
+        });
+
+        // assert
+        expect(error).toContain("Could not borrow club admin ref");
+      });
+    });
+  });
+
+  describe("SquadAdmin", () => {
+    describe("updateSquadMetadata()", () => {
+      test("should update squad metadata", async () => {
+        // prepare
+        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+          true,
+          true,
+        );
+        const clubId = 1;
+        const squadId = 10;
+        const updatedSquadName = "My squad";
+        const updatedSquadDescription = "My squad description";
+        await MFLClubTestsUtils.createClubNFT(clubId, squadId);
+
+        // execute
+        const result = await testsUtils.shallPass({
+          code: UPDATE_SQUAD_METADATA,
+          args: [squadId, updatedSquadName, updatedSquadDescription],
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        expect(result.events).toHaveLength(1);
+        expect(result.events[0]).toEqual({
+          type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.SquadMetadataUpdated`,
+          data: { id: squadId },
+          eventIndex: expect.any(Number),
+          transactionId: expect.any(String),
+          transactionIndex: expect.any(Number),
+        });
+        const squadData = await testsUtils.executeValidScript({
+          name: "mfl/clubs/squads/get_squad_data.script",
+          args: [squadId],
+        });
+        expect(squadData).toEqual({
+          id: squadId,
+          clubID: clubId,
+          type: "squadType",
+          status: { rawValue: 0 },
+          metadata: {},
+          competitionsMemberships: {},
+        });
+      });
+
+      test.only("should throw an error when squad does not exist", async () => {
+        // prepare
+        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+          true,
+          true,
+        );
+
+        // execute
+        const error = await testsUtils.shallRevert({
+          code: UPDATE_SQUAD_METADATA,
+          args: [208, "New name", "New description"],
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        expect(error).toContain("Squad data not found");
+      });
+    });
+
+    describe("createSquadAdmin()", () => {
+      test("should create a squad admin", async () => {
+        // prepare
+        const aliceAdminAccountAddress = await getAccountAddress("AliceAdminAccount");
+        const bobAccountAddress = await getAccountAddress("BobAccount");
+        const jackAccountAddress = await getAccountAddress("JackAccount");
+
+        // execute
+        const signers = [aliceAdminAccountAddress, bobAccountAddress];
+        await testsUtils.shallPass({
+          name: "mfl/clubs/squads/create_squad_admin.tx",
+          signers,
+        });
+
+        // assert
+        // bob must now be able to create another squad admin
+        await testsUtils.shallPass({
+          name: "mfl/clubs/squads/create_squad_admin.tx",
+          signers: [bobAccountAddress, jackAccountAddress],
+        });
+      });
+
+      test("should panic when trying to create a squad admin with a non admin account", async () => {
+        // prepare
+        const bobAccountAddress = await getAccountAddress("BobAccount");
+        const jackAccountAddress = await getAccountAddress("JackAccount");
+
+        // execute
+        const signers = [bobAccountAddress, jackAccountAddress];
+        const error = await testsUtils.shallRevert({
+          name: "mfl/clubs/squads/create_squad_admin.tx",
+          signers,
+        });
+
+        // assert
+        expect(error).toContain("Could not borrow squad admin ref");
       });
     });
   });

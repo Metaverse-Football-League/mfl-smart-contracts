@@ -5,7 +5,7 @@ import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
   This tx updates the metadata of a club.
 **/
 
- // ! TODO AnyStruct not valid in fcl arg
+ // ! TODO AnyStruct not valid in fcl arg - we have to define explicitly the metadata
 transaction(clubID: UInt64, metadata: {String: AnyStruct}) {
     let adminProxyRef: &MFLAdmin.AdminProxy
 

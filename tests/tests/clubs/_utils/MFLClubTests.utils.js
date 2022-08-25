@@ -1,12 +1,17 @@
 import { getAccountAddress, getServiceAddress } from "flow-js-testing";
 import { testsUtils } from "../../_utils/tests.utils";
 
-export const FOUNDATION_LICENSE_ARGS = {
+const FOUNDATION_LICENSE_ARGS = {
   foundationLicenseSerialNumber: 123,
   foundationLicenseCity: "Paris",
   foundationLicenseCountry: "France",
   foundationLicenseSeason: 1,
   foundationLicenseCID: "Qabcdef",
+};
+
+const CLUB_INFO_ARGS = {
+  name: "The Club",
+  description: "This is the best club",
 };
 
 export const MFLClubTestsUtils = {
@@ -47,11 +52,15 @@ export const MFLClubTestsUtils = {
     return receiverAcctAddress;
   },
 
-  async createClubNFT(clubID, squadID, playerAdminAccountName = "AliceAdminAccount") {
-    const adminAccountAddress = await getAccountAddress(playerAdminAccountName);
+  async createClubNFT(clubID, squadID, shallPass = true, clubAdminAccountName = "AliceAdminAccount") {
+    const adminAccountAddress = await getAccountAddress(clubAdminAccountName);
     const signers = [adminAccountAddress];
     const args = [clubID, ...Object.values(FOUNDATION_LICENSE_ARGS), squadID, "squadType", adminAccountAddress];
-    return await testsUtils.shallPass({ name: "mfl/clubs/mint_club_and_squad.tx", args, signers });
+    if (shallPass) {
+      return await testsUtils.shallPass({ name: "mfl/clubs/mint_club_and_squad.tx", args, signers });
+    } else {
+      return await testsUtils.shallRevert({ name: "mfl/clubs/mint_club_and_squad.tx", args, signers });
+    }
   },
 
   FOUNDATION_LICENSE: {
@@ -61,5 +70,16 @@ export const MFLClubTestsUtils = {
       cid: FOUNDATION_LICENSE_ARGS.foundationLicenseCID,
       path: null,
     },
+  },
+
+  CLUB_INFO: {
+    ...CLUB_INFO_ARGS,
+  },
+
+  async foundClub(clubID, clubName, clubDescription, clubAdminAccountName = "AliceAdminAccount") {
+    const adminAccountAddress = await getAccountAddress(clubAdminAccountName);
+    const signers = [adminAccountAddress];
+    const args = [clubID, clubName ?? CLUB_INFO_ARGS.name, clubDescription ?? CLUB_INFO_ARGS.description];
+    return await testsUtils.shallPass({ name: "mfl/clubs/found_club.tx", args, signers });
   },
 };
