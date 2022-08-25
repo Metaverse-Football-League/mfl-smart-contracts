@@ -63,6 +63,17 @@ export const MFLClubTestsUtils = {
     }
   },
 
+  async foundClub(clubID, clubName, clubDescription, shallPass = true, clubAdminAccountName = "AliceAdminAccount") {
+    const adminAccountAddress = await getAccountAddress(clubAdminAccountName);
+    const signers = [adminAccountAddress];
+    const args = [clubID, clubName ?? CLUB_INFO_ARGS.name, clubDescription ?? CLUB_INFO_ARGS.description];
+    if (shallPass) {
+      return await testsUtils.shallPass({ name: "mfl/clubs/found_club.tx", args, signers });
+    } else {
+      return await testsUtils.shallRevert({ name: "mfl/clubs/found_club.tx", args, signers });
+    }
+  },
+
   FOUNDATION_LICENSE: {
     ...FOUNDATION_LICENSE_ARGS,
     foundationLicenseCID: undefined,
@@ -76,10 +87,13 @@ export const MFLClubTestsUtils = {
     ...CLUB_INFO_ARGS,
   },
 
-  async foundClub(clubID, clubName, clubDescription, clubAdminAccountName = "AliceAdminAccount") {
-    const adminAccountAddress = await getAccountAddress(clubAdminAccountName);
-    const signers = [adminAccountAddress];
-    const args = [clubID, clubName ?? CLUB_INFO_ARGS.name, clubDescription ?? CLUB_INFO_ARGS.description];
-    return await testsUtils.shallPass({ name: "mfl/clubs/found_club.tx", args, signers });
+  CLUB_STATUS_RAW_VALUES: {
+    NOT_FOUNDED: 0,
+    PENDING_VALIDATION: 1,
+    FOUNDED: 2,
+  },
+
+  SQUAD_STATUS_RAW_VALUES: {
+    ACTIVE: 0,
   },
 };

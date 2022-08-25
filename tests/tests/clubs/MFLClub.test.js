@@ -6,15 +6,24 @@ import { ERROR_UPDATE_CLUB_METADATA } from "./_transactions/error_update_club_me
 import { ERROR_UPDATE_SQUAD_METADATA } from "./_transactions/error_update_squad_metadata.tx";
 import { UPDATE_CLUB_METADATA } from "./_transactions/update_club_metadata.tx";
 import { UPDATE_SQUAD_METADATA } from "./_transactions/update_squad_metadata.tx";
+import { ADD_SQUAD_COMPETITION_MEMBERSHIP } from "./_transactions/add_squad_competition_membership.tx";
+
 expect.extend(matchers);
 jest.setTimeout(40000);
 
 describe("MFLClub", () => {
   let addressMap = null;
+  let aliceAdminAccountAddress = null;
 
   beforeEach(async () => {
     await testsUtils.initEmulator(8084);
     addressMap = await MFLClubTestsUtils.deployMFLClubContract("AliceAdminAccount");
+    aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
+      "AliceAdminAccount",
+      "AliceAdminAccount",
+      true,
+      true,
+    );
   });
 
   afterEach(async () => {
@@ -85,12 +94,6 @@ describe("MFLClub", () => {
     describe("withdraw() / deposit()", () => {
       test("should withdraw a club NFT from a collection and deposit it in another collection", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
-          "AliceAdminAccount",
-          "AliceAdminAccount",
-          true,
-          true,
-        );
         await MFLClubTestsUtils.createClubNFT(1, 1);
         const bobAccountAddress = await getAccountAddress("BobAccount");
         await testsUtils.shallPass({
@@ -133,12 +136,6 @@ describe("MFLClub", () => {
     describe("batchWithdraw()", () => {
       test("should batch withdraw clubs NFTs from a collection and batch deposit them in another collection", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
-          "AliceAdminAccount",
-          "AliceAdminAccount",
-          true,
-          true,
-        );
         await MFLClubTestsUtils.createClubNFT(1, 1);
         await MFLClubTestsUtils.createClubNFT(2, 2);
         const bobAccountAddress = await getAccountAddress("BobAccount");
@@ -234,12 +231,6 @@ describe("MFLClub", () => {
     describe("getIDs()", () => {
       test("should get the IDs in the collection", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
-          "AliceAdminAccount",
-          "AliceAdminAccount",
-          true,
-          true,
-        );
         await MFLClubTestsUtils.createClubNFT(10, 1);
         await MFLClubTestsUtils.createClubNFT(42, 2);
         await MFLClubTestsUtils.createClubNFT(101, 3);
@@ -259,15 +250,9 @@ describe("MFLClub", () => {
     describe("borrowNFT()", () => {
       test("should borrow a NFT in the collection", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
-          "AliceAdminAccount",
-          "AliceAdminAccount",
-          true,
-          true,
-        );
-        const clubID = 101;
-        const squadID = 1;
-        await MFLClubTestsUtils.createClubNFT(clubID, squadID);
+        const clubId = 101;
+        const squadId = 1;
+        await MFLClubTestsUtils.createClubNFT(clubId, squadId);
 
         // execute
         const clubFromCollection = await testsUtils.executeValidScript({
@@ -282,16 +267,16 @@ describe("MFLClub", () => {
                   return nftRef
               }
             `,
-          args: [aliceAdminAccountAddress, clubID],
+          args: [aliceAdminAccountAddress, clubId],
         });
 
         // assert
         expect(clubFromCollection).toEqual({
-          id: clubID,
+          id: clubId,
           squads: {
             1: {
               id: 1,
-              clubID: clubID,
+              clubID: clubId,
               type: "squadType",
               metadata: {},
               uuid: expect.toBeNumber(),
@@ -303,23 +288,211 @@ describe("MFLClub", () => {
       });
     });
 
-    // describe(() => {
-    //   //TODO foundClub()
-    // });
+    describe("foundClub()", () => {
+      test("should found a club when it's valid", async () => {
+        // prepare
+        const clubId = 42;
+        const clubName = "Wax FC";
+        const clubDescription = "Hello world";
+        const squadId = 101;
+        await MFLClubTestsUtils.createClubNFT(clubId, squadId);
 
-    // describe(() => {
-    //   //TODO requestClubInfoUpdate()
-    // });
+        // execute
+        const result = await MFLClubTestsUtils.foundClub(clubId, clubName, clubDescription);
+
+        // assert
+        expect(result.events).toHaveLength(3);
+        expect(result.events).toEqual([
+          {
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.ClubMetadataUpdated`,
+            data: { id: clubId },
+            eventIndex: expect.any(Number),
+            transactionId: expect.any(String),
+            transactionIndex: expect.any(Number),
+          },
+          {
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.ClubStatusUpdated`,
+            data: { id: clubId, status: MFLClubTestsUtils.CLUB_STATUS_RAW_VALUES.PENDING_VALIDATION },
+            eventIndex: expect.any(Number),
+            transactionId: expect.any(String),
+            transactionIndex: expect.any(Number),
+          },
+          {
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.ClubFounded`,
+            data: {
+              id: clubId,
+              from: aliceAdminAccountAddress,
+              name: clubName,
+              description: clubDescription,
+              ...MFLClubTestsUtils.FOUNDATION_LICENSE,
+              foundationDate: expect.any(String),
+            },
+            eventIndex: expect.any(Number),
+            transactionId: expect.any(String),
+            transactionIndex: expect.any(Number),
+          },
+        ]);
+        const clubFromCollection = await testsUtils.executeValidScript({
+          code: `
+              import NonFungibleToken from "../../../../contracts/_libs/NonFungibleToken.cdc"
+              import MFLClub from "../../../../contracts/clubs/MFLClub.cdc"
+  
+              pub fun main(address: Address, clubID: UInt64): &NonFungibleToken.NFT {
+                  let clubCollectionRef = getAccount(address).getCapability<&{NonFungibleToken.CollectionPublic}>(MFLClub.CollectionPublicPath).borrow()
+                      ?? panic("Could not borrow the collection reference")
+                  let nftRef = clubCollectionRef.borrowNFT(id: clubID)
+                  return nftRef
+              }
+            `,
+          args: [aliceAdminAccountAddress, clubId],
+        });
+        expect(clubFromCollection).toEqual({
+          uuid: expect.any(Number),
+          id: clubId,
+          squads: {
+            [`${squadId}`]: { uuid: expect.any(Number), id: squadId, clubID: clubId, type: "squadType", metadata: {} },
+          },
+          metadata: MFLClubTestsUtils.FOUNDATION_LICENSE,
+        });
+        const clubData = await testsUtils.executeValidScript({
+          name: "mfl/clubs/get_club_data.script",
+          args: [clubId],
+        });
+        expect(clubData).toEqual({
+          id: clubId,
+          status: { rawValue: MFLClubTestsUtils.CLUB_STATUS_RAW_VALUES.PENDING_VALIDATION },
+          squadsIDs: [squadId],
+          metadata: {
+            ...MFLClubTestsUtils.FOUNDATION_LICENSE,
+            foundationDate: expect.any(String),
+            name: clubName,
+            description: clubDescription,
+          },
+        });
+      });
+
+      test("should throw an error when the club nft does not exist", async () => {
+        // prepare
+
+        // execute
+        const error = await MFLClubTestsUtils.foundClub(404, "name", "description", false);
+
+        // assert
+        expect(error).toContain("Club not found");
+      });
+
+      test("should throw an error when the club status is founded", async () => {
+        // prepare
+        const clubId = 42;
+        const clubName = "Wax FC";
+        const clubDescription = "Hello world";
+        const squadId = 101;
+        await MFLClubTestsUtils.createClubNFT(clubId, squadId);
+        await testsUtils.shallPass({
+          name: "mfl/clubs/update_club_status.tx",
+          signers: [aliceAdminAccountAddress],
+          args: [clubId, 2],
+        });
+
+        // execute
+        const error = await MFLClubTestsUtils.foundClub(clubId, clubName, clubDescription, false);
+
+        // assert
+        expect(error).toContain("Club already founded");
+      });
+
+      test("should throw an error when the club status is pending validation", async () => {
+        // prepare
+        const clubId = 42;
+        const clubName = "Wax FC";
+        const clubDescription = "Hello world";
+        const squadId = 101;
+        await MFLClubTestsUtils.createClubNFT(clubId, squadId);
+        await testsUtils.shallPass({
+          name: "mfl/clubs/update_club_status.tx",
+          signers: [aliceAdminAccountAddress],
+          args: [clubId, 1],
+        });
+
+        // execute
+        const error = await MFLClubTestsUtils.foundClub(clubId, clubName, clubDescription, false);
+
+        // assert
+        expect(error).toContain("Club already founded");
+      });
+    });
+
+    describe("requestClubInfoUpdate()", () => {
+      test("should emit an event when it's valid", async () => {
+        // prepare
+        const clubId = 1;
+        const clubInfo = {
+          name: "The MFL Club",
+          description: "The club number 1",
+        };
+        await MFLClubTestsUtils.createClubNFT(clubId, 1);
+        await testsUtils.shallPass({
+          name: "mfl/clubs/update_club_status.tx",
+          signers: [aliceAdminAccountAddress],
+          args: [clubId, 2],
+        });
+
+        // execute
+        const result = await testsUtils.shallPass({
+          name: "mfl/clubs/request_club_info_update.tx",
+          signers: [aliceAdminAccountAddress],
+          args: [clubId, clubInfo.name, clubInfo.description],
+        });
+
+        // assert
+        expect(result.events).toHaveLength(1);
+        expect(result.events[0]).toEqual({
+          type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.ClubInfoUpdateRequested`,
+          data: { id: clubId, info: clubInfo },
+          eventIndex: expect.any(Number),
+          transactionId: expect.any(String),
+          transactionIndex: expect.any(Number),
+        });
+      });
+
+      test("should throw an error when club nft does not exist", async () => {
+        // prepare
+
+        // execute
+        const error = await testsUtils.shallRevert({
+          name: "mfl/clubs/request_club_info_update.tx",
+          signers: [aliceAdminAccountAddress],
+          args: [108, "name", "description"],
+        });
+
+        // assert
+        expect(error).toContain("Club not found");
+      });
+
+      test("should throw an error when club is not founded", async () => {
+        // prepare
+        const clubId = 1;
+        const clubInfo = {
+          name: "The MFL Club",
+          description: "The club number 1",
+        };
+        await MFLClubTestsUtils.createClubNFT(clubId, 1);
+
+        // execute
+        const error = await testsUtils.shallRevert({
+          name: "mfl/clubs/request_club_info_update.tx",
+          signers: [aliceAdminAccountAddress],
+          args: [clubId, clubInfo.name, clubInfo.description],
+        });
+
+        // assert
+        expect(error).toContain("Club not founded");
+      });
+    });
 
     describe("destroy", () => {
       test("should destroy a collection", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
-          "AliceAdminAccount",
-          "AliceAdminAccount",
-          true,
-          true,
-        );
         await MFLClubTestsUtils.createClubNFT(1, 1);
         await MFLClubTestsUtils.createClubNFT(2, 2);
 
@@ -399,12 +572,6 @@ describe("MFLClub", () => {
       describe("getViews()", () => {
         test("should get views types", async () => {
           // prepare
-          const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
-            "AliceAdminAccount",
-            "AliceAdminAccount",
-            true,
-            true,
-          );
           await MFLClubTestsUtils.createClubNFT(1, 1);
 
           // execute
@@ -430,12 +597,6 @@ describe("MFLClub", () => {
       describe("resolveView()", () => {
         test("should resolve Display view for a specific club", async () => {
           // prepare
-          const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
-            "AliceAdminAccount",
-            "AliceAdminAccount",
-            true,
-            true,
-          );
           const clubId = 1000;
           await MFLClubTestsUtils.createClubNFT(clubId, 1);
 
@@ -457,12 +618,6 @@ describe("MFLClub", () => {
 
         test("should resolve Display view for all clubs", async () => {
           // prepare
-          const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
-            "AliceAdminAccount",
-            "AliceAdminAccount",
-            true,
-            true,
-          );
           const clubId1 = 450;
           const clubId2 = 578;
           await MFLClubTestsUtils.createClubNFT(clubId1, 1);
@@ -499,12 +654,6 @@ describe("MFLClub", () => {
       describe("destroy()", () => {
         test("should destroy the NFT", async () => {
           // prepare
-          const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
-            "AliceAdminAccount",
-            "AliceAdminAccount",
-            true,
-            true,
-          );
           const clubId = 450;
           const squadId = 1;
           await MFLClubTestsUtils.createClubNFT(clubId, squadId);
@@ -554,7 +703,6 @@ describe("MFLClub", () => {
   describe("getClubData()", () => {
     test("should get club data for a not founded club", async () => {
       // prepare
-      await MFLClubTestsUtils.createClubAndSquadAdmin("AliceAdminAccount", "AliceAdminAccount", true, true);
       const clubId = 42;
       const squadId = 101;
       await MFLClubTestsUtils.createClubNFT(clubId, squadId);
@@ -569,14 +717,13 @@ describe("MFLClub", () => {
       expect(clubData).toEqual({
         id: clubId,
         metadata: {},
-        status: { rawValue: 0 }, // status = NOT_FOUNDED
+        status: { rawValue: MFLClubTestsUtils.CLUB_STATUS_RAW_VALUES.NOT_FOUNDED },
         squadsIDs: [squadId],
       });
     });
 
     test("should get club data for a founded club", async () => {
       // prepare
-      await MFLClubTestsUtils.createClubAndSquadAdmin("AliceAdminAccount", "AliceAdminAccount", true, true);
       const clubId = 42;
       const clubName = "Wax FC";
       const clubDescription = "Hello world";
@@ -599,7 +746,7 @@ describe("MFLClub", () => {
           foundationDate: expect.any(String),
           ...MFLClubTestsUtils.FOUNDATION_LICENSE,
         },
-        status: { rawValue: 1 }, // status = PENDING_VALIDATION
+        status: { rawValue: MFLClubTestsUtils.CLUB_STATUS_RAW_VALUES.PENDING_VALIDATION },
         squadsIDs: [squadId],
       });
     });
@@ -619,7 +766,6 @@ describe("MFLClub", () => {
 
     test("should throw an error when updating club metadata", async () => {
       // prepare
-      await MFLClubTestsUtils.createClubAndSquadAdmin("AliceAdminAccount", "AliceAdminAccount", true, true);
       const clubId = 1;
       await MFLClubTestsUtils.createClubNFT(clubId, 1);
 
@@ -637,7 +783,6 @@ describe("MFLClub", () => {
   describe("getSquadData()", () => {
     test("should get squad data for a not founded club", async () => {
       // prepare
-      await MFLClubTestsUtils.createClubAndSquadAdmin("AliceAdminAccount", "AliceAdminAccount", true, true);
       const clubId = 42;
       const squadId = 101;
       await MFLClubTestsUtils.createClubNFT(clubId, squadId);
@@ -653,7 +798,7 @@ describe("MFLClub", () => {
         id: squadId,
         clubID: clubId,
         type: "squadType",
-        status: { rawValue: 0 }, // status = ACTIVE
+        status: { rawValue: MFLClubTestsUtils.SQUAD_STATUS_RAW_VALUES.ACTIVE },
         metadata: {},
         competitionsMemberships: {},
       });
@@ -674,7 +819,6 @@ describe("MFLClub", () => {
 
     test("should throw an error when updating squad metadata", async () => {
       // prepare
-      await MFLClubTestsUtils.createClubAndSquadAdmin("AliceAdminAccount", "AliceAdminAccount", true, true);
       const squadId = 1;
       await MFLClubTestsUtils.createClubNFT(1, squadId);
 
@@ -693,12 +837,6 @@ describe("MFLClub", () => {
     describe("mintClub()", () => {
       test("should mint a club", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
-          "AliceAdminAccount",
-          "AliceAdminAccount",
-          true,
-          true,
-        );
         const clubId = 1;
         const squadId = 1;
 
@@ -749,14 +887,14 @@ describe("MFLClub", () => {
         expect(clubData).toEqual({
           id: clubId,
           metadata: {},
-          status: { rawValue: 0 }, // status = NOT_FOUNDED
+          status: { rawValue: MFLClubTestsUtils.CLUB_STATUS_RAW_VALUES.NOT_FOUNDED },
           squadsIDs: [squadId],
         });
         expect(squadData).toEqual({
           id: squadId,
           clubID: clubId,
           type: "squadType",
-          status: { rawValue: 0 }, // status = ACTIVE
+          status: { rawValue: MFLClubTestsUtils.SQUAD_STATUS_RAW_VALUES.ACTIVE },
           metadata: {},
           competitionsMemberships: {},
         });
@@ -766,7 +904,6 @@ describe("MFLClub", () => {
 
       test("should panic when minting a club id already minted", async () => {
         // prepare
-        await MFLClubTestsUtils.createClubAndSquadAdmin("AliceAdminAccount", "AliceAdminAccount", true, true);
         const clubId = 1;
 
         // execute
@@ -781,21 +918,14 @@ describe("MFLClub", () => {
     describe("updateClubStatus()", () => {
       test("should update club status", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
-          "AliceAdminAccount",
-          "AliceAdminAccount",
-          true,
-          true,
-        );
         const clubId = 1;
         const squadId = 10;
-        const statusRawValue = 2; // rawValue 2 = FOUNDED status
         await MFLClubTestsUtils.createClubNFT(clubId, squadId);
 
         // execute
         const result = await testsUtils.shallPass({
           name: "mfl/clubs/update_club_status.tx",
-          args: [clubId, statusRawValue],
+          args: [clubId, MFLClubTestsUtils.CLUB_STATUS_RAW_VALUES.FOUNDED],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -803,7 +933,7 @@ describe("MFLClub", () => {
         expect(result.events).toHaveLength(1);
         expect(result.events[0]).toEqual({
           type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.ClubStatusUpdated`,
-          data: { id: clubId, status: statusRawValue },
+          data: { id: clubId, status: MFLClubTestsUtils.CLUB_STATUS_RAW_VALUES.FOUNDED },
           eventIndex: expect.any(Number),
           transactionId: expect.any(String),
           transactionIndex: expect.any(Number),
@@ -814,7 +944,7 @@ describe("MFLClub", () => {
         });
         expect(clubData).toEqual({
           id: clubId,
-          status: { rawValue: statusRawValue },
+          status: { rawValue: MFLClubTestsUtils.CLUB_STATUS_RAW_VALUES.FOUNDED },
           squadsIDs: [squadId],
           metadata: {},
         });
@@ -822,18 +952,11 @@ describe("MFLClub", () => {
 
       test("should throw an error when club does not exist", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
-          "AliceAdminAccount",
-          "AliceAdminAccount",
-          true,
-          true,
-        );
-        const statusRawValue = 2; // rawValue 2 = FOUNDED status
 
         // execute
         const error = await testsUtils.shallRevert({
           name: "mfl/clubs/update_club_status.tx",
-          args: [208, statusRawValue],
+          args: [208, MFLClubTestsUtils.CLUB_STATUS_RAW_VALUES.FOUNDED],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -845,12 +968,6 @@ describe("MFLClub", () => {
     describe("updateClubMetadata()", () => {
       test("should update club metadata", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
-          "AliceAdminAccount",
-          "AliceAdminAccount",
-          true,
-          true,
-        );
         const clubId = 1;
         const squadId = 10;
         const updatedClubName = "New Club Name";
@@ -879,7 +996,7 @@ describe("MFLClub", () => {
         });
         expect(clubData).toEqual({
           id: clubId,
-          status: { rawValue: 0 },
+          status: { rawValue: MFLClubTestsUtils.CLUB_STATUS_RAW_VALUES.NOT_FOUNDED },
           squadsIDs: [squadId],
           metadata: { name: updatedClubName, description: updatedClubDescription },
         });
@@ -887,12 +1004,6 @@ describe("MFLClub", () => {
 
       test("should throw an error when club does not exist", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
-          "AliceAdminAccount",
-          "AliceAdminAccount",
-          true,
-          true,
-        );
 
         // execute
         const error = await testsUtils.shallRevert({
@@ -909,12 +1020,6 @@ describe("MFLClub", () => {
     describe("updateClubSquadsIDs()", () => {
       test("should update club squads ids", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
-          "AliceAdminAccount",
-          "AliceAdminAccount",
-          true,
-          true,
-        );
         const clubId = 1;
         const squadId = 10;
         await MFLClubTestsUtils.createClubNFT(clubId, squadId);
@@ -941,7 +1046,7 @@ describe("MFLClub", () => {
         });
         expect(clubData).toEqual({
           id: clubId,
-          status: { rawValue: 0 },
+          status: { rawValue: MFLClubTestsUtils.CLUB_STATUS_RAW_VALUES.NOT_FOUNDED },
           squadsIDs: [squadId, 42],
           metadata: {},
         });
@@ -949,12 +1054,6 @@ describe("MFLClub", () => {
 
       test("should throw an error when club does not exist", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
-          "AliceAdminAccount",
-          "AliceAdminAccount",
-          true,
-          true,
-        );
 
         // execute
         const error = await testsUtils.shallRevert({
@@ -971,7 +1070,6 @@ describe("MFLClub", () => {
     describe("createClubAdmin()", () => {
       test("should create a club admin", async () => {
         // prepare
-        const aliceAdminAccountAddress = await getAccountAddress("AliceAdminAccount");
         const bobAccountAddress = await getAccountAddress("BobAccount");
         const jackAccountAddress = await getAccountAddress("JackAccount");
 
@@ -1012,12 +1110,6 @@ describe("MFLClub", () => {
     describe("updateSquadMetadata()", () => {
       test("should update squad metadata", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
-          "AliceAdminAccount",
-          "AliceAdminAccount",
-          true,
-          true,
-        );
         const clubId = 1;
         const squadId = 10;
         const updatedSquadName = "My squad";
@@ -1048,7 +1140,7 @@ describe("MFLClub", () => {
           id: squadId,
           clubID: clubId,
           type: "squadType",
-          status: { rawValue: 0 },
+          status: { rawValue: MFLClubTestsUtils.CLUB_STATUS_RAW_VALUES.NOT_FOUNDED },
           metadata: {},
           competitionsMemberships: {},
         });
@@ -1056,12 +1148,6 @@ describe("MFLClub", () => {
 
       test("should throw an error when squad does not exist", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
-          "AliceAdminAccount",
-          "AliceAdminAccount",
-          true,
-          true,
-        );
 
         // execute
         const error = await testsUtils.shallRevert({
@@ -1075,10 +1161,121 @@ describe("MFLClub", () => {
       });
     });
 
+    // describe("addSquadCompetitionMembership()", () => {
+    //   //TODO why this does not work ?!
+    //   test("should add competitionMembership", async () => {
+    //     // prepare
+    //     const clubId = 1;
+    //     const squadId = 10;
+    //     const competitionId = 567;
+    //     const competitionMembershipDataName = "The competition";
+    //     const competitionMembershipDataReward = 10000;
+    //     await MFLClubTestsUtils.createClubNFT(clubId, squadId);
+
+    //     // execute
+    //     const result = await testsUtils.shallPass({
+    //       code: ADD_SQUAD_COMPETITION_MEMBERSHIP,
+    //       args: [squadId, competitionId, competitionMembershipDataName, competitionMembershipDataReward],
+    //       signers: [aliceAdminAccountAddress],
+    //     });
+
+    //     // assert
+    //     console.log(result.events[0]);
+    //     expect(result.events).toHaveLength(1);
+    //     expect(result.events[0]).toEqual({
+    //       type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.SquadCompetitionMembershipAdded`,
+    //       data: { id: squadId, competitionID: competitionId },
+    //       eventIndex: expect.any(Number),
+    //       transactionId: expect.any(String),
+    //       transactionIndex: expect.any(Number),
+    //     });
+    //     const squadData = await testsUtils.executeValidScript({
+    //       name: "mfl/clubs/squads/get_squad_data.script",
+    //       args: [squadId],
+    //     });
+    //     console.log(squadData);
+    //     // expect(squadData).toEqual({
+    //     //   id: squadId,
+    //     //   clubID: clubId,
+    //     //   type: "squadType",
+    //     //   status: { rawValue: 0 }, // SQUAD_STATUS_RAW_VALUES
+    //     //   metadata: {},
+    //     //   competitionsMemberships: {},
+    //     // });
+    //   });
+
+    //   test("should throw an error when squad does not exist", async () => {
+    //     // prepare
+
+    //     // execute
+    //     const error = await testsUtils.shallRevert({
+    //       code: ADD_SQUAD_COMPETITION_MEMBERSHIP,
+    //       args: [208, 42, "The competition", 900],
+    //       signers: [aliceAdminAccountAddress],
+    //     });
+
+    //     // assert
+    //     expect(error).toContain("Squad data not found");
+    //   });
+    // });
+
+    // describe("removeSquadCompetitionMembership()", () => {
+    //   test("should remove competitionMembership", async () => {
+    //     // prepare
+    //     const clubId = 1;
+    //     const squadId = 10;
+    //     const competitionId = 10089;
+    //     await MFLClubTestsUtils.createClubNFT(clubId, squadId);
+
+    //     // execute
+    //     const result = await testsUtils.shallPass({
+    //       name: "mfl/clubs/squads/remove_squad_competition_membership.tx",
+    //       args: [squadId, competitionId],
+    //       signers: [aliceAdminAccountAddress],
+    //     });
+
+    //     // assert
+    //     expect(result.events).toHaveLength(1);
+    //     expect(result.events[0]).toEqual({
+    //       type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.SquadCompetitionMembershipRemoved`,
+    //       data: { id: squadId, competitionID: competitionId },
+    //       eventIndex: expect.any(Number),
+    //       transactionId: expect.any(String),
+    //       transactionIndex: expect.any(Number),
+    //     });
+    //     const squadData = await testsUtils.executeValidScript({
+    //       name: "mfl/clubs/squads/get_squad_data.script",
+    //       args: [squadId],
+    //     });
+    //     console.log(squadData);
+    //     // expect(squadData).toEqual({
+    //     //   id: squadId,
+    //     //   clubID: clubId,
+    //     //   type: "squadType",
+    //     //   status: { rawValue: 0 }, //SQUAD_STATUS_RAW_VALUES
+    //     //   metadata: {},
+    //     //   competitionsMemberships: {},
+    //     // });
+    //   });
+
+    //   test("should throw an error when squad does not exist", async () => {
+    //     // prepare
+
+    //     // execute
+    //     const error = await testsUtils.shallRevert({
+    //       code: UPDATE_SQUAD_METADATA,
+    //       args: [208, "New name", "New description"],
+    //       signers: [aliceAdminAccountAddress],
+    //     });
+
+    //     // assert
+    //     expect(error).toContain("Squad data not found");
+    //   });
+    // });
+
     describe("createSquadAdmin()", () => {
       test("should create a squad admin", async () => {
         // prepare
-        const aliceAdminAccountAddress = await getAccountAddress("AliceAdminAccount");
         const bobAccountAddress = await getAccountAddress("BobAccount");
         const jackAccountAddress = await getAccountAddress("JackAccount");
 
