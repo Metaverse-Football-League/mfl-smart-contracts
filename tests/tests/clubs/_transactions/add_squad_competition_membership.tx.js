@@ -23,7 +23,7 @@ export const ADD_SQUAD_COMPETITION_MEMBERSHIP = `
             let squadAdminClaimRef = squadAdminClaimCap.borrow<&{MFLClub.SquadAdminClaim}>() ?? panic("Could not borrow SquadAdminClaim")
 
             let competitionMembershipData: {String: AnyStruct} = {}
-            competitionMembershipData.insert(key: "name", "competitionMembershipDataName")
+            competitionMembershipData.insert(key: "name", competitionMembershipDataName)
             competitionMembershipData.insert(key: "reward", competitionMembershipDataReward)
 
             squadAdminClaimRef.addSquadCompetitionMembership(id: squadID, competitionID: competitionID, competitionMembershipData: competitionMembershipData)

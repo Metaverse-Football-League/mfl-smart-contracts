@@ -558,21 +558,21 @@ pub contract MFLClub: NonFungibleToken {
             pre {
                 MFLClub.getSquadData(id: id) != nil  : "Squad data not found"
             }
-            MFLClub.getSquadData(id: id)!.setMetadata(metadata: metadata)
+            MFLClub.squadsDatas[id]!.setMetadata(metadata: metadata)
         }
 
         pub fun addSquadCompetitionMembership(id: UInt64, competitionID: UInt64, competitionMembershipData: AnyStruct) {
             pre {
                 MFLClub.getSquadData(id: id) != nil  : "Squad data not found"
             }
-            MFLClub.getSquadData(id: id)!.addCompetitionMembership(competitionID: competitionID, competitionMembershipData: competitionMembershipData)
+            MFLClub.squadsDatas[id]!.addCompetitionMembership(competitionID: competitionID, competitionMembershipData: competitionMembershipData)
         }
 
         pub fun removeSquadCompetitionMembership(id: UInt64, competitionID: UInt64) {
             pre {
                 MFLClub.getSquadData(id: id) != nil  : "Squad data not found"
             }
-            MFLClub.getSquadData(id: id)!.removeCompetitionMembership(competitionID: competitionID)
+            MFLClub.squadsDatas[id]!.removeCompetitionMembership(competitionID: competitionID)
         }
 
         pub fun createSquadAdmin(): @SquadAdmin {
@@ -606,3 +606,4 @@ pub contract MFLClub: NonFungibleToken {
         emit ContractInitialized()
     }
 }
+ 

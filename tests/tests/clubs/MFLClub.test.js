@@ -1140,8 +1140,11 @@ describe("MFLClub", () => {
           id: squadId,
           clubID: clubId,
           type: "squadType",
-          status: { rawValue: MFLClubTestsUtils.CLUB_STATUS_RAW_VALUES.NOT_FOUNDED },
-          metadata: {},
+          status: { rawValue: MFLClubTestsUtils.SQUAD_STATUS_RAW_VALUES.ACTIVE },
+          metadata: {
+            name: updatedSquadName,
+            description: updatedSquadDescription,
+          },
           competitionsMemberships: {},
         });
       });
@@ -1161,117 +1164,120 @@ describe("MFLClub", () => {
       });
     });
 
-    // describe("addSquadCompetitionMembership()", () => {
-    //   //TODO why this does not work ?!
-    //   test("should add competitionMembership", async () => {
-    //     // prepare
-    //     const clubId = 1;
-    //     const squadId = 10;
-    //     const competitionId = 567;
-    //     const competitionMembershipDataName = "The competition";
-    //     const competitionMembershipDataReward = 10000;
-    //     await MFLClubTestsUtils.createClubNFT(clubId, squadId);
+    describe("addSquadCompetitionMembership()", () => {
+      test("should add competitionMembership", async () => {
+        // prepare
+        const clubId = 1;
+        const squadId = 10;
+        const competitionId = 567;
+        const competitionMembershipDataName = "The competition";
+        const competitionMembershipDataReward = 10000;
+        await MFLClubTestsUtils.createClubNFT(clubId, squadId);
 
-    //     // execute
-    //     const result = await testsUtils.shallPass({
-    //       code: ADD_SQUAD_COMPETITION_MEMBERSHIP,
-    //       args: [squadId, competitionId, competitionMembershipDataName, competitionMembershipDataReward],
-    //       signers: [aliceAdminAccountAddress],
-    //     });
+        // execute
+        const result = await testsUtils.shallPass({
+          code: ADD_SQUAD_COMPETITION_MEMBERSHIP,
+          args: [squadId, competitionId, competitionMembershipDataName, competitionMembershipDataReward],
+          signers: [aliceAdminAccountAddress],
+        });
 
-    //     // assert
-    //     console.log(result.events[0]);
-    //     expect(result.events).toHaveLength(1);
-    //     expect(result.events[0]).toEqual({
-    //       type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.SquadCompetitionMembershipAdded`,
-    //       data: { id: squadId, competitionID: competitionId },
-    //       eventIndex: expect.any(Number),
-    //       transactionId: expect.any(String),
-    //       transactionIndex: expect.any(Number),
-    //     });
-    //     const squadData = await testsUtils.executeValidScript({
-    //       name: "mfl/clubs/squads/get_squad_data.script",
-    //       args: [squadId],
-    //     });
-    //     console.log(squadData);
-    //     // expect(squadData).toEqual({
-    //     //   id: squadId,
-    //     //   clubID: clubId,
-    //     //   type: "squadType",
-    //     //   status: { rawValue: 0 }, // SQUAD_STATUS_RAW_VALUES
-    //     //   metadata: {},
-    //     //   competitionsMemberships: {},
-    //     // });
-    //   });
+        // assert
+        expect(result.events).toHaveLength(1);
+        expect(result.events[0]).toEqual({
+          type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.SquadCompetitionMembershipAdded`,
+          data: { id: squadId, competitionID: competitionId },
+          eventIndex: expect.any(Number),
+          transactionId: expect.any(String),
+          transactionIndex: expect.any(Number),
+        });
+        const squadData = await testsUtils.executeValidScript({
+          name: "mfl/clubs/squads/get_squad_data.script",
+          args: [squadId],
+        });
+        expect(squadData).toEqual({
+          id: squadId,
+          clubID: clubId,
+          type: "squadType",
+          status: { rawValue: MFLClubTestsUtils.SQUAD_STATUS_RAW_VALUES.ACTIVE }, // SQUAD_STATUS_RAW_VALUES
+          metadata: {},
+          competitionsMemberships: {
+            [`${competitionId}`]: { name: competitionMembershipDataName, reward: competitionMembershipDataReward },
+          },
+        });
+      });
 
-    //   test("should throw an error when squad does not exist", async () => {
-    //     // prepare
+      test("should throw an error when squad does not exist", async () => {
+        // prepare
 
-    //     // execute
-    //     const error = await testsUtils.shallRevert({
-    //       code: ADD_SQUAD_COMPETITION_MEMBERSHIP,
-    //       args: [208, 42, "The competition", 900],
-    //       signers: [aliceAdminAccountAddress],
-    //     });
+        // execute
+        const error = await testsUtils.shallRevert({
+          code: ADD_SQUAD_COMPETITION_MEMBERSHIP,
+          args: [208, 42, "The competition", 900],
+          signers: [aliceAdminAccountAddress],
+        });
 
-    //     // assert
-    //     expect(error).toContain("Squad data not found");
-    //   });
-    // });
+        // assert
+        expect(error).toContain("Squad data not found");
+      });
+    });
 
-    // describe("removeSquadCompetitionMembership()", () => {
-    //   test("should remove competitionMembership", async () => {
-    //     // prepare
-    //     const clubId = 1;
-    //     const squadId = 10;
-    //     const competitionId = 10089;
-    //     await MFLClubTestsUtils.createClubNFT(clubId, squadId);
+    describe("removeSquadCompetitionMembership()", () => {
+      test("should remove competitionMembership", async () => {
+        // prepare
+        const clubId = 1;
+        const squadId = 10;
+        const competitionId = 10089;
+        await MFLClubTestsUtils.createClubNFT(clubId, squadId);
+        await testsUtils.shallPass({
+          code: ADD_SQUAD_COMPETITION_MEMBERSHIP,
+          args: [squadId, competitionId, "The competition", 900],
+          signers: [aliceAdminAccountAddress],
+        });
 
-    //     // execute
-    //     const result = await testsUtils.shallPass({
-    //       name: "mfl/clubs/squads/remove_squad_competition_membership.tx",
-    //       args: [squadId, competitionId],
-    //       signers: [aliceAdminAccountAddress],
-    //     });
+        // execute
+        const result = await testsUtils.shallPass({
+          name: "mfl/clubs/squads/remove_squad_competition_membership.tx",
+          args: [squadId, competitionId],
+          signers: [aliceAdminAccountAddress],
+        });
 
-    //     // assert
-    //     expect(result.events).toHaveLength(1);
-    //     expect(result.events[0]).toEqual({
-    //       type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.SquadCompetitionMembershipRemoved`,
-    //       data: { id: squadId, competitionID: competitionId },
-    //       eventIndex: expect.any(Number),
-    //       transactionId: expect.any(String),
-    //       transactionIndex: expect.any(Number),
-    //     });
-    //     const squadData = await testsUtils.executeValidScript({
-    //       name: "mfl/clubs/squads/get_squad_data.script",
-    //       args: [squadId],
-    //     });
-    //     console.log(squadData);
-    //     // expect(squadData).toEqual({
-    //     //   id: squadId,
-    //     //   clubID: clubId,
-    //     //   type: "squadType",
-    //     //   status: { rawValue: 0 }, //SQUAD_STATUS_RAW_VALUES
-    //     //   metadata: {},
-    //     //   competitionsMemberships: {},
-    //     // });
-    //   });
+        // assert
+        expect(result.events).toHaveLength(1);
+        expect(result.events[0]).toEqual({
+          type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.SquadCompetitionMembershipRemoved`,
+          data: { id: squadId, competitionID: competitionId },
+          eventIndex: expect.any(Number),
+          transactionId: expect.any(String),
+          transactionIndex: expect.any(Number),
+        });
+        const squadData = await testsUtils.executeValidScript({
+          name: "mfl/clubs/squads/get_squad_data.script",
+          args: [squadId],
+        });
+        expect(squadData).toEqual({
+          id: squadId,
+          clubID: clubId,
+          type: "squadType",
+          status: { rawValue: MFLClubTestsUtils.SQUAD_STATUS_RAW_VALUES.ACTIVE }, //SQUAD_STATUS_RAW_VALUES
+          metadata: {},
+          competitionsMemberships: {},
+        });
+      });
 
-    //   test("should throw an error when squad does not exist", async () => {
-    //     // prepare
+      test("should throw an error when squad does not exist", async () => {
+        // prepare
 
-    //     // execute
-    //     const error = await testsUtils.shallRevert({
-    //       code: UPDATE_SQUAD_METADATA,
-    //       args: [208, "New name", "New description"],
-    //       signers: [aliceAdminAccountAddress],
-    //     });
+        // execute
+        const error = await testsUtils.shallRevert({
+          name: "mfl/clubs/squads/remove_squad_competition_membership.tx",
+          args: [208, 31],
+          signers: [aliceAdminAccountAddress],
+        });
 
-    //     // assert
-    //     expect(error).toContain("Squad data not found");
-    //   });
-    // });
+        // assert
+        expect(error).toContain("Squad data not found");
+      });
+    });
 
     describe("createSquadAdmin()", () => {
       test("should create a squad admin", async () => {
