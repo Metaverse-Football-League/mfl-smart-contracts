@@ -30,7 +30,7 @@ pub contract MFLClub: NonFungibleToken {
         foundationLicenseCity: String?,
         foundationLicenseCountry: String?,
         foundationLicenseSeason: UInt32?,
-        foundationLicenseImage: MetadataViews.IPFSFile?
+        foundationLicenseImageUri: String?
     )
 
     // Squads Events
@@ -413,7 +413,7 @@ pub contract MFLClub: NonFungibleToken {
                 foundationLicenseCity: foundationLicenseCity,
                 foundationLicenseCountry: foundationLicenseCountry,
                 foundationLicenseSeason: foundationLicenseSeason,
-                foundationLicenseImage: foundationLicenseImage,
+                foundationLicenseImageUri: foundationLicenseImage?.uri(),
             )
         }
 

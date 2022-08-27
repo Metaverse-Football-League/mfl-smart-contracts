@@ -325,6 +325,8 @@ describe("MFLClub", () => {
               name: clubName,
               description: clubDescription,
               ...MFLClubTestsUtils.FOUNDATION_LICENSE,
+              foundationLicenseImageUri: "ipfs://Qabcdef",
+              foundationLicenseImage: undefined,
               foundationDate: expect.any(String),
             },
             eventIndex: expect.any(Number),
