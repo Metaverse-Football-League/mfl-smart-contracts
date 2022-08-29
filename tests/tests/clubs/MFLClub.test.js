@@ -7,7 +7,7 @@ import { ERROR_UPDATE_SQUAD_METADATA } from "./_transactions/error_update_squad_
 import { UPDATE_CLUB_METADATA } from "./_transactions/update_club_metadata.tx";
 import { UPDATE_SQUAD_METADATA } from "./_transactions/update_squad_metadata.tx";
 import { ADD_SQUAD_COMPETITION_MEMBERSHIP } from "./_transactions/add_squad_competition_membership.tx";
-import {UPDATE_SQUAD_COMPETITION_MEMBERSHIP} from './_transactions/update_squad_competition_membership.tx';
+import { UPDATE_SQUAD_COMPETITION_MEMBERSHIP } from "./_transactions/update_squad_competition_membership.tx";
 
 expect.extend(matchers);
 jest.setTimeout(40000);
