@@ -30,7 +30,6 @@ pub contract MFLClub: NonFungibleToken {
         foundationLicenseCity: String?,
         foundationLicenseCountry: String?,
         foundationLicenseSeason: UInt32?,
-        foundationLicenseImageUri: String?
     )
 
     // Squads Events
@@ -38,6 +37,7 @@ pub contract MFLClub: NonFungibleToken {
     pub event SquadDestroyed(id: UInt64)
     pub event SquadMetadataUpdated(id: UInt64)
     pub event SquadCompetitionMembershipAdded(id: UInt64, competitionID: UInt64)
+    pub event SquadCompetitionMembershipUpdated(id: UInt64, competitionID: UInt64)
     pub event SquadCompetitionMembershipRemoved(id: UInt64, competitionID: UInt64)
 
     // Named Paths
@@ -106,6 +106,15 @@ pub contract MFLClub: NonFungibleToken {
             emit SquadCompetitionMembershipAdded(id: self.id, competitionID: competitionID)
         }
 
+        // Update competitionMembership
+        access(contract) fun updateCompetitionMembership(competitionID: UInt64, competitionMembershipData: AnyStruct) {
+            pre {
+                self.competitionsMemberships[competitionID] != nil: "Competition membership not found"
+            }
+            self.competitionsMemberships[competitionID] = competitionMembershipData
+            emit SquadCompetitionMembershipUpdated(id: self.id, competitionID: competitionID)
+        }
+
         // Remove competitionMembership
         access(contract) fun removeCompetitionMembership(competitionID: UInt64) {
             self.competitionsMemberships.remove(key: competitionID)
@@ -148,7 +157,7 @@ pub contract MFLClub: NonFungibleToken {
                 type: type,
                 metadata: metadata,
                 competitionsMemberships: competitionsMemberships,
-            ) 
+            )
             emit SquadMinted(id: self.id)
         }
 
@@ -413,7 +422,6 @@ pub contract MFLClub: NonFungibleToken {
                 foundationLicenseCity: foundationLicenseCity,
                 foundationLicenseCountry: foundationLicenseCountry,
                 foundationLicenseSeason: foundationLicenseSeason,
-                foundationLicenseImageUri: foundationLicenseImage?.uri(),
             )
         }
 
@@ -429,7 +437,7 @@ pub contract MFLClub: NonFungibleToken {
         destroy() {
             destroy self.ownedNFTs
         }
-        
+
         init() {
             self.ownedNFTs <- {}
         }
@@ -568,6 +576,13 @@ pub contract MFLClub: NonFungibleToken {
             MFLClub.squadsDatas[id]!.addCompetitionMembership(competitionID: competitionID, competitionMembershipData: competitionMembershipData)
         }
 
+        pub fun updateSquadCompetitionMembership(id: UInt64, competitionID: UInt64, competitionMembershipData: AnyStruct) {
+            pre {
+                MFLClub.getSquadData(id: id) != nil  : "Squad data not found"
+            }
+            MFLClub.squadsDatas[id]!.updateCompetitionMembership(competitionID: competitionID, competitionMembershipData: competitionMembershipData)
+        }
+
         pub fun removeSquadCompetitionMembership(id: UInt64, competitionID: UInt64) {
             pre {
                 MFLClub.getSquadData(id: id) != nil  : "Squad data not found"
@@ -606,4 +621,3 @@ pub contract MFLClub: NonFungibleToken {
         emit ContractInitialized()
     }
 }
- 

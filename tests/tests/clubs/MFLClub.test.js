@@ -7,6 +7,7 @@ import { ERROR_UPDATE_SQUAD_METADATA } from "./_transactions/error_update_squad_
 import { UPDATE_CLUB_METADATA } from "./_transactions/update_club_metadata.tx";
 import { UPDATE_SQUAD_METADATA } from "./_transactions/update_squad_metadata.tx";
 import { ADD_SQUAD_COMPETITION_MEMBERSHIP } from "./_transactions/add_squad_competition_membership.tx";
+import {UPDATE_SQUAD_COMPETITION_MEMBERSHIP} from './_transactions/update_squad_competition_membership.tx';
 
 expect.extend(matchers);
 jest.setTimeout(40000);
@@ -325,7 +326,6 @@ describe("MFLClub", () => {
               name: clubName,
               description: clubDescription,
               ...MFLClubTestsUtils.FOUNDATION_LICENSE,
-              foundationLicenseImageUri: "ipfs://Qabcdef",
               foundationLicenseImage: undefined,
               foundationDate: expect.any(String),
             },
@@ -1220,6 +1220,93 @@ describe("MFLClub", () => {
 
         // assert
         expect(error).toContain("Squad data not found");
+      });
+    });
+
+    describe("updateSquadCompetitionMembership()", () => {
+      test("should update competitionMembership", async () => {
+        // prepare
+        const clubId = 1;
+        const squadId = 10;
+        const competitionId = 567;
+        const competitionMembershipDataName = "The competition";
+        const competitionMembershipDataReward = 10000;
+        await MFLClubTestsUtils.createClubNFT(clubId, squadId);
+        await testsUtils.shallPass({
+          code: ADD_SQUAD_COMPETITION_MEMBERSHIP,
+          args: [squadId, competitionId, competitionMembershipDataName, competitionMembershipDataReward],
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // execute
+        const result = await testsUtils.shallPass({
+          code: UPDATE_SQUAD_COMPETITION_MEMBERSHIP,
+          args: [squadId, competitionId, "updated competition name", 400],
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        expect(result.events).toHaveLength(1);
+        expect(result.events[0]).toEqual({
+          type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.SquadCompetitionMembershipUpdated`,
+          data: { id: squadId, competitionID: competitionId },
+          eventIndex: expect.any(Number),
+          transactionId: expect.any(String),
+          transactionIndex: expect.any(Number),
+        });
+        const squadData = await testsUtils.executeValidScript({
+          name: "mfl/clubs/squads/get_squad_data.script",
+          args: [squadId],
+        });
+        expect(squadData).toEqual({
+          id: squadId,
+          clubID: clubId,
+          type: "squadType",
+          status: { rawValue: MFLClubTestsUtils.SQUAD_STATUS_RAW_VALUES.ACTIVE }, // SQUAD_STATUS_RAW_VALUES
+          metadata: {},
+          competitionsMemberships: {
+            [`${competitionId}`]: { name: "updated competition name", reward: 400 },
+          },
+        });
+      });
+
+      test("should throw an error when squad does not exist", async () => {
+        // prepare
+
+        // execute
+        const error = await testsUtils.shallRevert({
+          code: UPDATE_SQUAD_COMPETITION_MEMBERSHIP,
+          args: [208, 42, "The competition", 900],
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        expect(error).toContain("Squad data not found");
+      });
+
+      test("should throw an error when squad does not have the competition membership", async () => {
+        // prepare
+        const clubId = 1;
+        const squadId = 10;
+        const competitionId = 567;
+        const competitionMembershipDataName = "The competition";
+        const competitionMembershipDataReward = 10000;
+        await MFLClubTestsUtils.createClubNFT(clubId, squadId);
+        await testsUtils.shallPass({
+          code: ADD_SQUAD_COMPETITION_MEMBERSHIP,
+          args: [squadId, competitionId, competitionMembershipDataName, competitionMembershipDataReward],
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // execute
+        const error = await testsUtils.shallRevert({
+          code: UPDATE_SQUAD_COMPETITION_MEMBERSHIP,
+          args: [10, 42, "The competition", 900],
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // assert
+        expect(error).toContain("Competition membership not found");
       });
     });
 
