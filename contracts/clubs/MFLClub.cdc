@@ -270,7 +270,7 @@ pub contract MFLClub: NonFungibleToken {
                         name: clubData.getMetadata()["name"] as! String? ?? "",
                         description: clubData.getMetadata()["description"] as! String? ?? "",
                         thumbnail: MetadataViews.HTTPFile(
-                            url: "https://d11e2517uhbeau.cloudfront.net/clubs/".concat(self.id.toString()).concat("/thumbnail.png") //TODO change path staging / prod
+                            url: "https://d13e14gtps4iwl.cloudfront.net/clubs/".concat(self.id.toString()).concat("/thumbnail.png")
                         ),
                     )
                 case Type<MetadataViews.Royalties>():
