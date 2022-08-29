@@ -533,6 +533,7 @@ pub contract MFLClub: NonFungibleToken {
         ): @Squad
         pub fun updateSquadMetadata(id: UInt64, metadata: {String: AnyStruct})
         pub fun addSquadCompetitionMembership(id: UInt64, competitionID: UInt64, competitionMembershipData: AnyStruct)
+        pub fun updateSquadCompetitionMembership(id: UInt64, competitionID: UInt64, competitionMembershipData: AnyStruct)
         pub fun removeSquadCompetitionMembership(id: UInt64, competitionID: UInt64)
     }
 
