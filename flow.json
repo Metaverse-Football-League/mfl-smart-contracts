@@ -1,171 +1,165 @@
 {
-  "emulators": {
-    "default": {
-      "port": 3569,
-      "serviceAccount": "emulator-account"
-    }
-  },
-  "contracts": {
-    "FungibleToken": {
-      "source": "./contracts/_libs/FungibleToken.cdc",
-      "aliases": {
-        "emulator": "ee82856bf20e2aa6",
-        "testnet": "9a0766d93b6608b7",
-        "mainnet": "f233dcee88fe0abe"
-      }
-    },
-    "FUSD": {
-      "source": "./contracts/_libs/FUSD.cdc",
-      "aliases": {
-        "testnet": "e223d8a629e49c68",
-        "mainnet": "3c5959b568896393"
-      }
-    },
-    "NonFungibleToken": {
-      "source": "./contracts/_libs/NonFungibleToken.cdc",
-      "aliases": {
-        "testnet": "631e88ae7f1d7c20",
-        "mainnet": "1d7e57aa55817448"
-      }
-    },
-    "MetadataViews": {
-      "source": "./contracts/_libs/MetadataViews.cdc",
-      "aliases": {
-        "testnet": "631e88ae7f1d7c20",
-        "mainnet": "1d7e57aa55817448"
-      }
-    },
-    "FlowStorageFees": {
-      "source": "./contracts/_libs/FlowStorageFees.cdc",
-      "aliases": {
-        "emulator": "f8d6e0586b0a20c7",
-        "testnet": "8c5303eaa26202d6",
-        "mainnet": "e467b9dd11fa00df"
-      }
-    },
-    "FlowToken": {
-      "source": "./contracts/_libs/FlowToken.cdc",
-      "aliases": {
-        "emulator": "0ae53cb6e3f42a79",
-        "testnet": "7e60df042a9c0868",
-        "mainnet": "1654653399040a61"
-      }
-    },
-    "DapperUtilityCoin": {
-      "source": "./contracts/_libs/DapperUtilityCoin.cdc",
-      "aliases": {
-        "testnet": "82ec283f88a62e65",
-        "mainnet": "ead892083b3e2c6c"
-      }
-    },
-    "TokenForwarding": {
-      "source": "./contracts/_libs/TokenForwarding.cdc",
-      "aliases": {
-        "testnet": "51ea0e37c27a1f1a",
-        "mainnet": "e544175ee0461c4b"
-      }
-    },
-    "NFTStorefront": {
-      "source": "./contracts/_libs/NFTStorefront.cdc",
-      "aliases": {
-        "testnet": "94b06cfca1d8a476",
-        "mainnet": "4eb8a10cb9f87357"
-      }
-    },
-    "MFLAdmin": {
-      "source": "./contracts/core/MFLAdmin.cdc",
-      "aliases": {
-        "testnet": "683564e46977788a",
-        "mainnet": "8ebcbfd516b1da27"
-      }
-    },
-    "MFLPlayer": {
-      "source": "./contracts/players/MFLPlayer.cdc",
-      "aliases": {
-        "testnet": "683564e46977788a",
-        "mainnet": "8ebcbfd516b1da27"
-      }
-    },
-    "MFLPack": {
-      "source": "./contracts/packs/MFLPack.cdc",
-      "aliases": {
-        "testnet": "683564e46977788a",
-        "mainnet": "8ebcbfd516b1da27"
-      }
-    },
-    "MFLPackTemplate": {
-      "source": "./contracts/packs/MFLPackTemplate.cdc",
-      "aliases": {
-        "testnet": "683564e46977788a",
-        "mainnet": "8ebcbfd516b1da27"
-      }
-    },
-    "MFLViews": {
-      "source": "./contracts/views/MFLViews.cdc",
-      "aliases": {
-        "testnet": "683564e46977788a",
-        "mainnet": "8ebcbfd516b1da27"
-      }
-    },
-    "MFLClub": "./contracts/clubs/MFLClub.cdc"
-  },
-  "networks": {
-    "emulator": "127.0.0.1:3569",
-    "mainnet": "access.mainnet.nodes.onflow.org:9000",
-    "testnet": "access.devnet.nodes.onflow.org:9000"
-  },
-  "accounts": {
-    "emulator-account": {
-      "address": "f8d6e0586b0a20c7",
-      "key": "84f82df6790f07b281adb5bbc848bd6298a2de67f94bdfac7a400d5a1b893de5"
-    },
-    "admin-alice-account": {
-      "address": "01cf0e2f2f715450",
-      "key": "7066849395db7a15113f5f0606acbedc503462c25c3fdf90216f1f860a3b8a85"
-    },
-    "bob-account": {
-      "address": "179b6b1cb6755e31",
-      "key": "9e86822bacb9c9799345b024651c9b6ebe2aab49754ec2e1c19f5dabbf1ee42c"
-    },
-    "testnet-deploy-account": {
-      "fromFile": "./flow.testnet.json"
-    },
-    "testnet-storefront-account": {
-      "fromFile": "./flow.testnet.json"
-    },
-    "testnet-players-store-account": {
-      "fromFile": "./flow.testnet.json"
-    },
-    "testnet-clubs-store-account": {
-      "fromFile": "./flow.testnet.json"
-    }
-  },
-  "deployments": {
-    "emulator": {
-      "emulator-account": [
-        "FUSD",
-        "NonFungibleToken",
-        "MetadataViews",
-        "DapperUtilityCoin",
-        "TokenForwarding",
-        "NFTStorefront",
-        "MFLAdmin",
-        "MFLPlayer",
-        "MFLPackTemplate",
-        "MFLPack",
-        "MFLViews",
-        "MFLClub"
-      ]
-    },
-    "testnet": {
-      "testnet-deploy-account": [
-        "MFLAdmin",
-        "MFLPackTemplate",
-        "MFLViews",
-        "MFLPlayer",
-        "MFLPack",
-        "MFLClub"
-      ]
-    }
-  }
+	"contracts": {
+		"DapperUtilityCoin": {
+			"source": "./contracts/_libs/DapperUtilityCoin.cdc",
+			"aliases": {
+				"mainnet": "ead892083b3e2c6c",
+				"testnet": "82ec283f88a62e65"
+			}
+		},
+		"FUSD": {
+			"source": "./contracts/_libs/FUSD.cdc",
+			"aliases": {
+				"mainnet": "3c5959b568896393",
+				"testnet": "e223d8a629e49c68"
+			}
+		},
+		"FlowStorageFees": {
+			"source": "./contracts/_libs/FlowStorageFees.cdc",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "e467b9dd11fa00df",
+				"testnet": "8c5303eaa26202d6"
+			}
+		},
+		"FlowToken": {
+			"source": "./contracts/_libs/FlowToken.cdc",
+			"aliases": {
+				"emulator": "0ae53cb6e3f42a79",
+				"mainnet": "1654653399040a61",
+				"testnet": "7e60df042a9c0868"
+			}
+		},
+		"FungibleToken": {
+			"source": "./contracts/_libs/FungibleToken.cdc",
+			"aliases": {
+				"emulator": "ee82856bf20e2aa6",
+				"mainnet": "f233dcee88fe0abe",
+				"testnet": "9a0766d93b6608b7"
+			}
+		},
+		"MFLAdmin": {
+			"source": "./contracts/core/MFLAdmin.cdc",
+			"aliases": {
+				"mainnet": "8ebcbfd516b1da27",
+				"testnet": "683564e46977788a"
+			}
+		},
+		"MFLClub": "./contracts/clubs/MFLClub.cdc",
+		"MFLPack": {
+			"source": "./contracts/packs/MFLPack.cdc",
+			"aliases": {
+				"mainnet": "8ebcbfd516b1da27",
+				"testnet": "683564e46977788a"
+			}
+		},
+		"MFLPackTemplate": {
+			"source": "./contracts/packs/MFLPackTemplate.cdc",
+			"aliases": {
+				"mainnet": "8ebcbfd516b1da27",
+				"testnet": "683564e46977788a"
+			}
+		},
+		"MFLPlayer": {
+			"source": "./contracts/players/MFLPlayer.cdc",
+			"aliases": {
+				"mainnet": "8ebcbfd516b1da27",
+				"testnet": "683564e46977788a"
+			}
+		},
+		"MFLViews": {
+			"source": "./contracts/views/MFLViews.cdc",
+			"aliases": {
+				"mainnet": "8ebcbfd516b1da27",
+				"testnet": "683564e46977788a"
+			}
+		},
+		"MetadataViews": {
+			"source": "./contracts/_libs/MetadataViews.cdc",
+			"aliases": {
+				"mainnet": "1d7e57aa55817448",
+				"testnet": "631e88ae7f1d7c20"
+			}
+		},
+		"NFTStorefront": {
+			"source": "./contracts/_libs/NFTStorefront.cdc",
+			"aliases": {
+				"mainnet": "4eb8a10cb9f87357",
+				"testnet": "94b06cfca1d8a476"
+			}
+		},
+		"NonFungibleToken": {
+			"source": "./contracts/_libs/NonFungibleToken.cdc",
+			"aliases": {
+				"mainnet": "1d7e57aa55817448",
+				"testnet": "631e88ae7f1d7c20"
+			}
+		},
+		"TokenForwarding": {
+			"source": "./contracts/_libs/TokenForwarding.cdc",
+			"aliases": {
+				"mainnet": "e544175ee0461c4b",
+				"testnet": "51ea0e37c27a1f1a"
+			}
+		}
+	},
+	"networks": {
+		"emulator": "127.0.0.1:3569",
+		"mainnet": "access.mainnet.nodes.onflow.org:9000",
+		"testnet": "access.devnet.nodes.onflow.org:9000"
+	},
+	"accounts": {
+		"admin-alice-account": {
+			"address": "01cf0e2f2f715450",
+			"key": "7066849395db7a15113f5f0606acbedc503462c25c3fdf90216f1f860a3b8a85"
+		},
+		"bob-account": {
+			"address": "179b6b1cb6755e31",
+			"key": "9e86822bacb9c9799345b024651c9b6ebe2aab49754ec2e1c19f5dabbf1ee42c"
+		},
+		"emulator-account": {
+			"address": "f8d6e0586b0a20c7",
+			"key": "84f82df6790f07b281adb5bbc848bd6298a2de67f94bdfac7a400d5a1b893de5"
+		},
+		"testnet-clubs-store-account": {
+			"fromFile": "testnet-clubs-store-account.private.json"
+		},
+		"testnet-deploy-account": {
+			"fromFile": "./flow.testnet.json"
+		},
+		"testnet-players-store-account": {
+			"fromFile": "./flow.testnet.json"
+		},
+		"testnet-storefront-account": {
+			"fromFile": "./flow.testnet.json"
+		}
+	},
+	"deployments": {
+		"emulator": {
+			"emulator-account": [
+				"FUSD",
+				"NonFungibleToken",
+				"MetadataViews",
+				"DapperUtilityCoin",
+				"TokenForwarding",
+				"NFTStorefront",
+				"MFLAdmin",
+				"MFLPlayer",
+				"MFLPackTemplate",
+				"MFLPack",
+				"MFLViews",
+				"MFLClub"
+			]
+		},
+		"testnet": {
+			"testnet-deploy-account": [
+				"MFLAdmin",
+				"MFLPackTemplate",
+				"MFLViews",
+				"MFLPlayer",
+				"MFLPack",
+				"MFLClub"
+			]
+		}
+	}
 }
