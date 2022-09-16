@@ -275,13 +275,23 @@ pub contract MFLClub: NonFungibleToken {
             let clubData = MFLClub.getClubData(id: self.id)!
             switch view {
                 case Type<MetadataViews.Display>():
-                    return MetadataViews.Display(
-                        name: clubData.getMetadata()["name"] as! String? ?? "",
-                        description: clubData.getMetadata()["description"] as! String? ?? "",
-                        thumbnail: MetadataViews.HTTPFile(
-                            url: "https://d13e14gtps4iwl.cloudfront.net/clubs/".concat(self.id.toString()).concat("/thumbnail.png")
-                        ),
-                    )
+                    if clubData.getStatus() === ClubStatus.NOT_FOUNDED {
+                        return MetadataViews.Display(
+                            name: "Club License",
+                            description: "",
+                            thumbnail: MetadataViews.HTTPFile(
+                                url: "https://d13e14gtps4iwl.cloudfront.net/clubs/".concat(self.id.toString()).concat("/licenses/foundation.png")
+                            ),
+                        )
+                    } else {
+                        return MetadataViews.Display(
+                            name: clubData.getMetadata()["name"] as! String? ?? "",
+                            description: clubData.getMetadata()["description"] as! String? ?? "",
+                            thumbnail: MetadataViews.HTTPFile(
+                                url: "https://d13e14gtps4iwl.cloudfront.net/clubs/".concat(self.id.toString()).concat("/logo.png")
+                            ),
+                        )
+                    }
                 case Type<MetadataViews.Royalties>():
                     return MetadataViews.Royalties([])
                 case Type<MetadataViews.NFTCollectionDisplay>():

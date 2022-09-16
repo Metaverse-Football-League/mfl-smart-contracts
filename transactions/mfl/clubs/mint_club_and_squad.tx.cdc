@@ -3,7 +3,7 @@ import MetadataViews from "../../../contracts/_libs/MetadataViews.cdc"
 import MFLClub from "../../../contracts/clubs/MFLClub.cdc"
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 
-/** 
+/**
   This tx creates a Squad resource and a Club NFT
   and deposit it in the receiver collection.
   The Squad resource lives inside the Club NFT.
@@ -45,7 +45,7 @@ transaction(
             competitionsMemberships: {} // TODO empty for now ?
         )
 
-        let nftMetadata: {String: AnyStruct} = {}
+        let metadata: {String: AnyStruct} = {}
         nftMetadata.insert(key: "foundationLicenseSerialNumber", foundationLicenseSerialNumber)
         nftMetadata.insert(key: "foundationLicenseCity", foundationLicenseCity)
         nftMetadata.insert(key: "foundationLicenseCountry", foundationLicenseCountry)
@@ -55,8 +55,8 @@ transaction(
         let clubNFT <- clubAdminClaimRef.mintClub(
             id: clubID,
             squads: <- [<-squadNFT],
-            nftMetadata: nftMetadata,
-            metadata: {} // TODO empty for now ?
+            nftMetadata: metadata,
+            metadata: metadata
         )
         self.receiverRef.deposit(token: <- clubNFT)
     }
