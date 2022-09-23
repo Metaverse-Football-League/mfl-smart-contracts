@@ -46,11 +46,11 @@ transaction(
         )
 
         let metadata: {String: AnyStruct} = {}
-        nftMetadata.insert(key: "foundationLicenseSerialNumber", foundationLicenseSerialNumber)
-        nftMetadata.insert(key: "foundationLicenseCity", foundationLicenseCity)
-        nftMetadata.insert(key: "foundationLicenseCountry", foundationLicenseCountry)
-        nftMetadata.insert(key: "foundationLicenseSeason", foundationLicenseSeason)
-        nftMetadata.insert(key: "foundationLicenseImage", MetadataViews.IPFSFile(cid: foundationLicenseCID, path: nil))
+        metadata.insert(key: "foundationLicenseSerialNumber", foundationLicenseSerialNumber)
+        metadata.insert(key: "foundationLicenseCity", foundationLicenseCity)
+        metadata.insert(key: "foundationLicenseCountry", foundationLicenseCountry)
+        metadata.insert(key: "foundationLicenseSeason", foundationLicenseSeason)
+        metadata.insert(key: "foundationLicenseImage", MetadataViews.IPFSFile(cid: foundationLicenseCID, path: nil))
 
         let clubNFT <- clubAdminClaimRef.mintClub(
             id: clubID,
