@@ -48,9 +48,6 @@ transaction(
             id: squadID,
             clubID: clubID,
             type: squadType,
-            nftMetadata: {}, // TODO empty for now ?
-            metadata: {}, // TODO empty for now ?
-            competitionsMemberships: {} // TODO empty for now ?
             nftMetadata: {},
             metadata: {},
             competitionsMemberships: competitionsMemberships
