@@ -1,4 +1,10 @@
 {
+	"emulators": {	
+		"default": {	
+		  "port": 3569,	
+		  "serviceAccount": "emulator-account"	
+		}	
+	},
 	"contracts": {
 		"DapperUtilityCoin": {
 			"source": "./contracts/_libs/DapperUtilityCoin.cdc",
@@ -45,7 +51,13 @@
 				"testnet": "683564e46977788a"
 			}
 		},
-		"MFLClub": "./contracts/clubs/MFLClub.cdc",
+		"MFLClub": {
+			"source": "./contracts/clubs/MFLClub.cdc",
+			"aliases": {
+				"mainnet": "8ebcbfd516b1da27",
+				"testnet": "683564e46977788a"
+			}
+		},
 		"MFLPack": {
 			"source": "./contracts/packs/MFLPack.cdc",
 			"aliases": {
