@@ -802,7 +802,7 @@ describe("MFLClub", () => {
         type: "squadType",
         status: { rawValue: MFLClubTestsUtils.SQUAD_STATUS_RAW_VALUES.ACTIVE },
         metadata: {},
-        competitionsMemberships: {},
+        competitionsMemberships: { 42: { division: 1 } },
       });
     });
 
@@ -846,9 +846,16 @@ describe("MFLClub", () => {
         const result = await MFLClubTestsUtils.createClubNFT(clubId, squadId);
 
         // assert
-        expect(result.events).toHaveLength(3);
+        expect(result.events).toHaveLength(4);
         expect(result.events).toEqual(
           expect.arrayContaining([
+            {
+              type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.SquadCompetitionMembershipAdded`,
+              data: { competitionID: 42, id: squadId },
+              eventIndex: expect.any(Number),
+              transactionId: expect.any(String),
+              transactionIndex: expect.any(Number),
+            },
             {
               type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.SquadMinted`,
               data: { id: squadId },
@@ -898,7 +905,7 @@ describe("MFLClub", () => {
           type: "squadType",
           status: { rawValue: MFLClubTestsUtils.SQUAD_STATUS_RAW_VALUES.ACTIVE },
           metadata: {},
-          competitionsMemberships: {},
+          competitionsMemberships: { 42: { division: 1 } },
         });
         expect(totalSupply).toBe(1);
         expect(squadsTotalSupply).toBe(1);
@@ -1147,7 +1154,7 @@ describe("MFLClub", () => {
             name: updatedSquadName,
             description: updatedSquadDescription,
           },
-          competitionsMemberships: {},
+          competitionsMemberships: { 42: { division: 1 } },
         });
       });
 
@@ -1203,6 +1210,7 @@ describe("MFLClub", () => {
           status: { rawValue: MFLClubTestsUtils.SQUAD_STATUS_RAW_VALUES.ACTIVE },
           metadata: {},
           competitionsMemberships: {
+            42: { division: 1 },
             [`${competitionId}`]: { name: competitionMembershipDataName, reward: competitionMembershipDataReward },
           },
         });
@@ -1265,6 +1273,7 @@ describe("MFLClub", () => {
           status: { rawValue: MFLClubTestsUtils.SQUAD_STATUS_RAW_VALUES.ACTIVE },
           metadata: {},
           competitionsMemberships: {
+            42: { division: 1 },
             [`${competitionId}`]: { name: "updated competition name", reward: 400 },
           },
         });
@@ -1301,7 +1310,7 @@ describe("MFLClub", () => {
         // execute
         const error = await testsUtils.shallRevert({
           code: UPDATE_SQUAD_COMPETITION_MEMBERSHIP,
-          args: [10, 42, "The competition", 900],
+          args: [10, 43, "The competition", 900],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -1349,7 +1358,7 @@ describe("MFLClub", () => {
           type: "squadType",
           status: { rawValue: MFLClubTestsUtils.SQUAD_STATUS_RAW_VALUES.ACTIVE },
           metadata: {},
-          competitionsMemberships: {},
+          competitionsMemberships: { 42: { division: 1 } },
         });
       });
 
