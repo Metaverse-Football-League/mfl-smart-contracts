@@ -55,7 +55,7 @@ export const MFLClubTestsUtils = {
   async createClubNFT(clubID, squadID, shallPass = true, clubAdminAccountName = "AliceAdminAccount") {
     const adminAccountAddress = await getAccountAddress(clubAdminAccountName);
     const signers = [adminAccountAddress];
-    const args = [clubID, ...Object.values(FOUNDATION_LICENSE_ARGS), squadID, "squadType", adminAccountAddress];
+    const args = [clubID, ...Object.values(FOUNDATION_LICENSE_ARGS), squadID, "squadType", 42, 1, adminAccountAddress];
     if (shallPass) {
       return await testsUtils.shallPass({ name: "mfl/clubs/mint_club_and_squad.tx", args, signers });
     } else {
