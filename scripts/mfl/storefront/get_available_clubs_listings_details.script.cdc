@@ -42,11 +42,11 @@ pub fun main(account: Address): [ListingDetails] {
     let listingsIDs = storefrontRef!.getListingIDs()
     let clubsListings: [ListingDetails] = []
 
-    for listingsID in listingsIDs {
-        if let listing = storefrontRef!.borrowListing(listingResourceID: listingsID) {
+    for listingID in listingsIDs {
+        if let listing = storefrontRef!.borrowListing(listingResourceID: listingID) {
             let storefrontListingDetails = listing.getDetails()
             if storefrontListingDetails.nftType == Type<@MFLClub.NFT>() && !storefrontListingDetails.purchased {
-                clubsListings.append(ListingDetails(storefrontListingDetails, listingsID))
+                clubsListings.append(ListingDetails(storefrontListingDetails, listingID))
             }
         }
     }

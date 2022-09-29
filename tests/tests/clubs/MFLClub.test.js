@@ -610,9 +610,9 @@ describe("MFLClub", () => {
 
           // assert
           expect(clubDisplayView).toEqual({
-            name: "",
-            description: "",
-            thumbnail: `https://d11e2517uhbeau.cloudfront.net/clubs/${clubId}/thumbnail.png`,
+            name: `Club License #${clubId}`,
+            description: `MFL Club License #${clubId}`,
+            thumbnail: `https://d13e14gtps4iwl.cloudfront.net/clubs/${clubId}/licenses/foundation.png`,
             owner: aliceAdminAccountAddress,
             type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.NFT`,
           });
@@ -635,16 +635,16 @@ describe("MFLClub", () => {
           expect(clubsDisplayView).toEqual(
             expect.arrayContaining([
               {
-                name: "",
-                description: "",
-                thumbnail: `https://d11e2517uhbeau.cloudfront.net/clubs/${clubId1}/thumbnail.png`,
+                name: `Club License #${clubId1}`,
+                description: `MFL Club License #${clubId1}`,
+                thumbnail: `https://d13e14gtps4iwl.cloudfront.net/clubs/${clubId1}/licenses/foundation.png`,
                 owner: aliceAdminAccountAddress,
                 type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.NFT`,
               },
               {
-                name: "",
-                description: "",
-                thumbnail: `https://d11e2517uhbeau.cloudfront.net/clubs/${clubId2}/thumbnail.png`,
+                name: `Club License #${clubId2}`,
+                description: `MFL Club License #${clubId2}`,
+                thumbnail: `https://d13e14gtps4iwl.cloudfront.net/clubs/${clubId2}/licenses/foundation.png`,
                 owner: aliceAdminAccountAddress,
                 type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.NFT`,
               },
@@ -718,7 +718,7 @@ describe("MFLClub", () => {
       // assert
       expect(clubData).toEqual({
         id: clubId,
-        metadata: {},
+        metadata: MFLClubTestsUtils.FOUNDATION_LICENSE,
         status: { rawValue: MFLClubTestsUtils.CLUB_STATUS_RAW_VALUES.NOT_FOUNDED },
         squadsIDs: [squadId],
       });
@@ -888,7 +888,7 @@ describe("MFLClub", () => {
         });
         expect(clubData).toEqual({
           id: clubId,
-          metadata: {},
+          metadata: MFLClubTestsUtils.FOUNDATION_LICENSE,
           status: { rawValue: MFLClubTestsUtils.CLUB_STATUS_RAW_VALUES.NOT_FOUNDED },
           squadsIDs: [squadId],
         });
@@ -948,7 +948,7 @@ describe("MFLClub", () => {
           id: clubId,
           status: { rawValue: MFLClubTestsUtils.CLUB_STATUS_RAW_VALUES.FOUNDED },
           squadsIDs: [squadId],
-          metadata: {},
+          metadata: MFLClubTestsUtils.FOUNDATION_LICENSE,
         });
       });
 
@@ -1050,7 +1050,7 @@ describe("MFLClub", () => {
           id: clubId,
           status: { rawValue: MFLClubTestsUtils.CLUB_STATUS_RAW_VALUES.NOT_FOUNDED },
           squadsIDs: [squadId, 42],
-          metadata: {},
+          metadata: MFLClubTestsUtils.FOUNDATION_LICENSE,
         });
       });
 
@@ -1200,7 +1200,7 @@ describe("MFLClub", () => {
           id: squadId,
           clubID: clubId,
           type: "squadType",
-          status: { rawValue: MFLClubTestsUtils.SQUAD_STATUS_RAW_VALUES.ACTIVE }, // SQUAD_STATUS_RAW_VALUES
+          status: { rawValue: MFLClubTestsUtils.SQUAD_STATUS_RAW_VALUES.ACTIVE },
           metadata: {},
           competitionsMemberships: {
             [`${competitionId}`]: { name: competitionMembershipDataName, reward: competitionMembershipDataReward },
@@ -1262,7 +1262,7 @@ describe("MFLClub", () => {
           id: squadId,
           clubID: clubId,
           type: "squadType",
-          status: { rawValue: MFLClubTestsUtils.SQUAD_STATUS_RAW_VALUES.ACTIVE }, // SQUAD_STATUS_RAW_VALUES
+          status: { rawValue: MFLClubTestsUtils.SQUAD_STATUS_RAW_VALUES.ACTIVE },
           metadata: {},
           competitionsMemberships: {
             [`${competitionId}`]: { name: "updated competition name", reward: 400 },
@@ -1347,7 +1347,7 @@ describe("MFLClub", () => {
           id: squadId,
           clubID: clubId,
           type: "squadType",
-          status: { rawValue: MFLClubTestsUtils.SQUAD_STATUS_RAW_VALUES.ACTIVE }, //SQUAD_STATUS_RAW_VALUES
+          status: { rawValue: MFLClubTestsUtils.SQUAD_STATUS_RAW_VALUES.ACTIVE },
           metadata: {},
           competitionsMemberships: {},
         });
