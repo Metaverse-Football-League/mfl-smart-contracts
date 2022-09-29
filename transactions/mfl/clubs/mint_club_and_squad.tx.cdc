@@ -3,6 +3,7 @@ import MetadataViews from "../../../contracts/_libs/MetadataViews.cdc"
 import MFLClub from "../../../contracts/clubs/MFLClub.cdc"
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 
+
 /**
   This tx creates a Squad resource and a Club NFT
   and deposit it in the receiver collection.
@@ -18,6 +19,8 @@ transaction(
     foundationLicenseCID: String,
     squadID: UInt64,
     squadType: String,
+    competitionID: UInt64,
+    leagueDivision: UInt32,
     receiverAddress: Address
 ) {
     let adminProxyRef: &MFLAdmin.AdminProxy
@@ -36,6 +39,11 @@ transaction(
         let clubAdminClaimRef = clubAdminClaimCap.borrow<&{MFLClub.ClubAdminClaim}>() ?? panic("Could not borrow ClubAdminClaim")
         let squadAdminClaimRef = squadAdminClaimCap.borrow<&{MFLClub.SquadAdminClaim}>() ?? panic("Could not borrow SquadAdminClaim")
 
+        let competitionsMemberships: {UInt64: AnyStruct} = {}
+        let leagueMembership: {String: AnyStruct} = {}
+        leagueMembership.insert(key: "division", leagueDivision)
+        competitionsMemberships.insert(key: competitionID, leagueMembership)
+
         let squadNFT <- squadAdminClaimRef.mintSquad(
             id: squadID,
             clubID: clubID,
@@ -43,14 +51,18 @@ transaction(
             nftMetadata: {}, // TODO empty for now ?
             metadata: {}, // TODO empty for now ?
             competitionsMemberships: {} // TODO empty for now ?
+            nftMetadata: {},
+            metadata: {},
+            competitionsMemberships: competitionsMemberships
         )
 
+
         let metadata: {String: AnyStruct} = {}
-        nftMetadata.insert(key: "foundationLicenseSerialNumber", foundationLicenseSerialNumber)
-        nftMetadata.insert(key: "foundationLicenseCity", foundationLicenseCity)
-        nftMetadata.insert(key: "foundationLicenseCountry", foundationLicenseCountry)
-        nftMetadata.insert(key: "foundationLicenseSeason", foundationLicenseSeason)
-        nftMetadata.insert(key: "foundationLicenseImage", MetadataViews.IPFSFile(cid: foundationLicenseCID, path: nil))
+        metadata.insert(key: "foundationLicenseSerialNumber", foundationLicenseSerialNumber)
+        metadata.insert(key: "foundationLicenseCity", foundationLicenseCity)
+        metadata.insert(key: "foundationLicenseCountry", foundationLicenseCountry)
+        metadata.insert(key: "foundationLicenseSeason", foundationLicenseSeason)
+        metadata.insert(key: "foundationLicenseImage", MetadataViews.IPFSFile(cid: foundationLicenseCID, path: nil))
 
         let clubNFT <- clubAdminClaimRef.mintClub(
             id: clubID,
