@@ -11,10 +11,10 @@ const CHECK_PLAYER_ADMIN_CLAIM = `
         
         execute {
             let playerAdminClaimCap = self.playerAdminProxyRef.getClaimCapability(name: "PlayerAdminClaim") ?? panic("PlayerAdminClaim capability not found")
-            playerAdminClaimCap.borrow<&MFLPlayer.PlayerAdmin{MFLPlayer.PlayerAdminClaim}>() ?? panic("Could not borrow PlayerAdminClaim")
+            playerAdminClaimCap.borrow<&{MFLPlayer.PlayerAdminClaim}>() ?? panic("Could not borrow PlayerAdminClaim")
         }
     }
-`
+`;
 
 const CHECK_PACK_ADMIN_CLAIM = `
     import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
@@ -29,10 +29,10 @@ const CHECK_PACK_ADMIN_CLAIM = `
 
         execute {
             let packAdminClaimCap = self.packAdminProxyRef.getClaimCapability(name: "PackAdminClaim") ?? panic("PackAdminClaim capability not found")
-            packAdminClaimCap.borrow<&MFLPack.PackAdmin{MFLPack.PackAdminClaim}>() ?? panic("Could not borrow PackAdminClaim")
+            packAdminClaimCap.borrow<&{MFLPack.PackAdminClaim}>() ?? panic("Could not borrow PackAdminClaim")
         }
     }
-`
+`;
 const CHECK_PACK_TEMPLATE_ADMIN_CLAIM = `
     import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
     import MFLPackTemplate from "../../../contracts/packs/MFLPackTemplate.cdc"
@@ -46,10 +46,10 @@ const CHECK_PACK_TEMPLATE_ADMIN_CLAIM = `
 
         execute {
             let packTemplateAdminClaimCap = self.packTemplateAdminProxyRef.getClaimCapability(name: "PackTemplateAdminClaim") ?? panic("PackTemplateAdminClaim capability not found")
-            packTemplateAdminClaimCap.borrow<&MFLPackTemplate.PackTemplateAdmin{MFLPackTemplate.PackTemplateAdminClaim}>() ?? panic("Could not borrow PackTemplateAdminClaim")
+            packTemplateAdminClaimCap.borrow<&{MFLPackTemplate.PackTemplateAdminClaim}>() ?? panic("Could not borrow PackTemplateAdminClaim")
         }
     }
-`
+`;
 
 const CHECK_CLUB_ADMIN_CLAIM = `
     import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
@@ -64,10 +64,10 @@ const CHECK_CLUB_ADMIN_CLAIM = `
 
         execute {
             let clubAdminClaimCap = self.clubAdminProxyRef.getClaimCapability(name: "ClubAdminClaim") ?? panic("ClubAdminClaim capability not found")
-            clubAdminClaimCap.borrow<&MFLClub.ClubAdmin{MFLClub.ClubAdminClaim}>() ?? panic("Could not borrow ClubAdminClaim")
+            clubAdminClaimCap.borrow<&{MFLClub.ClubAdminClaim}>() ?? panic("Could not borrow ClubAdminClaim")
         }
     }
-`
+`;
 
 const CHECK_SQUAD_ADMIN_CLAIM = `
     import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
@@ -82,15 +82,15 @@ const CHECK_SQUAD_ADMIN_CLAIM = `
 
         execute {
             let squadAdminClaimCap = self.squadAdminProxyRef.getClaimCapability(name: "SquadAdminClaim") ?? panic("SquadAdminClaim capability not found")
-            squadAdminClaimCap.borrow<&MFLClub.SquadAdmin{MFLClub.SquadAdminClaim}>() ?? panic("Could not borrow SquadAdminClaim")
+            squadAdminClaimCap.borrow<&{MFLClub.SquadAdminClaim}>() ?? panic("Could not borrow SquadAdminClaim")
         }
     }
-`
+`;
 
 module.exports = {
-    CHECK_PLAYER_ADMIN_CLAIM,
-    CHECK_PACK_ADMIN_CLAIM,
-    CHECK_PACK_TEMPLATE_ADMIN_CLAIM,
-    CHECK_CLUB_ADMIN_CLAIM,
-    CHECK_SQUAD_ADMIN_CLAIM
-}
+  CHECK_PLAYER_ADMIN_CLAIM,
+  CHECK_PACK_ADMIN_CLAIM,
+  CHECK_PACK_TEMPLATE_ADMIN_CLAIM,
+  CHECK_CLUB_ADMIN_CLAIM,
+  CHECK_SQUAD_ADMIN_CLAIM,
+};

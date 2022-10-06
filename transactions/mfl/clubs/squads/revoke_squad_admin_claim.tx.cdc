@@ -9,7 +9,7 @@ transaction(privatePath: Path) {
 
   prepare(acct: AuthAccount) {
     let privateCapabilityPath = privatePath as? PrivatePath
-    assert(acct.getCapability<&MFLClub.SquadAdmin{MFLClub.SquadAdminClaim}>(privateCapabilityPath!).check(), message: "Capability path does not exist")
+    assert(acct.getCapability<&{MFLClub.SquadAdminClaim}>(privateCapabilityPath!).check(), message: "Capability path does not exist")
     acct.unlink(privateCapabilityPath!)
   }
 
