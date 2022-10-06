@@ -1,37 +1,37 @@
-import { emulator, getAccountAddress } from 'flow-js-testing';
-import { MFLPlayerTestsUtils } from './_utils/MFLPlayerTests.utils';
-import { testsUtils } from '../_utils/tests.utils';
-import { BORROW_VIEW_RESOLVER } from './_scripts/borrow_view_resolver.script';
-import { ERROR_UPDATE_PLAYER_METADATA } from './_transactions/error_update_player_metadata.tx';
-import { omit } from "lodash"; 
-import * as matchers from 'jest-extended';
+import { emulator, getAccountAddress } from "flow-js-testing";
+import { MFLPlayerTestsUtils } from "./_utils/MFLPlayerTests.utils";
+import { testsUtils } from "../_utils/tests.utils";
+import { BORROW_VIEW_RESOLVER } from "./_scripts/borrow_view_resolver.script";
+import { ERROR_UPDATE_PLAYER_METADATA } from "./_transactions/error_update_player_metadata.tx";
+import { omit } from "lodash";
+import * as matchers from "jest-extended";
 
 expect.extend(matchers);
 jest.setTimeout(40000);
 
-describe('MFLPlayer', () => {
+describe("MFLPlayer", () => {
   let addressMap = null;
 
   beforeEach(async () => {
     await testsUtils.initEmulator(8080);
-    addressMap = await MFLPlayerTestsUtils.deployMFLPlayerContract('AliceAdminAccount');
+    addressMap = await MFLPlayerTestsUtils.deployMFLPlayerContract("AliceAdminAccount");
   });
 
   afterEach(async () => {
     await emulator.stop();
   });
 
-  describe('totalSupply', () => {
-    test('should be able to get the totalSupply', async () => {
+  describe("totalSupply", () => {
+    test("should be able to get the totalSupply", async () => {
       const totalSupply = await testsUtils.executeValidScript({
-        name: 'mfl/players/get_players_total_supply.script',
+        name: "mfl/players/get_players_total_supply.script",
       });
       expect(totalSupply).toBe(0);
     });
   });
 
-  describe('playersDatas', () => {
-    test('should not be able to get the playersDatas', async () => {
+  describe("playersDatas", () => {
+    test("should not be able to get the playersDatas", async () => {
       // prepare
 
       // execute
@@ -47,112 +47,151 @@ describe('MFLPlayer', () => {
       });
 
       // assert
-      expect(error.message).toContain('field has private access');
+      expect(error.message).toContain("field has private access");
     });
   });
 
-  describe('Collection', () => {
-    describe('withdraw() / deposit()', () => {
-      test('should withdraw a NFT from a collection and deposit it in another collection', async () => {
+  describe("Collection", () => {
+    describe("withdraw() / deposit()", () => {
+      test("should withdraw a NFT from a collection and deposit it in another collection", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+        );
         await MFLPlayerTestsUtils.createPlayerNFT(1);
-        const bobAccountAddress = await getAccountAddress('BobAccount');
+        const bobAccountAddress = await getAccountAddress("BobAccount");
         await testsUtils.shallPass({
-          name: 'mfl/players/create_and_link_player_collection.tx',
+          name: "mfl/players/create_and_link_player_collection.tx",
           signers: [bobAccountAddress],
         });
 
         // execute
         const result = await testsUtils.shallPass({
-          name: 'mfl/players/withdraw_player.tx',
+          name: "mfl/players/withdraw_player.tx",
           signers: [aliceAdminAccountAddress],
           args: [bobAccountAddress, 1],
         });
 
         // assert
         expect(result.events).toHaveLength(2);
-        expect(result.events[0]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Withdraw`,
-          data: {id: 1, from: aliceAdminAccountAddress},
-        }));
-        expect(result.events[1]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Deposit`,
-          data: {id: 1, to: bobAccountAddress},
-        }));
+        expect(result.events[0]).toEqual(
+          expect.objectContaining({
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Withdraw`,
+            data: { id: 1, from: aliceAdminAccountAddress },
+          }),
+        );
+        expect(result.events[1]).toEqual(
+          expect.objectContaining({
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Deposit`,
+            data: { id: 1, to: bobAccountAddress },
+          }),
+        );
         const alicePlayersIds = await testsUtils.executeValidScript({
-          name: 'mfl/players/get_ids_in_collection.script',
+          name: "mfl/players/get_ids_in_collection.script",
           args: [aliceAdminAccountAddress],
         });
         expect(alicePlayersIds).toEqual([]);
         const bobPlayersIds = await testsUtils.executeValidScript({
-          name: 'mfl/players/get_ids_in_collection.script',
+          name: "mfl/players/get_ids_in_collection.script",
           args: [bobAccountAddress],
         });
         expect(bobPlayersIds).toEqual([1]);
       });
     });
 
-    describe('batchWithdraw()', () => {
-      test('should batch withdraw NFTs from a collection and batch deposit them in another collection', async () => {
+    describe("batchWithdraw()", () => {
+      test("should batch withdraw NFTs from a collection and batch deposit them in another collection", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+        );
         await MFLPlayerTestsUtils.createPlayerNFT(1);
         await MFLPlayerTestsUtils.createPlayerNFT(31);
-        const bobAccountAddress = await getAccountAddress('BobAccount');
+        const bobAccountAddress = await getAccountAddress("BobAccount");
         await testsUtils.shallPass({
-          name: 'mfl/players/create_and_link_player_collection.tx',
+          name: "mfl/players/create_and_link_player_collection.tx",
           signers: [bobAccountAddress],
         });
 
         // execute
         const result = await testsUtils.shallPass({
-          name: 'mfl/players/batch_withdraw_players.tx',
+          name: "mfl/players/batch_withdraw_players.tx",
           signers: [aliceAdminAccountAddress],
           args: [bobAccountAddress, [1, 31]],
         });
 
         // assert
         expect(result.events).toHaveLength(8);
-        expect(result.events[0]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Withdraw`,
-          data: {id: 1, from: aliceAdminAccountAddress},
-        }));
-        expect(result.events[1]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Deposit`,
-          data: {id: 1, to: null},
-        }));
-        expect(result.events[2]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Withdraw`,
-          data: {id: 31, from: aliceAdminAccountAddress},
-        }));
-        expect(result.events[3]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Deposit`,
-          data: {id: 31, to: null},
-        }));
-        expect(result.events[4]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Withdraw`,
-          data: {id: 1, from: null},
-        }));
-        expect(result.events[5]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Deposit`,
-          data: {id: 1, to: bobAccountAddress},
-        }));
-        expect(result.events[6]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Withdraw`,
-          data: {id: 31, from: null},
-        }));
-        expect(result.events[7]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Deposit`,
-          data: {id: 31, to: bobAccountAddress},
-        }));
+        expect(result.events).toEqual(
+          expect.arrayContaining([
+            {
+              type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Withdraw`,
+              data: { id: 1, from: aliceAdminAccountAddress },
+              eventIndex: expect.any(Number),
+              transactionId: expect.any(String),
+              transactionIndex: expect.any(Number),
+            },
+            {
+              type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Withdraw`,
+              data: { id: 31, from: aliceAdminAccountAddress },
+              eventIndex: expect.any(Number),
+              transactionId: expect.any(String),
+              transactionIndex: expect.any(Number),
+            },
+            {
+              type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Deposit`,
+              data: { id: 1, to: null },
+              eventIndex: expect.any(Number),
+              transactionId: expect.any(String),
+              transactionIndex: expect.any(Number),
+            },
+            {
+              type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Deposit`,
+              data: { id: 31, to: null },
+              eventIndex: expect.any(Number),
+              transactionId: expect.any(String),
+              transactionIndex: expect.any(Number),
+            },
+            {
+              type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Withdraw`,
+              data: { id: 1, from: null },
+              eventIndex: expect.any(Number),
+              transactionId: expect.any(String),
+              transactionIndex: expect.any(Number),
+            },
+            {
+              type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Deposit`,
+              data: { id: 1, to: bobAccountAddress },
+              eventIndex: expect.any(Number),
+              transactionId: expect.any(String),
+              transactionIndex: expect.any(Number),
+            },
+            {
+              type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Withdraw`,
+              data: { id: 31, from: null },
+              eventIndex: expect.any(Number),
+              transactionId: expect.any(String),
+              transactionIndex: expect.any(Number),
+            },
+            {
+              type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Deposit`,
+              data: { id: 31, to: bobAccountAddress },
+              eventIndex: expect.any(Number),
+              transactionId: expect.any(String),
+              transactionIndex: expect.any(Number),
+            },
+          ]),
+        );
+
         const alicePlayersIds = await testsUtils.executeValidScript({
-          name: 'mfl/players/get_ids_in_collection.script',
+          name: "mfl/players/get_ids_in_collection.script",
           args: [aliceAdminAccountAddress],
         });
         expect(alicePlayersIds).toEqual([]);
         const bobPlayersIds = await testsUtils.executeValidScript({
-          name: 'mfl/players/get_ids_in_collection.script',
+          name: "mfl/players/get_ids_in_collection.script",
           args: [bobAccountAddress],
         });
         expect(bobPlayersIds).toHaveLength(2);
@@ -160,17 +199,20 @@ describe('MFLPlayer', () => {
       });
     });
 
-    describe('getIDs()', () => {
-      test('should get the IDs in the collection', async () => {
+    describe("getIDs()", () => {
+      test("should get the IDs in the collection", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+        );
         await MFLPlayerTestsUtils.createPlayerNFT(100022);
         await MFLPlayerTestsUtils.createPlayerNFT(1);
         await MFLPlayerTestsUtils.createPlayerNFT(89);
 
         // execute
         const ids = await testsUtils.executeValidScript({
-          name: 'mfl/players/get_ids_in_collection.script',
+          name: "mfl/players/get_ids_in_collection.script",
           args: [aliceAdminAccountAddress],
         });
 
@@ -180,10 +222,13 @@ describe('MFLPlayer', () => {
       });
     });
 
-    describe('borrowNFT()', () => {
-      test('should borrow a NFT in the collection', async () => {
+    describe("borrowNFT()", () => {
+      test("should borrow a NFT in the collection", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+        );
         const playerID = 5;
         await MFLPlayerTestsUtils.createPlayerNFT(playerID);
 
@@ -209,17 +254,20 @@ describe('MFLPlayer', () => {
           season: MFLPlayerTestsUtils.PLAYER_DATA.season,
           image: {
             cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
-            path: `${playerID}.svg`
+            path: null,
           },
           uuid: expect.toBeNumber(),
         });
       });
     });
 
-    describe('destroy', () => {
-      test('should destroy a collection', async () => {
+    describe("destroy", () => {
+      test("should destroy a collection", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+        );
         await MFLPlayerTestsUtils.createPlayerNFT(1);
         await MFLPlayerTestsUtils.createPlayerNFT(23);
 
@@ -241,129 +289,136 @@ describe('MFLPlayer', () => {
 
         // assert
         expect(result.events).toHaveLength(2);
-        expect(result.events).toPartiallyContain(
-          {
-            type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Destroyed`,
-            data: {id: 1},
-          }
-        );
-        expect(result.events).toPartiallyContain(
-          {
-            type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Destroyed`,
-            data: {id: 23},
-          }
-        );
+        expect(result.events).toPartiallyContain({
+          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Destroyed`,
+          data: { id: 1 },
+        });
+        expect(result.events).toPartiallyContain({
+          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Destroyed`,
+          data: { id: 23 },
+        });
       });
     });
   });
 
-  describe('createEmptyCollection()', () => {
-    test('should create an empty collection', async () => {
+  describe("createEmptyCollection()", () => {
+    test("should create an empty collection", async () => {
       // prepare
-      const bobAccountAddress = await getAccountAddress('BobAccount');
+      const bobAccountAddress = await getAccountAddress("BobAccount");
 
       // execute
       await testsUtils.shallPass({
-        name: 'mfl/players/create_and_link_player_collection.tx',
+        name: "mfl/players/create_and_link_player_collection.tx",
         signers: [bobAccountAddress],
       });
 
       // assert
       await testsUtils.executeValidScript({
-        name: 'mfl/players/get_ids_in_collection.script',
+        name: "mfl/players/get_ids_in_collection.script",
         args: [bobAccountAddress],
       });
     });
   });
 
-  describe('NFT', () => {
-
-    describe('getViews()', () => {
-      test('should get views types', async () => {
+  describe("NFT", () => {
+    describe("getViews()", () => {
+      test("should get views types", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+        );
         await MFLPlayerTestsUtils.createPlayerNFT(100022);
 
         // execute
         const viewsTypes = await testsUtils.executeValidScript({
-          name: 'mfl/players/get_player_views_from_collection.script',
+          name: "mfl/players/get_player_views_from_collection.script",
           args: [aliceAdminAccountAddress, 100022],
         });
 
         // assert
-        expect(viewsTypes).toEqual(expect.arrayContaining([
-          `A.${testsUtils.sansPrefix(addressMap.MetadataViews)}.MetadataViews.Display`,
-          `A.${testsUtils.sansPrefix(addressMap.MFLViews)}.MFLViews.PlayerDataViewV1`,
-        ]));
+        expect(viewsTypes.map((viewType) => viewType.typeID)).toEqual(
+          expect.arrayContaining([
+            `A.${testsUtils.sansPrefix(addressMap.MetadataViews)}.MetadataViews.Display`,
+            `A.${testsUtils.sansPrefix(addressMap.MFLViews)}.MFLViews.PlayerDataViewV1`,
+          ]),
+        );
       });
     });
 
-    describe('resolveView()', () => {
-      test('should resolve Display view for a specific player', async () => {
+    describe("resolveView()", () => {
+      test("should resolve Display view for a specific player", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+        );
         await MFLPlayerTestsUtils.createPlayerNFT(100022);
 
         // execute
         const playerDisplayView = await testsUtils.executeValidScript({
-          name: 'mfl/players/get_player_display_view_from_collection.script',
+          name: "mfl/players/get_player_display_view_from_collection.script",
           args: [aliceAdminAccountAddress, 100022],
         });
 
         // assert
-        expect(playerDisplayView).toEqual(
-          {
-            name: 'some name',
-            description: 'MFL Player #100022',
-            thumbnail: 'ipfs://QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm/100022.svg',
-            owner: aliceAdminAccountAddress,
-            type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.NFT`,
-          }
-        );
+        expect(playerDisplayView).toEqual({
+          name: "some name",
+          description: "MFL Player #100022",
+          thumbnail: "ipfs://QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm",
+          owner: aliceAdminAccountAddress,
+          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.NFT`,
+        });
       });
 
-      test('should resolve Display view for all players', async () => {
+      test("should resolve Display view for all players", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+        );
         await MFLPlayerTestsUtils.createPlayerNFT(100022);
         await MFLPlayerTestsUtils.createPlayerNFT(100023);
 
         // execute
         const playersDisplayView = await testsUtils.executeValidScript({
-          name: 'mfl/players/get_players_display_view_from_collection.script',
-          args: [aliceAdminAccountAddress],
+          name: "mfl/players/get_players_display_view_from_collection.script",
+          args: [aliceAdminAccountAddress, [100022, 100023]],
         });
 
         // assert
-        expect(playersDisplayView).toEqual(expect.arrayContaining(
-          [
+        expect(playersDisplayView).toEqual(
+          expect.arrayContaining([
             {
-              name: 'some name',
-              description: 'MFL Player #100022',
-              thumbnail: 'ipfs://QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm/100022.svg',
+              name: "some name",
+              description: "MFL Player #100022",
+              thumbnail: "ipfs://QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm",
               owner: aliceAdminAccountAddress,
-              type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.NFT`
+              type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.NFT`,
             },
             {
-              name: 'some name',
-              description: 'MFL Player #100023',
-              thumbnail: 'ipfs://QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm/100023.svg',
+              name: "some name",
+              description: "MFL Player #100023",
+              thumbnail: "ipfs://QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm",
               owner: aliceAdminAccountAddress,
-              type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.NFT`
-            }
-          ])
+              type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.NFT`,
+            },
+          ]),
         );
       });
 
-      test('should resolve PlayerData view for a specific player', async () => {
+      test("should resolve PlayerData view for a specific player", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+        );
         const playerID = 100022;
         await MFLPlayerTestsUtils.createPlayerNFT(playerID);
 
         // execute
         const playerDataView = await testsUtils.executeValidScript({
-          name: 'mfl/players/get_player_data_view_from_collection.script',
+          name: "mfl/players/get_player_data_view_from_collection.script",
           args: [aliceAdminAccountAddress, playerID],
         });
 
@@ -373,15 +428,18 @@ describe('MFLPlayer', () => {
           season: 1,
           thumbnail: {
             cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
-            path: `${playerID}.svg`
+            path: null,
           },
           metadata: omit(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY, "longevity"),
         });
       });
 
-      test('should resolve PlayerData view for all players', async () => {
+      test("should resolve PlayerData view for all players", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+        );
         const playerID1 = 100022;
         const playerID2 = 100023;
         await MFLPlayerTestsUtils.createPlayerNFT(playerID1);
@@ -389,69 +447,74 @@ describe('MFLPlayer', () => {
 
         // execute
         const playersDataView = await testsUtils.executeValidScript({
-          name: 'mfl/players/get_players_data_view_from_collection.script',
-          args: [aliceAdminAccountAddress],
+          name: "mfl/players/get_players_data_view_from_collection.script",
+          args: [aliceAdminAccountAddress, [100022, 100023]],
         });
 
         // assert
-        expect(playersDataView).toEqual(expect.arrayContaining([
-          {
-            id: playerID1,
-            season: 1,
-            thumbnail: {
-              cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
-              path: `${playerID1}.svg`
+        expect(playersDataView).toEqual(
+          expect.arrayContaining([
+            {
+              id: playerID1,
+              season: 1,
+              thumbnail: {
+                cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
+                path: null,
+              },
+              metadata: omit(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY, "longevity"),
             },
-            metadata: omit(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY, "longevity"),
-          },
-          {
-            id: playerID2,
-            season: 1,
-            thumbnail: {
-              cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
-              path: `${playerID2}.svg`
+            {
+              id: playerID2,
+              season: 1,
+              thumbnail: {
+                cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
+                path: null,
+              },
+              metadata: omit(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY, "longevity"),
             },
-            metadata: omit(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY, "longevity"),
-          },
-        ])); 
+          ]),
+        );
       });
     });
 
-    describe('destroy()', () => {
-      test('should destroy the NFT', async () => {
+    describe("destroy()", () => {
+      test("should destroy the NFT", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+        );
         await MFLPlayerTestsUtils.createPlayerNFT(100022);
 
         // execute
         const signers = [aliceAdminAccountAddress];
         const args = [100022];
-        const result = await testsUtils.shallPass({name: 'mfl/players/destroy_player.tx', args, signers});
+        const result = await testsUtils.shallPass({ name: "mfl/players/destroy_player.tx", args, signers });
 
         // assert
         expect(result.events).toPartiallyContain({
           type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Destroyed`,
-          data: {id: 100022},
+          data: { id: 100022 },
         });
         const error = await testsUtils.executeFailingScript({
-          name: 'mfl/players/get_player_data_view_from_collection.script',
+          name: "mfl/players/get_player_data_view_from_collection.script",
           args: [aliceAdminAccountAddress, 100022],
         });
-        expect(error.message).toContain("dereference failed")
+        expect(error.message).toContain("unexpectedly found nil while forcing an Optional value");
       });
     });
   });
 
-  describe('getPlayerData()', () => {
-    test('should get player data', async () => {
+  describe("getPlayerData()", () => {
+    test("should get player data", async () => {
       // prepare
-      await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+      await MFLPlayerTestsUtils.createPlayerAdmin("AliceAdminAccount", "AliceAdminAccount");
       const playerID = 4;
       await MFLPlayerTestsUtils.createPlayerNFT(playerID);
 
       // execute
       const playerData = await testsUtils.executeValidScript({
-        name: 'mfl/players/get_player_data.script',
+        name: "mfl/players/get_player_data.script",
         args: [playerID],
       });
 
@@ -462,17 +525,17 @@ describe('MFLPlayer', () => {
         season: 1,
         image: {
           cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
-          path: `${playerID}.svg`
+          path: null,
         },
       });
     });
 
-    test('should return nil when getting player data for an unknown player', async () => {
+    test("should return nil when getting player data for an unknown player", async () => {
       // prepare
 
       // execute
       const playerData = await testsUtils.executeValidScript({
-        name: 'mfl/players/get_player_data.script',
+        name: "mfl/players/get_player_data.script",
         args: [4],
       });
 
@@ -480,9 +543,9 @@ describe('MFLPlayer', () => {
       expect(playerData).toBeNull();
     });
 
-    test('should throw an error when updating player metadata', async () => {
+    test("should throw an error when updating player metadata", async () => {
       // prepare
-      await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+      await MFLPlayerTestsUtils.createPlayerAdmin("AliceAdminAccount", "AliceAdminAccount");
       await MFLPlayerTestsUtils.createPlayerNFT(1);
 
       // execute
@@ -496,30 +559,43 @@ describe('MFLPlayer', () => {
     });
   });
 
-  describe('PlayerAdmin', () => {
-    describe('mintPlayer()', () => {
-      test('should mint a player', async () => {
+  describe("PlayerAdmin", () => {
+    describe("mintPlayer()", () => {
+      test("should mint a player", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+        );
 
         // execute
         const signers = [aliceAdminAccountAddress];
         const playerID = 1201;
-        const args = [playerID, 1, 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm', ...Object.values(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY), aliceAdminAccountAddress];
-        const result = await testsUtils.shallPass({name: 'mfl/players/mint_player.tx', args, signers});
+        const args = [
+          playerID,
+          1,
+          "QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm",
+          ...Object.values(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY),
+          aliceAdminAccountAddress,
+        ];
+        const result = await testsUtils.shallPass({ name: "mfl/players/mint_player.tx", args, signers });
 
         // assert
         expect(result.events).toHaveLength(2);
-        expect(result.events[0]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Minted`,
-          data: {id: playerID},
-        }));
-        expect(result.events[1]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Deposit`,
-          data: {id: playerID, to: aliceAdminAccountAddress},
-        }));
+        expect(result.events[0]).toEqual(
+          expect.objectContaining({
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Minted`,
+            data: { id: playerID },
+          }),
+        );
+        expect(result.events[1]).toEqual(
+          expect.objectContaining({
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Deposit`,
+            data: { id: playerID, to: aliceAdminAccountAddress },
+          }),
+        );
         const playerData = await testsUtils.executeValidScript({
-          name: 'mfl/players/get_player_data.script',
+          name: "mfl/players/get_player_data.script",
           args: [playerID],
         });
         expect(playerData).toEqual({
@@ -528,11 +604,11 @@ describe('MFLPlayer', () => {
           season: 1,
           image: {
             cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
-            path: `${playerID}.svg`
+            path: null,
           },
         });
         const totalSupply = await testsUtils.executeValidScript({
-          name: 'mfl/players/get_players_total_supply.script',
+          name: "mfl/players/get_players_total_supply.script",
         });
         expect(totalSupply).toBe(1);
         const playerFromCollection = await testsUtils.executeValidScript({
@@ -544,49 +620,61 @@ describe('MFLPlayer', () => {
           season: 1,
           image: {
             cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
-            path: `${playerID}.svg`
+            path: null,
           },
           uuid: expect.toBeNumber(),
         });
       });
 
-      test('should panic when minting a player id already minted', async () => {
+      test("should panic when minting a player id already minted", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+        );
 
         // execute
         const signers = [aliceAdminAccountAddress];
         const playerID = 1201;
-        const args = [playerID, 1, 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm', ...Object.values(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY), aliceAdminAccountAddress];
-        await testsUtils.shallPass({name: 'mfl/players/mint_player.tx', args, signers});
-        const error = await testsUtils.shallRevert({name: 'mfl/players/mint_player.tx', args, signers});
+        const args = [
+          playerID,
+          1,
+          "QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm",
+          ...Object.values(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY),
+          aliceAdminAccountAddress,
+        ];
+        await testsUtils.shallPass({ name: "mfl/players/mint_player.tx", args, signers });
+        const error = await testsUtils.shallRevert({ name: "mfl/players/mint_player.tx", args, signers });
 
         // assert
-        expect(error).toContain('Player already exists');
+        expect(error).toContain("Player already exists");
       });
     });
 
-    describe('updatePlayerMetadata()', () => {
-      test('should update player metadata', async () => {
+    describe("updatePlayerMetadata()", () => {
+      test("should update player metadata", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+        );
         const signers = [aliceAdminAccountAddress];
         const playerID = 1200;
         await MFLPlayerTestsUtils.createPlayerNFT(playerID);
 
         // execute
-        const updatedMetadata = {...MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY};
-        updatedMetadata.positions = ['ST', 'RW', 'LW'];
+        const updatedMetadata = { ...MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY };
+        updatedMetadata.positions = ["ST", "RW", "LW"];
         updatedMetadata.overall = 99;
         const result = await testsUtils.shallPass({
-          name: 'mfl/players/update_player_metadata.tx',
+          name: "mfl/players/update_player_metadata.tx",
           args: [playerID, ...Object.values(updatedMetadata)],
           signers,
         });
 
         // assert
         const playerData = await testsUtils.executeValidScript({
-          name: 'mfl/players/get_player_data.script',
+          name: "mfl/players/get_player_data.script",
           args: [playerID],
         });
         expect(playerData).toEqual({
@@ -595,69 +683,77 @@ describe('MFLPlayer', () => {
           season: 1,
           image: {
             cid: MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
-            path: `${playerID}.svg`
+            path: null,
           },
         });
         expect(result.events).toHaveLength(1);
-        expect(result.events[0]).toEqual(expect.objectContaining({
-          type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Updated`,
-          data: {id: playerID},
-        }));
+        expect(result.events[0]).toEqual(
+          expect.objectContaining({
+            type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Updated`,
+            data: { id: playerID },
+          }),
+        );
       });
 
-      test('should panic when updating a player metadata for an unknown player', async () => {
+      test("should panic when updating a player metadata for an unknown player", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+        );
         const signers = [aliceAdminAccountAddress];
 
         // execute
         const error = await testsUtils.shallRevert({
-          name: 'mfl/players/update_player_metadata.tx',
+          name: "mfl/players/update_player_metadata.tx",
           args: [1201, ...Object.values(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY)],
           signers,
         });
 
         // assert
-        expect(error).toContain('Data not found');
+        expect(error).toContain("Data not found");
       });
     });
 
-    describe('createPlayerAdmin()', () => {
-      test('should create a player admin', async () => {
+    describe("createPlayerAdmin()", () => {
+      test("should create a player admin", async () => {
         // prepare
-        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
-        const bobAccountAddress = await getAccountAddress('BobAccount');
-        const jackAccountAddress = await getAccountAddress('JackAccount');
+        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+        );
+        const bobAccountAddress = await getAccountAddress("BobAccount");
+        const jackAccountAddress = await getAccountAddress("JackAccount");
 
         // execute
         const signers = [aliceAdminAccountAddress, bobAccountAddress];
         await testsUtils.shallPass({
-          name: 'mfl/players/create_player_admin.tx',
+          name: "mfl/players/create_player_admin.tx",
           signers,
         });
 
         // assert
         // bob must now be able to create another player admin
         await testsUtils.shallPass({
-          name: 'mfl/players/create_player_admin.tx',
+          name: "mfl/players/create_player_admin.tx",
           signers: [bobAccountAddress, jackAccountAddress],
         });
       });
 
-      test('should panic when trying to create a player admin with a non admin account', async () => {
+      test("should panic when trying to create a player admin with a non admin account", async () => {
         // prepare
-        const bobAccountAddress = await getAccountAddress('BobAccount');
-        const jackAccountAddress = await getAccountAddress('JackAccount');
+        const bobAccountAddress = await getAccountAddress("BobAccount");
+        const jackAccountAddress = await getAccountAddress("JackAccount");
 
         // execute
         const signers = [bobAccountAddress, jackAccountAddress];
         const error = await testsUtils.shallRevert({
-          name: 'mfl/players/create_player_admin.tx',
+          name: "mfl/players/create_player_admin.tx",
           signers,
         });
 
         // assert
-        expect(error).toContain('Could not borrow player admin ref');
+        expect(error).toContain("Could not borrow player admin ref");
       });
     });
   });

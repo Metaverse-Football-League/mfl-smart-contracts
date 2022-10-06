@@ -76,5 +76,4 @@ pub contract MFLViews {
     init() {
         emit ContractInitialized()
     }
-
 }

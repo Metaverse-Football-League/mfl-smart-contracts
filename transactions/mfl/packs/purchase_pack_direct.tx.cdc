@@ -5,10 +5,12 @@ import NFTStorefront from "../../../contracts/_libs/NFTStorefront.cdc"
 import DapperUtilityCoin from "../../../contracts/_libs/DapperUtilityCoin.cdc"
 import MFLPack from "../../../contracts/packs/MFLPack.cdc"
 import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
+import MFLClub from "../../../contracts/clubs/MFLClub.cdc"
 
 /** 
-  This transaction purchases a pack on from a dapp. This transaction will also initialize the buyer's account with a Pack NFT
-  collection and a Player NFT collection if it does not already have them.
+  This transaction purchases a pack on from a dapp.
+  This transaction will also initialize the buyer's account with a Pack NFT
+  collection, a Player NFT collection and a Club NFT collection if it does not already have them.
 **/
 
 transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice: UFix64) {
@@ -30,6 +32,16 @@ transaction(storefrontAddress: Address, listingResourceID: UInt64, expectedPrice
             buyer.link<&MFLPlayer.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(
                 MFLPlayer.CollectionPublicPath,
                 target: MFLPlayer.CollectionStoragePath
+            )
+                ?? panic("Could not link collection Pub Path")
+        }
+
+        // Initialize the MFLClub collection if the buyer does not already have one
+        if buyer.borrow<&MFLClub.Collection>(from: MFLClub.CollectionStoragePath) == nil {
+            buyer.save(<- MFLClub.createEmptyCollection(), to: MFLClub.CollectionStoragePath)
+            buyer.link<&MFLClub.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(
+                MFLClub.CollectionPublicPath,
+                target: MFLClub.CollectionStoragePath
             )
                 ?? panic("Could not link collection Pub Path")
         }

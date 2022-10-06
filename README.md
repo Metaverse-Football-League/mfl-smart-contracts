@@ -31,6 +31,13 @@ to perform actions in the smart contract like creating players, buying packs, ..
 Contract defining the player's resource and the collection used to store players. The contract also contains a central
 ledger where all the players' metadata are stored. Allowing MFL admins to update them easily.
 
+### MFLClub
+
+`/contracts/clubs/MFLClub.cdc`
+
+Contract defining the club's resource and the collection used to store them. The contract also contains a central
+ledger where all the clubs' metadata are stored. Squads 
+
 ### MFLPack
 
 `/contracts/packs/MFLPack.cdc`
