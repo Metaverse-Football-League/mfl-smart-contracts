@@ -197,7 +197,7 @@ pub contract MFLPack: NonFungibleToken {
     pub fun createEmptyCollection(): @Collection {
         return <- create Collection()
     }
-    
+
     // This interface allows any account that has a private capability to a PackAdminClaim to call the methods below
     pub resource interface PackAdminClaim {
         pub let name: String
@@ -240,7 +240,7 @@ pub contract MFLPack: NonFungibleToken {
         // Create a Collection and save it to storage
         self.account.save<@MFLPack.Collection>(<- MFLPack.createEmptyCollection(), to: MFLPack.CollectionStoragePath)
         // Create a public capability for the Collection
-        self.account.link<&MFLPack.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(MFLPack.CollectionPublicPath, target: MFLPack.CollectionStoragePath)
+        self.account.link<&MFLPack.Collection{NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(MFLPack.CollectionPublicPath, target: MFLPack.CollectionStoragePath)
 
         // Create PackAdmin resource and save it to storage
         self.account.save(<- create PackAdmin() , to: self.PackAdminStoragePath)
@@ -248,4 +248,3 @@ pub contract MFLPack: NonFungibleToken {
         emit ContractInitialized()
     }
 }
- 
