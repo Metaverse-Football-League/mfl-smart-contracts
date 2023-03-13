@@ -72,6 +72,7 @@ pub contract MFLPlayer: NonFungibleToken {
                 Type<MetadataViews.NFTCollectionData>(),
                 Type<MetadataViews.ExternalURL>(),
                 Type<MetadataViews.Traits>(),
+                Type<MetadataViews.Serial>(),
                 Type<MFLViews.PlayerDataViewV1>()
             ]
         }
@@ -135,6 +136,8 @@ pub contract MFLPlayer: NonFungibleToken {
                     traits.append(MetadataViews.Trait(name: "physical", value: playerData.metadata["physical"] as! UInt32?, displayType: "Number", rarity: nil))
                     traits.append(MetadataViews.Trait(name: "goalkeeping", value: playerData.metadata["goalkeeping"] as! UInt32?, displayType: "Number", rarity: nil))
                     return MetadataViews.Traits(traits)
+                case Type<MetadataViews.Serial>():
+                    return MetadataViews.Serial(playerData.id)
                 case Type<MFLViews.PlayerDataViewV1>():
                     return MFLViews.PlayerDataViewV1(
                        id: playerData.id,

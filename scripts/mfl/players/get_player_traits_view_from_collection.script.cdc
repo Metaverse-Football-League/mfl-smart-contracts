@@ -2,32 +2,10 @@ import MetadataViews from "../../../contracts/_libs/MetadataViews.cdc"
 import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 
 /**
-  This script returns a data representation of a player
+  This script returns a generic data representation of a player traits
   given a collection address and a player id,
-  following the Display View defined in the MedataViews contract.
+  following the Traits View defined in the MedataViews contract.
 **/
-
-pub struct PlayerNFT {
-    pub let name: String
-    pub let description: String
-    pub let thumbnail: String
-    pub let owner: Address
-    pub let type: String
-
-    init(
-        name: String,
-        description: String,
-        thumbnail: String,
-        owner: Address,
-        nftType: String,
-    ) {
-        self.name = name
-        self.description = description
-        self.thumbnail = thumbnail
-        self.owner = owner
-        self.type = nftType
-    }
-}
 
 pub fun main(address: Address, id: UInt64): MetadataViews.Traits {
 
