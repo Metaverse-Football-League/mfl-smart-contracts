@@ -71,10 +71,11 @@ pub contract MFLPlayer: NonFungibleToken {
                 Type<MetadataViews.NFTCollectionDisplay>(),
                 Type<MetadataViews.NFTCollectionData>(),
                 Type<MetadataViews.ExternalURL>(),
+                Type<MetadataViews.Traits>(),
                 Type<MFLViews.PlayerDataViewV1>()
             ]
         }
-        
+
         // Resolve a specific view
         pub fun resolveView(_ view: Type): AnyStruct? {
             let playerData = MFLPlayer.getPlayerData(id: self.id)!
@@ -116,6 +117,24 @@ pub contract MFLPlayer: NonFungibleToken {
                     )
                 case Type<MetadataViews.ExternalURL>():
                     return MetadataViews.ExternalURL("https://playmfl.com")
+                case Type<MetadataViews.Traits>():
+                    let traits: [MetadataViews.Trait] = []
+                    traits.append(MetadataViews.Trait(name: "id", value: playerData.id, displayType: "Number", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "name", value: playerData.metadata["name"] as! String?, displayType: "String", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "nationalities", value: playerData.metadata["nationalities"] as! [String]?, displayType: nil, rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "positions", value: playerData.metadata["positions"] as! [String]?, displayType: nil, rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "preferredFoot", value: playerData.metadata["preferredFoot"] as! String?, displayType: "String", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "ageAtMint", value: playerData.metadata["ageAtMint"] as! UInt32?, displayType: "Number", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "height", value: playerData.metadata["height"] as! UInt32?, displayType: "Number", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "overall", value: playerData.metadata["overall"] as! UInt32?, displayType: "Number", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "pace", value: playerData.metadata["pace"] as! UInt32?, displayType: "Number", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "shooting", value: playerData.metadata["shooting"] as! UInt32?, displayType: "Number", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "passing", value: playerData.metadata["passing"] as! UInt32?, displayType: "Number", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "dribbling", value: playerData.metadata["dribbling"] as! UInt32?, displayType: "Number", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "defense", value: playerData.metadata["defense"] as! UInt32?, displayType: "Number", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "physical", value: playerData.metadata["physical"] as! UInt32?, displayType: "Number", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "goalkeeping", value: playerData.metadata["goalkeeping"] as! UInt32?, displayType: "Number", rarity: nil))
+                    return MetadataViews.Traits(traits)
                 case Type<MFLViews.PlayerDataViewV1>():
                     return MFLViews.PlayerDataViewV1(
                        id: playerData.id,
@@ -183,7 +202,7 @@ pub contract MFLPlayer: NonFungibleToken {
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT {
             return (&self.ownedNFTs[id] as &NonFungibleToken.NFT?)!
         }
-        
+
         pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
             let nft = (&self.ownedNFTs[id] as auth &NonFungibleToken.NFT?)!
             let playerNFT = nft as! &MFLPlayer.NFT
