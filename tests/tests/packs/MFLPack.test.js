@@ -694,10 +694,14 @@ describe("MFLPack", () => {
         });
 
         // assert
-        expect(viewsTypes).toHaveLength(2);
+        expect(viewsTypes).toHaveLength(6);
         expect(viewsTypes.map((viewType) => viewType.typeID)).toEqual(
           expect.arrayContaining([
             `A.${testsUtils.sansPrefix(addressMap.MetadataViews)}.MetadataViews.Display`,
+            `A.${testsUtils.sansPrefix(addressMap.MetadataViews)}.MetadataViews.Royalties`,
+            `A.${testsUtils.sansPrefix(addressMap.MetadataViews)}.MetadataViews.NFTCollectionDisplay`,
+            `A.${testsUtils.sansPrefix(addressMap.MetadataViews)}.MetadataViews.NFTCollectionData`,
+            `A.${testsUtils.sansPrefix(addressMap.MetadataViews)}.MetadataViews.ExternalURL`,
             `A.${testsUtils.sansPrefix(addressMap.MFLViews)}.MFLViews.PackDataViewV1`,
           ]),
         );
