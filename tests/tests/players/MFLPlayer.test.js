@@ -371,6 +371,87 @@ describe("MFLPlayer", () => {
         });
       });
 
+      test("should resolve Traits view for a specific player", async () => {
+        // prepare
+        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
+          "AliceAdminAccount",
+          "AliceAdminAccount",
+        );
+        await MFLPlayerTestsUtils.createPlayerNFT(100022);
+
+        // execute
+        const playerTraitsView = await testsUtils.executeValidScript({
+          name: "mfl/players/get_player_traits_view_from_collection.script",
+          args: [aliceAdminAccountAddress, 100022],
+        });
+
+        // assert
+        expect(playerTraitsView).toEqual( {
+          traits: [
+            { name: 'id', value: 100022, displayType: 'Number', rarity: null },
+            {
+              name: 'name',
+              value: 'some name',
+              displayType: 'String',
+              rarity: null
+            },
+            {
+              name: 'nationalities',
+              value: ['FR', 'DE'],
+              displayType: null,
+              rarity: null
+            },
+            {
+              name: 'positions',
+              value: ['ST', 'CAM'],
+              displayType: null,
+              rarity: null
+            },
+            {
+              name: 'preferredFoot',
+              value: 'left',
+              displayType: 'String',
+              rarity: null
+            },
+            {
+              name: 'ageAtMint',
+              value: 17,
+              displayType: 'Number',
+              rarity: null
+            },
+            { name: 'height', value: 180, displayType: 'Number', rarity: null },
+            { name: 'overall', value: 87, displayType: 'Number', rarity: null },
+            { name: 'pace', value: 56, displayType: 'Number', rarity: null },
+            {
+              name: 'shooting',
+              value: 66,
+              displayType: 'Number',
+              rarity: null
+            },
+            { name: 'passing', value: 62, displayType: 'Number', rarity: null },
+            {
+              name: 'dribbling',
+              value: 61,
+              displayType: 'Number',
+              rarity: null
+            },
+            { name: 'defense', value: 60, displayType: 'Number', rarity: null },
+            {
+              name: 'physical',
+              value: 59,
+              displayType: 'Number',
+              rarity: null
+            },
+            {
+              name: 'goalkeeping',
+              value: 1,
+              displayType: 'Number',
+              rarity: null
+            }
+          ]
+        })
+      });
+
       test("should resolve Display view for all players", async () => {
         // prepare
         const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
