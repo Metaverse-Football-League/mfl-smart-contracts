@@ -395,7 +395,6 @@ describe('MFLPlayer', () => {
         // assert
         expect(playerTraitsView).toEqual({
           traits: [
-            {name: 'id', value: 100022, displayType: 'Number', rarity: null},
             {
               name: 'name',
               value: 'some name',
