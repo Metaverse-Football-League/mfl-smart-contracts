@@ -617,7 +617,7 @@ pub contract MFLClub: NonFungibleToken {
         // Put a new Collection in storage
         self.account.save<@Collection>(<- create Collection(), to: self.CollectionStoragePath)
         // Create a public capability for the Collection
-        self.account.link<&MFLClub.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(self.CollectionPublicPath, target: self.CollectionStoragePath)
+        self.account.link<&MFLClub.Collection{NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(self.CollectionPublicPath, target: self.CollectionStoragePath)
         // Create a ClubAdmin resource and save it to storage
         self.account.save(<- create ClubAdmin() , to: self.ClubAdminStoragePath)
         // Create SquadAdmin resource and save it to storage

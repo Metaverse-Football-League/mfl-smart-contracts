@@ -74,7 +74,7 @@ pub contract MFLPlayer: NonFungibleToken {
                 Type<MFLViews.PlayerDataViewV1>()
             ]
         }
-        
+
         // Resolve a specific view
         pub fun resolveView(_ view: Type): AnyStruct? {
             let playerData = MFLPlayer.getPlayerData(id: self.id)!
@@ -183,7 +183,7 @@ pub contract MFLPlayer: NonFungibleToken {
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT {
             return (&self.ownedNFTs[id] as &NonFungibleToken.NFT?)!
         }
-        
+
         pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
             let nft = (&self.ownedNFTs[id] as auth &NonFungibleToken.NFT?)!
             let playerNFT = nft as! &MFLPlayer.NFT
@@ -275,7 +275,7 @@ pub contract MFLPlayer: NonFungibleToken {
         // Put a new Collection in storage
         self.account.save<@Collection>(<- create Collection(), to: self.CollectionStoragePath)
         // Create a public capability for the Collection
-        self.account.link<&MFLPlayer.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(self.CollectionPublicPath, target: self.CollectionStoragePath)
+        self.account.link<&MFLPlayer.Collection{NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(self.CollectionPublicPath, target: self.CollectionStoragePath)
         // Create a PlayerAdmin resource and save it to storage
         self.account.save(<- create PlayerAdmin() , to: self.PlayerAdminStoragePath)
 

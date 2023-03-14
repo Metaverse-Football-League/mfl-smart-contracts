@@ -148,7 +148,7 @@ pub contract MFLPackTemplate {
     access(account) fun increasePackTemplateCurrentSupply(id: UInt64, nbToMint: UInt32) {
         self.getPackTemplateRef(id: id)?.increaseCurrentSupply(nbToMint: nbToMint)
     }
-    
+
     // This interface allows any account that has a private capability to a PackTemplateAdminClaim to call the methods below
     pub resource interface PackTemplateAdminClaim {
         pub let name: String
@@ -185,7 +185,7 @@ pub contract MFLPackTemplate {
 
         pub fun createPackTemplateAdmin(): @PackTemplateAdmin {
             return <- create PackTemplateAdmin()
-        } 
+        }
     }
 
 
@@ -200,7 +200,7 @@ pub contract MFLPackTemplate {
 
         // Create PackTemplateAdmin resource and save it to storage
         self.account.save(<- create PackTemplateAdmin() , to: self.PackTemplateAdminStoragePath)
-        
+
         emit ContractInitialized()
     }
 }
