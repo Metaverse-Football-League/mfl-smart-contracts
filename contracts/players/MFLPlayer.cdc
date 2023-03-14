@@ -122,8 +122,30 @@ pub contract MFLPlayer: NonFungibleToken {
                     let traits: [MetadataViews.Trait] = []
                     traits.append(MetadataViews.Trait(name: "id", value: playerData.id, displayType: "Number", rarity: nil))
                     traits.append(MetadataViews.Trait(name: "name", value: playerData.metadata["name"] as! String?, displayType: "String", rarity: nil))
-                    traits.append(MetadataViews.Trait(name: "nationalities", value: playerData.metadata["nationalities"] as! [String]?, displayType: nil, rarity: nil))
-                    traits.append(MetadataViews.Trait(name: "positions", value: playerData.metadata["positions"] as! [String]?, displayType: nil, rarity: nil))
+
+                    let nationalitiesOptional = playerData.metadata["nationalities"] as! [String]?
+                    var nationalitiesString: String = ""
+                    if let nationalities = nationalitiesOptional {
+                        for nationality in nationalities {
+                            if nationalitiesString.length > 0 {
+                                nationalitiesString = nationalitiesString.concat(", ")
+                            }
+                            nationalitiesString = nationalitiesString.concat(nationality)
+                        }
+                    }
+                    traits.append(MetadataViews.Trait(name: "nationalities", value: nationalitiesString, displayType: "String", rarity: nil))
+
+                    let positionsOptional = playerData.metadata["positions"] as! [String]?
+                    var positionsString: String = ""
+                    if let positions = positionsOptional {
+                        for position in positions {
+                            if positionsString.length > 0 {
+                                positionsString = positionsString.concat(", ")
+                            }
+                            positionsString = positionsString.concat(position)
+                        }
+                    }
+                    traits.append(MetadataViews.Trait(name: "positions", value: positionsString, displayType: "String", rarity: nil))
                     traits.append(MetadataViews.Trait(name: "preferredFoot", value: playerData.metadata["preferredFoot"] as! String?, displayType: "String", rarity: nil))
                     traits.append(MetadataViews.Trait(name: "ageAtMint", value: playerData.metadata["ageAtMint"] as! UInt32?, displayType: "Number", rarity: nil))
                     traits.append(MetadataViews.Trait(name: "height", value: playerData.metadata["height"] as! UInt32?, displayType: "Number", rarity: nil))
