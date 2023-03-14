@@ -404,14 +404,14 @@ describe('MFLPlayer', () => {
             },
             {
               name: 'nationalities',
-              value: ['FR', 'DE'],
-              displayType: null,
+              value: 'FR, DE',
+              displayType: "String",
               rarity: null,
             },
             {
               name: 'positions',
-              value: ['ST', 'CAM'],
-              displayType: null,
+              value: 'ST, CAM',
+              displayType: "String",
               rarity: null,
             },
             {
