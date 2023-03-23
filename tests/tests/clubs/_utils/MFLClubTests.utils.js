@@ -52,10 +52,10 @@ export const MFLClubTestsUtils = {
     return receiverAcctAddress;
   },
 
-  async createClubNFT(clubID, squadID, shallPass = true, clubAdminAccountName = "AliceAdminAccount") {
+  async createClubNFT(clubID, squadID, shallPass = true, clubAdminAccountName = "AliceAdminAccount", competitionId = 42) {
     const adminAccountAddress = await getAccountAddress(clubAdminAccountName);
     const signers = [adminAccountAddress];
-    const args = [clubID, ...Object.values(FOUNDATION_LICENSE_ARGS), squadID, "squadType", 42, 1, adminAccountAddress];
+    const args = [clubID, ...Object.values(FOUNDATION_LICENSE_ARGS), squadID, "squadType", competitionId, 1, adminAccountAddress];
     if (shallPass) {
       return await testsUtils.shallPass({ name: "mfl/clubs/mint_club_and_squad.tx", args, signers });
     } else {

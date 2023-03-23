@@ -71,6 +71,8 @@ pub contract MFLPlayer: NonFungibleToken {
                 Type<MetadataViews.NFTCollectionDisplay>(),
                 Type<MetadataViews.NFTCollectionData>(),
                 Type<MetadataViews.ExternalURL>(),
+                Type<MetadataViews.Traits>(),
+                Type<MetadataViews.Serial>(),
                 Type<MFLViews.PlayerDataViewV1>()
             ]
         }
@@ -116,6 +118,47 @@ pub contract MFLPlayer: NonFungibleToken {
                     )
                 case Type<MetadataViews.ExternalURL>():
                     return MetadataViews.ExternalURL("https://playmfl.com")
+                case Type<MetadataViews.Traits>():
+                    let traits: [MetadataViews.Trait] = []
+                    traits.append(MetadataViews.Trait(name: "name", value: playerData.metadata["name"] as! String?, displayType: "String", rarity: nil))
+
+                    let nationalitiesOptional = playerData.metadata["nationalities"] as! [String]?
+                    var nationalitiesString: String = ""
+                    if let nationalities = nationalitiesOptional {
+                        for nationality in nationalities {
+                            if nationalitiesString.length > 0 {
+                                nationalitiesString = nationalitiesString.concat(", ")
+                            }
+                            nationalitiesString = nationalitiesString.concat(nationality)
+                        }
+                    }
+                    traits.append(MetadataViews.Trait(name: "nationalities", value: nationalitiesString, displayType: "String", rarity: nil))
+
+                    var positionsString: String = ""
+                    if let positions = playerData.metadata["positions"] as! [String]? {
+                        for position in positions {
+                            if positionsString.length > 0 {
+                                positionsString = positionsString.concat(", ")
+                            }
+                            positionsString = positionsString.concat(position)
+                        }
+                    }
+                    traits.append(MetadataViews.Trait(name: "positions", value: positionsString, displayType: "String", rarity: nil))
+
+                    traits.append(MetadataViews.Trait(name: "preferredFoot", value: playerData.metadata["preferredFoot"] as! String?, displayType: "String", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "ageAtMint", value: playerData.metadata["ageAtMint"] as! UInt32?, displayType: "Number", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "height", value: playerData.metadata["height"] as! UInt32?, displayType: "Number", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "overall", value: playerData.metadata["overall"] as! UInt32?, displayType: "Number", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "pace", value: playerData.metadata["pace"] as! UInt32?, displayType: "Number", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "shooting", value: playerData.metadata["shooting"] as! UInt32?, displayType: "Number", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "passing", value: playerData.metadata["passing"] as! UInt32?, displayType: "Number", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "dribbling", value: playerData.metadata["dribbling"] as! UInt32?, displayType: "Number", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "defense", value: playerData.metadata["defense"] as! UInt32?, displayType: "Number", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "physical", value: playerData.metadata["physical"] as! UInt32?, displayType: "Number", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "goalkeeping", value: playerData.metadata["goalkeeping"] as! UInt32?, displayType: "Number", rarity: nil))
+                    return MetadataViews.Traits(traits)
+                case Type<MetadataViews.Serial>():
+                    return MetadataViews.Serial(playerData.id)
                 case Type<MFLViews.PlayerDataViewV1>():
                     return MFLViews.PlayerDataViewV1(
                        id: playerData.id,

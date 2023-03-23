@@ -266,7 +266,9 @@ pub contract MFLClub: NonFungibleToken {
                 Type<MetadataViews.Royalties>(),
                 Type<MetadataViews.NFTCollectionDisplay>(),
                 Type<MetadataViews.NFTCollectionData>(),
-                Type<MetadataViews.ExternalURL>()
+                Type<MetadataViews.ExternalURL>(),
+                Type<MetadataViews.Traits>(),
+                Type<MetadataViews.Serial>()
             ]
         }
 
@@ -323,6 +325,27 @@ pub contract MFLClub: NonFungibleToken {
                     )
                 case Type<MetadataViews.ExternalURL>():
                     return MetadataViews.ExternalURL("https://playmfl.com")
+                case Type<MetadataViews.Traits>():
+                    let traits: [MetadataViews.Trait] = []
+                    traits.append(MetadataViews.Trait(name: "city", value: clubData.getMetadata()["foundationLicenseCity"] as! String?, displayType: "String", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "country", value: clubData.getMetadata()["foundationLicenseCountry"] as! String?, displayType: "String", rarity: nil))
+
+                    let squadsIDs = clubData.getSquadIDs()
+                    if squadsIDs.length > 0 {
+                        let firstSquadID = squadsIDs[0]
+                        if let squadData = MFLClub.getSquadData(id: firstSquadID) {
+                            if let globalLeagueMembership = squadData.getCompetitionsMemberships()[1] {
+                                if let globalLeagueMembershipDataOptional = globalLeagueMembership as? {String: AnyStruct}? {
+                                    if let globalLeagueMembershipData = globalLeagueMembershipDataOptional {
+                                        traits.append(MetadataViews.Trait(name: "division", value: globalLeagueMembershipData["division"] as! UInt32?, displayType: "Number", rarity: nil))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return MetadataViews.Traits(traits)
+                case Type<MetadataViews.Serial>():
+                    return MetadataViews.Serial(clubData.id)
             }
             return nil
         }
