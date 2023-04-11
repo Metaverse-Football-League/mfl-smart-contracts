@@ -290,7 +290,7 @@ pub contract MFLClub: NonFungibleToken {
                             name: clubData.getMetadata()["name"] as! String? ?? "",
                             description: clubData.getMetadata()["description"] as! String? ?? "",
                             thumbnail: MetadataViews.HTTPFile(
-                                url: "https://d13e14gtps4iwl.cloudfront.net/clubs/".concat(clubData.id.toString()).concat("/logo.png")
+                                url: "https://d13e14gtps4iwl.cloudfront.net/u/clubs/".concat(clubData.id.toString()).concat("/logo.png")
                             ),
                         )
                     }
