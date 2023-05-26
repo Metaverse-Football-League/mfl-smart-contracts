@@ -1,5 +1,7 @@
 import NonFungibleToken from "../_libs/NonFungibleToken.cdc"
+import FungibleToken from "../_libs/FungibleToken.cdc"
 import MetadataViews from "../_libs/MetadataViews.cdc"
+import MFLAdmin from "../core/MFLAdmin.cdc"
 
 /**
   This contract is based on the NonFungibleToken standard on Flow.
@@ -295,7 +297,16 @@ pub contract MFLClub: NonFungibleToken {
                         )
                     }
                 case Type<MetadataViews.Royalties>():
-                    return MetadataViews.Royalties([])
+                     let royalties: [MetadataViews.Royalty] = []
+                     let royaltyReceiverCap = getAccount(MFLAdmin.royaltyAddress()).getCapability<&{FungibleToken.Receiver}>(/public/GenericFTReceiver)
+                     royalties.append(
+                         MetadataViews.Royalty(
+                             receiver: royaltyReceiverCap,
+                             cut:  0.05,
+                             description: "Creator Royalty"
+                         )
+                     )
+                     return MetadataViews.Royalties(royalties)
                 case Type<MetadataViews.NFTCollectionDisplay>():
                     let socials = {
                         "twitter": MetadataViews.ExternalURL("https://twitter.com/playMFL"),

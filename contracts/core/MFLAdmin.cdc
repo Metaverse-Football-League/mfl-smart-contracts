@@ -14,6 +14,11 @@ pub contract MFLAdmin {
     pub let AdminProxyStoragePath: StoragePath
     pub let AdminProxyPublicPath: PublicPath
 
+    // MFL Royalty Address
+    pub fun royaltyAddress(): Address {
+        return 0xa654669bd96b2014
+    }
+
     // Interface that an AdminProxy will expose to be able to receive Claims capabilites from an AdminRoot
     pub resource interface AdminProxyPublic {
         access(contract) fun setClaimCapability(name: String, capability: Capability)
