@@ -9,6 +9,8 @@ import {UPDATE_SQUAD_METADATA} from './_transactions/update_squad_metadata.tx';
 import {ADD_SQUAD_COMPETITION_MEMBERSHIP} from './_transactions/add_squad_competition_membership.tx';
 import {UPDATE_SQUAD_COMPETITION_MEMBERSHIP} from './_transactions/update_squad_competition_membership.tx';
 import {GET_CLUB_SERIAL_VIEW} from './_scripts/get_club_serial_view.script';
+import {GET_PACK_ROYALTIES_VIEW} from '../packs/_scripts/get_pack_royalties_view.script';
+import {GET_CLUB_ROYALTIES_VIEW} from './_scripts/get_club_royalties_view.script';
 
 expect.extend(matchers);
 jest.setTimeout(40000);
@@ -618,6 +620,47 @@ describe('MFLClub', () => {
             thumbnail: `https://d13e14gtps4iwl.cloudfront.net/clubs/${clubId}/licenses/foundation.png`,
             owner: aliceAdminAccountAddress,
             type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.NFT`,
+          });
+        });
+
+        test('should resolve Royalties view for a specific club', async () => {
+          // prepare
+          const clubId = 1000;
+          await MFLClubTestsUtils.createClubNFT(clubId, 1);
+
+          // execute
+          const clubRoyaltiesView = await testsUtils.executeValidScript({
+            code: GET_CLUB_ROYALTIES_VIEW,
+            args: [aliceAdminAccountAddress, clubId],
+          });
+
+          // assert
+          expect(clubRoyaltiesView).toEqual({
+            cutInfos: [{
+              receiver: {
+                path: {
+                  value: {
+                    domain: 'public',
+                    identifier: 'GenericFTReceiver',
+                  }, type: 'Path',
+                },
+                address: '0xa654669bd96b2014',
+                borrowType: {
+                  type: {
+                    kind: 'Restriction',
+                    typeID: 'AnyResource{A.ee82856bf20e2aa6.FungibleToken.Receiver}',
+                    type: {kind: 'AnyResource'},
+                    restrictions: [{
+                      type: '',
+                      kind: 'ResourceInterface',
+                      typeID: 'A.ee82856bf20e2aa6.FungibleToken.Receiver',
+                      fields: [{type: {kind: 'UInt64'}, id: 'uuid'}],
+                      initializers: [],
+                    }],
+                  }, kind: 'Reference', authorized: false,
+                },
+              }, cut: '0.05000000', description: 'Creator Royalty',
+            }],
           });
         });
 

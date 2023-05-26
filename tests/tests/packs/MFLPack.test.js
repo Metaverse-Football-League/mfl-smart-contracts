@@ -6,6 +6,9 @@ import { WITHDRAW_PACK } from "./_transactions/withdaw_pack.tx";
 import { BATCH_WITHDRAW_PACK } from "./_transactions/batch_withdaw_pack.tx";
 import { BORROW_NFT } from "./_scripts/borrow_nft.script";
 import { BORROW_VIEW_RESOLVER } from "./_scripts/borrow_view_resolver.script";
+import {MFLPlayerTestsUtils} from '../players/_utils/MFLPlayerTests.utils';
+import {GET_PLAYER_ROYALTIES_VIEW} from '../players/_scripts/get_player_royalties_view.script';
+import {GET_PACK_ROYALTIES_VIEW} from './_scripts/get_pack_royalties_view.script';
 
 expect.extend(matchers);
 jest.setTimeout(40000);
@@ -735,6 +738,55 @@ describe("MFLPack", () => {
           thumbnail: argsPackTemplate.imageUrl,
           owner: bobAccountAddress,
           type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.NFT`,
+        });
+      });
+
+      test('should resolve Royalties view for a specific pack', async () => {
+        // prepare
+        const argsMint = [1, bobAccountAddress, 2];
+        await testsUtils.shallPass({
+          name: "mfl/packs/create_and_link_pack_collection.tx",
+          signers: [bobAccountAddress],
+        });
+        await testsUtils.shallPass({
+          name: "mfl/packs/batch_mint_pack.tx",
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // execute
+        const packRoyaltiesView = await testsUtils.executeValidScript({
+          code: GET_PACK_ROYALTIES_VIEW,
+          args: [bobAccountAddress, 1],
+        });
+
+        // assert
+        expect(packRoyaltiesView).toEqual({
+          cutInfos: [{
+            receiver: {
+              path: {
+                value: {
+                  domain: 'public',
+                  identifier: 'GenericFTReceiver',
+                }, type: 'Path',
+              },
+              address: '0xa654669bd96b2014',
+              borrowType: {
+                type: {
+                  kind: 'Restriction',
+                  typeID: 'AnyResource{A.ee82856bf20e2aa6.FungibleToken.Receiver}',
+                  type: {kind: 'AnyResource'},
+                  restrictions: [{
+                    type: '',
+                    kind: 'ResourceInterface',
+                    typeID: 'A.ee82856bf20e2aa6.FungibleToken.Receiver',
+                    fields: [{type: {kind: 'UInt64'}, id: 'uuid'}],
+                    initializers: [],
+                  }],
+                }, kind: 'Reference', authorized: false,
+              },
+            }, cut: '0.05000000', description: 'Creator Royalty',
+          }],
         });
       });
 

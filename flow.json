@@ -1,13 +1,20 @@
 {
-	"emulators": {	
-		"default": {	
-		  "port": 3569,	
-		  "serviceAccount": "emulator-account"	
-		}	
+	"emulators": {
+		"default": {
+		  "port": 3569,
+		  "serviceAccount": "emulator-account"
+		}
 	},
 	"contracts": {
 		"DapperUtilityCoin": {
 			"source": "./contracts/_libs/DapperUtilityCoin.cdc",
+			"aliases": {
+				"mainnet": "ead892083b3e2c6c",
+				"testnet": "82ec283f88a62e65"
+			}
+		},
+		"FlowUtilityToken": {
+			"source": "./contracts/_libs/FlowUtilityToken.cdc",
 			"aliases": {
 				"mainnet": "ead892083b3e2c6c",
 				"testnet": "82ec283f88a62e65"
@@ -42,6 +49,30 @@
 				"emulator": "ee82856bf20e2aa6",
 				"mainnet": "f233dcee88fe0abe",
 				"testnet": "9a0766d93b6608b7"
+			}
+		},
+		"FungibleTokenSwitchboard": {
+			"source": "./contracts/_libs/FungibleTokenSwitchboard.cdc",
+			"aliases": {
+				"emulator": "ee82856bf20e2aa6",
+				"mainnet": "f233dcee88fe0abe",
+				"testnet": "9a0766d93b6608b7"
+			}
+		},
+		"FiatToken": {
+			"source": "./contracts/_libs/FiatToken.cdc",
+			"aliases": {
+				"emulator": "ee82856bf20e2aa6",
+				"mainnet": "b19436aae4d94622",
+				"testnet": "a983fecbed621163"
+			}
+		},
+		"OnChainMultiSig": {
+			"source": "./contracts/_libs/OnChainMultiSig.cdc",
+			"aliases": {
+				"emulator": "ee82856bf20e2aa6",
+				"mainnet": "220c1b4155f86f2f",
+				"testnet": "5a5b0a73a29e83f1"
 			}
 		},
 		"MFLAdmin": {
@@ -153,6 +184,7 @@
 				"NonFungibleToken",
 				"MetadataViews",
 				"DapperUtilityCoin",
+				"FlowUtilityToken",
 				"TokenForwarding",
 				"NFTStorefront",
 				"MFLAdmin",

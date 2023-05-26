@@ -6,4 +6,5 @@ node_modules
 flow.testnet.json
 flow.mainnet.json
 
-testnet-clubs-store-account.private.json
+*.private.json
+*.pkey

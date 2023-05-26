@@ -6,6 +6,7 @@ import {ERROR_UPDATE_PLAYER_METADATA} from './_transactions/error_update_player_
 import {omit} from 'lodash';
 import * as matchers from 'jest-extended';
 import {GET_PLAYER_SERIAL_VIEW} from './_scripts/get_player_serial_view.script';
+import {GET_PLAYER_ROYALTIES_VIEW} from './_scripts/get_player_royalties_view.script';
 
 expect.extend(matchers);
 jest.setTimeout(40000);
@@ -378,6 +379,50 @@ describe('MFLPlayer', () => {
         });
       });
 
+      test('should resolve Royalties view for a specific player', async () => {
+        // prepare
+        const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
+          'AliceAdminAccount',
+          'AliceAdminAccount',
+        );
+        await MFLPlayerTestsUtils.createPlayerNFT(100022);
+
+        // execute
+        const playerRoyaltiesView = await testsUtils.executeValidScript({
+          code: GET_PLAYER_ROYALTIES_VIEW,
+          args: [aliceAdminAccountAddress, 100022],
+        });
+
+        // assert
+        expect(playerRoyaltiesView).toEqual({
+          cutInfos: [{
+            receiver: {
+              path: {
+                value: {
+                  domain: 'public',
+                  identifier: 'GenericFTReceiver',
+                }, type: 'Path',
+              },
+              address: '0xa654669bd96b2014',
+              borrowType: {
+                type: {
+                  kind: 'Restriction',
+                  typeID: 'AnyResource{A.ee82856bf20e2aa6.FungibleToken.Receiver}',
+                  type: {kind: 'AnyResource'},
+                  restrictions: [{
+                    type: '',
+                    kind: 'ResourceInterface',
+                    typeID: 'A.ee82856bf20e2aa6.FungibleToken.Receiver',
+                    fields: [{type: {kind: 'UInt64'}, id: 'uuid'}],
+                    initializers: [],
+                  }],
+                }, kind: 'Reference', authorized: false,
+              },
+            }, cut: '0.05000000', description: 'Creator Royalty',
+          }],
+        });
+      });
+
       test('should resolve Traits view for a specific player', async () => {
         // prepare
         const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
@@ -404,13 +449,13 @@ describe('MFLPlayer', () => {
             {
               name: 'nationalities',
               value: 'FR, DE',
-              displayType: "String",
+              displayType: 'String',
               rarity: null,
             },
             {
               name: 'positions',
               value: 'ST, CAM',
-              displayType: "String",
+              displayType: 'String',
               rarity: null,
             },
             {
