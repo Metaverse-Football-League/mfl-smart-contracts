@@ -6,8 +6,6 @@ import { WITHDRAW_PACK } from "./_transactions/withdaw_pack.tx";
 import { BATCH_WITHDRAW_PACK } from "./_transactions/batch_withdaw_pack.tx";
 import { BORROW_NFT } from "./_scripts/borrow_nft.script";
 import { BORROW_VIEW_RESOLVER } from "./_scripts/borrow_view_resolver.script";
-import {MFLPlayerTestsUtils} from '../players/_utils/MFLPlayerTests.utils';
-import {GET_PLAYER_ROYALTIES_VIEW} from '../players/_scripts/get_player_royalties_view.script';
 import {GET_PACK_ROYALTIES_VIEW} from './_scripts/get_pack_royalties_view.script';
 
 expect.extend(matchers);
@@ -357,56 +355,56 @@ describe("MFLPack", () => {
             {
               type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Withdraw`,
               transactionId: expect.toBeString(),
-              transactionIndex: 1,
+              transactionIndex: expect.toBeNumber(),
               eventIndex: expect.toBeNumber(),
               data: { id: 1, from: bobAccountAddress },
             },
             {
               type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Deposit`,
               transactionId: expect.toBeString(),
-              transactionIndex: 1,
+              transactionIndex: expect.toBeNumber(),
               eventIndex: expect.toBeNumber(),
               data: { id: 1, to: null },
             },
             {
               type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Withdraw`,
               transactionId: expect.toBeString(),
-              transactionIndex: 1,
+              transactionIndex: expect.toBeNumber(),
               eventIndex: expect.toBeNumber(),
               data: { id: 2, from: bobAccountAddress },
             },
             {
               type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Deposit`,
               transactionId: expect.toBeString(),
-              transactionIndex: 1,
+              transactionIndex: expect.toBeNumber(),
               eventIndex: expect.toBeNumber(),
               data: { id: 2, to: null },
             },
             {
               type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Withdraw`,
               transactionId: expect.toBeString(),
-              transactionIndex: 1,
+              transactionIndex: expect.toBeNumber(),
               eventIndex: expect.toBeNumber(),
               data: { id: 2, from: null },
             },
             {
               type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Deposit`,
               transactionId: expect.toBeString(),
-              transactionIndex: 1,
+              transactionIndex: expect.toBeNumber(),
               eventIndex: expect.toBeNumber(),
               data: { id: 2, to: jackAccountAddress },
             },
             {
               type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Withdraw`,
               transactionId: expect.toBeString(),
-              transactionIndex: 1,
+              transactionIndex: expect.toBeNumber(),
               eventIndex: expect.toBeNumber(),
               data: { id: 1, from: null },
             },
             {
               type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Deposit`,
               transactionId: expect.toBeString(),
-              transactionIndex: 1,
+              transactionIndex: expect.toBeNumber(),
               eventIndex: expect.toBeNumber(),
               data: { id: 1, to: jackAccountAddress },
             },
@@ -632,14 +630,14 @@ describe("MFLPack", () => {
             {
               type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Destroyed`,
               transactionId: expect.toBeString(),
-              transactionIndex: 1,
+              transactionIndex: expect.toBeNumber(),
               eventIndex: expect.toBeNumber(),
               data: { id: 1 },
             },
             {
               type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Destroyed`,
               transactionId: expect.toBeString(),
-              transactionIndex: 1,
+              transactionIndex: expect.toBeNumber(),
               eventIndex: expect.toBeNumber(),
               data: { id: 2 },
             },

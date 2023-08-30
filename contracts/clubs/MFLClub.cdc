@@ -338,8 +338,22 @@ pub contract MFLClub: NonFungibleToken {
                     return MetadataViews.ExternalURL("https://playmfl.com")
                 case Type<MetadataViews.Traits>():
                     let traits: [MetadataViews.Trait] = []
-                    traits.append(MetadataViews.Trait(name: "city", value: clubData.getMetadata()["foundationLicenseCity"] as! String?, displayType: "String", rarity: nil))
-                    traits.append(MetadataViews.Trait(name: "country", value: clubData.getMetadata()["foundationLicenseCountry"] as! String?, displayType: "String", rarity: nil))
+
+                    // TODO must be fixed correctly in the data rather than here.
+                    // foundationLicenseCity and foundationLicenseCountry should always be of type String? in the metadata
+                    let clubMetadata = clubData.getMetadata()
+                    var city: String? = nil
+                    var country: String? = nil
+                    if clubData.getStatus() == ClubStatus.NOT_FOUNDED {
+                        city = clubMetadata["foundationLicenseCity"] as! String?
+                        country = clubMetadata["foundationLicenseCountry"] as! String?
+                    }
+                    else {
+                        city = clubMetadata["foundationLicenseCity"] as! String?? ?? nil
+                        country = clubMetadata["foundationLicenseCountry"] as! String?? ?? nil
+                    }
+                    traits.append(MetadataViews.Trait(name: "city", value: city, displayType: "String", rarity: nil))
+                    traits.append(MetadataViews.Trait(name: "country", value: country, displayType: "String", rarity: nil))
 
                     let squadsIDs = clubData.getSquadIDs()
                     if squadsIDs.length > 0 {

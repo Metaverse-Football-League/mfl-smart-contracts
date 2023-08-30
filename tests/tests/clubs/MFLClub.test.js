@@ -9,7 +9,6 @@ import {UPDATE_SQUAD_METADATA} from './_transactions/update_squad_metadata.tx';
 import {ADD_SQUAD_COMPETITION_MEMBERSHIP} from './_transactions/add_squad_competition_membership.tx';
 import {UPDATE_SQUAD_COMPETITION_MEMBERSHIP} from './_transactions/update_squad_competition_membership.tx';
 import {GET_CLUB_SERIAL_VIEW} from './_scripts/get_club_serial_view.script';
-import {GET_PACK_ROYALTIES_VIEW} from '../packs/_scripts/get_pack_royalties_view.script';
 import {GET_CLUB_ROYALTIES_VIEW} from './_scripts/get_club_royalties_view.script';
 
 expect.extend(matchers);
@@ -668,6 +667,43 @@ describe('MFLClub', () => {
           // prepare
           const clubId = 1000;
           await MFLClubTestsUtils.createClubNFT(clubId, 2, true, 'AliceAdminAccount', 1);
+
+          // execute
+          const clubTraitsView = await testsUtils.executeValidScript({
+            name: 'mfl/clubs/get_club_traits_view_from_collection.script',
+            args: [aliceAdminAccountAddress, clubId],
+          });
+
+          // assert
+          expect(clubTraitsView).toEqual({
+            traits: [
+              {
+                displayType: 'String',
+                name: 'city',
+                rarity: null,
+                value: 'Paris',
+              },
+              {
+                displayType: 'String',
+                name: 'country',
+                rarity: null,
+                value: 'France',
+              },
+              {
+                displayType: 'Number',
+                name: 'division',
+                rarity: null,
+                value: 1,
+              },
+            ],
+          });
+        });
+
+        test('should resolve Traits view for a specific founded club', async () => {
+          // prepare
+          const clubId = 1000;
+          await MFLClubTestsUtils.createClubNFT(clubId, 2, true, 'AliceAdminAccount', 1);
+          await MFLClubTestsUtils.foundClub(clubId, "Some Club", "Some Description");
 
           // execute
           const clubTraitsView = await testsUtils.executeValidScript({
