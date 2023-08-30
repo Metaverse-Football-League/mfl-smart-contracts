@@ -9,7 +9,6 @@ import {UPDATE_SQUAD_METADATA} from './_transactions/update_squad_metadata.tx';
 import {ADD_SQUAD_COMPETITION_MEMBERSHIP} from './_transactions/add_squad_competition_membership.tx';
 import {UPDATE_SQUAD_COMPETITION_MEMBERSHIP} from './_transactions/update_squad_competition_membership.tx';
 import {GET_CLUB_SERIAL_VIEW} from './_scripts/get_club_serial_view.script';
-import {GET_PACK_ROYALTIES_VIEW} from '../packs/_scripts/get_pack_royalties_view.script';
 import {GET_CLUB_ROYALTIES_VIEW} from './_scripts/get_club_royalties_view.script';
 
 expect.extend(matchers);
