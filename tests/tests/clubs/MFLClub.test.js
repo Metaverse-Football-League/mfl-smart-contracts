@@ -700,6 +700,43 @@ describe('MFLClub', () => {
           });
         });
 
+        test('should resolve Traits view for a specific founded club', async () => {
+          // prepare
+          const clubId = 1000;
+          await MFLClubTestsUtils.createClubNFT(clubId, 2, true, 'AliceAdminAccount', 1);
+          await MFLClubTestsUtils.foundClub(clubId, "Some Club", "Some Description");
+
+          // execute
+          const clubTraitsView = await testsUtils.executeValidScript({
+            name: 'mfl/clubs/get_club_traits_view_from_collection.script',
+            args: [aliceAdminAccountAddress, clubId],
+          });
+
+          // assert
+          expect(clubTraitsView).toEqual({
+            traits: [
+              {
+                displayType: 'String',
+                name: 'city',
+                rarity: null,
+                value: 'Paris',
+              },
+              {
+                displayType: 'String',
+                name: 'country',
+                rarity: null,
+                value: 'France',
+              },
+              {
+                displayType: 'Number',
+                name: 'division',
+                rarity: null,
+                value: 1,
+              },
+            ],
+          });
+        });
+
         test('should resolve Traits view for a specific club without a division for global league', async () => {
           // prepare
           const clubId = 1000;
