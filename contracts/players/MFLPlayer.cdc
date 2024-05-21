@@ -28,12 +28,6 @@ contract MFLPlayer: NonFungibleToken {
 	event ContractInitialized()
 	
 	access(all)
-	event Withdraw(id: UInt64, from: Address?)
-	
-	access(all)
-	event Deposit(id: UInt64, to: Address?)
-	
-	access(all)
 	event Minted(id: UInt64)
 	
 	access(all)
@@ -62,7 +56,7 @@ contract MFLPlayer: NonFungibleToken {
 	
 	// Data stored in playersdatas. Updatable by an admin
 	access(all)
-	struct PlayerData{ 
+	struct PlayerData { 
 		access(all)
 		let id: UInt64
 		
@@ -73,7 +67,7 @@ contract MFLPlayer: NonFungibleToken {
 		let season: UInt32
 		
 		access(all)
-		let image:{ MetadataViews.File}
+		let image: {MetadataViews.File}
 		
 		init(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, image: {MetadataViews.File}){ 
 			self.id = id
@@ -109,7 +103,16 @@ contract MFLPlayer: NonFungibleToken {
 		// Get all supported views for this NFT
 		access(all)
 		view fun getViews(): [Type] { 
-			return [Type<MetadataViews.Display>(), Type<MetadataViews.Royalties>(), Type<MetadataViews.NFTCollectionDisplay>(), Type<MetadataViews.NFTCollectionData>(), Type<MetadataViews.ExternalURL>(), Type<MetadataViews.Traits>(), Type<MetadataViews.Serial>(), Type<MFLViews.PlayerDataViewV1>()]
+			return [
+				Type<MetadataViews.Display>(),
+				Type<MetadataViews.Royalties>(),
+				Type<MetadataViews.NFTCollectionDisplay>(),
+				Type<MetadataViews.NFTCollectionData>(),
+				Type<MetadataViews.ExternalURL>(),
+				Type<MetadataViews.Traits>(),
+				Type<MetadataViews.Serial>(),
+				Type<MFLViews.PlayerDataViewV1>()
+			]
 		}
 		
 		// Resolve a specific view
@@ -118,19 +121,47 @@ contract MFLPlayer: NonFungibleToken {
 			let playerData = MFLPlayer.getPlayerData(id: self.id)!
 			switch view{ 
 				case Type<MetadataViews.Display>():
-					return MetadataViews.Display(name: playerData.metadata["name"] as! String? ?? "", description: "MFL Player #".concat(playerData.id.toString()), thumbnail: playerData.image)
+					return MetadataViews.Display(
+						name: playerData.metadata["name"] as! String? ?? "",
+						description: "MFL Player #".concat(playerData.id.toString()),
+						thumbnail: playerData.image
+					)
 				case Type<MetadataViews.Royalties>():
 					let royalties: [MetadataViews.Royalty] = []
 					let royaltyReceiverCap = getAccount(MFLAdmin.royaltyAddress()).capabilities.get<&{FungibleToken.Receiver}>(/public/GenericFTReceiver)
 					royalties.append(MetadataViews.Royalty(receiver: royaltyReceiverCap!, cut: 0.05, description: "Creator Royalty"))
 					return MetadataViews.Royalties(royalties)
 				case Type<MetadataViews.NFTCollectionDisplay>():
-					let socials ={ "twitter": MetadataViews.ExternalURL("https://twitter.com/playMFL"), "discord": MetadataViews.ExternalURL("https://discord.gg/pEDTR4wSPr"), "linkedin": MetadataViews.ExternalURL("https://www.linkedin.com/company/playmfl"), "medium": MetadataViews.ExternalURL("https://medium.com/playmfl")}
-					return MetadataViews.NFTCollectionDisplay(name: "MFL Player Collection", description: "MFL is a unique Web3 Football (Soccer) Management game & ecosystem where you\u{2019}ll be able to own and develop your football players as well as build a club from the ground up. As in real football, you\u{2019}ll be able to : Be a recruiter (Scout, find, and trade players\u{2026}), be an agent (Find the best clubs for your players, negotiate contracts with club owners\u{2026}), be a club owner (Develop your club, recruit players, compete in leagues and tournaments\u{2026}) and be a coach (Train and develop your players, play matches, and define your match tactics...). This collection allows you to collect Players.", externalURL: MetadataViews.ExternalURL("https://playmfl.com"), squareImage: MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://d13e14gtps4iwl.cloudfront.net/branding/logos/mfl_logo_black_square_small.svg"), mediaType: "image/svg+xml"), bannerImage: MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://d13e14gtps4iwl.cloudfront.net/branding/players/banner_1900_X_600.png"), mediaType: "image/png"), socials: socials)
+					let socials = {
+						"twitter": MetadataViews.ExternalURL("https://twitter.com/playMFL"),
+						"discord": MetadataViews.ExternalURL("https://discord.gg/pEDTR4wSPr"),
+						"linkedin": MetadataViews.ExternalURL("https://www.linkedin.com/company/playmfl"),
+						"medium": MetadataViews.ExternalURL("https://medium.com/playmfl")
+					}
+					return MetadataViews.NFTCollectionDisplay(
+						name: "MFL Player Collection",
+						description: "MFL is a unique Web3 Football (Soccer) Management game & ecosystem where you\u{2019}ll be able to own and develop your football players as well as build a club from the ground up. As in real football, you\u{2019}ll be able to : Be a recruiter (Scout, find, and trade players\u{2026}), be an agent (Find the best clubs for your players, negotiate contracts with club owners\u{2026}), be a club owner (Develop your club, recruit players, compete in leagues and tournaments\u{2026}) and be a coach (Train and develop your players, play matches, and define your match tactics...). This collection allows you to collect Players.",
+						externalURL: MetadataViews.ExternalURL("https://playmfl.com"),
+						squareImage: MetadataViews.Media(
+							file: MetadataViews.HTTPFile(url: "https://d13e14gtps4iwl.cloudfront.net/branding/logos/mfl_logo_black_square_small.svg"),
+							mediaType: "image/svg+xml"
+						),
+						bannerImage: MetadataViews.Media(
+							file: MetadataViews.HTTPFile(url: "https://d13e14gtps4iwl.cloudfront.net/branding/players/banner_1900_X_600.png"),
+							mediaType: "image/png"
+						),
+						socials: socials
+					)
 				case Type<MetadataViews.NFTCollectionData>():
-					return MetadataViews.NFTCollectionData(storagePath: MFLPlayer.CollectionStoragePath, publicPath: MFLPlayer.CollectionPublicPath, publicCollection: Type<&MFLPlayer.Collection>(), publicLinkedType: Type<&MFLPlayer.Collection>(), createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}{ 
+					return MetadataViews.NFTCollectionData(
+						storagePath: MFLPlayer.CollectionStoragePath,
+						publicPath: MFLPlayer.CollectionPublicPath,
+						publicCollection: Type<&MFLPlayer.Collection>(),
+						publicLinkedType: Type<&MFLPlayer.Collection>(),
+						createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}{ 
 							return <-MFLPlayer.createEmptyCollection(nftType: Type<@MFLPlayer.Collection>())
-						})
+						}
+					)
 				case Type<MetadataViews.ExternalURL>():
 					return MetadataViews.ExternalURL("https://playmfl.com")
 				case Type<MetadataViews.Traits>():
@@ -138,9 +169,9 @@ contract MFLPlayer: NonFungibleToken {
 					traits.append(MetadataViews.Trait(name: "name", value: playerData.metadata["name"] as! String?, displayType: "String", rarity: nil))
 					let nationalitiesOptional = playerData.metadata["nationalities"] as! [String]?
 					var nationalitiesString: String = ""
-					if let nationalities = nationalitiesOptional{ 
-						for nationality in nationalities{ 
-							if nationalitiesString.length > 0{ 
+					if let nationalities = nationalitiesOptional { 
+						for nationality in nationalities { 
+							if nationalitiesString.length > 0 { 
 								nationalitiesString = nationalitiesString.concat(", ")
 							}
 							nationalitiesString = nationalitiesString.concat(nationality)
@@ -148,9 +179,9 @@ contract MFLPlayer: NonFungibleToken {
 					}
 					traits.append(MetadataViews.Trait(name: "nationalities", value: nationalitiesString, displayType: "String", rarity: nil))
 					var positionsString: String = ""
-					if let positions = playerData.metadata["positions"] as! [String]?{ 
-						for position in positions{ 
-							if positionsString.length > 0{ 
+					if let positions = playerData.metadata["positions"] as! [String]? { 
+						for position in positions { 
+							if positionsString.length > 0 { 
 								positionsString = positionsString.concat(", ")
 							}
 							positionsString = positionsString.concat(position)
@@ -179,28 +210,27 @@ contract MFLPlayer: NonFungibleToken {
 		
 		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection} { 
-			return <-create Collection()
+			return <-MFLPlayer.createEmptyCollection(nftType: Type<@MFLPlayer.Collection>())
 		}
 	}
 	
 	// A collection of Player NFTs owned by an account
 	access(all)
-	resource Collection: NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.Collection, NonFungibleToken.CollectionPublic, ViewResolver.ResolverCollection { 
+	resource Collection: NonFungibleToken.Collection, ViewResolver.ResolverCollection { 
 		
 		// Dictionary of NFT conforming tokens
 		access(all)
-		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
+		var ownedNFTs: @{UInt64: {NonFungibleToken.NFT}}
 		
 		// Removes an NFT from the collection and moves it to the caller
 		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT} { 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
-			emit Withdraw(id: token.id, from: self.owner?.address)
 			return <-token
 		}
 		
 		// Withdraws multiple Players and returns them as a Collection
-		access(all)
+		access(NonFungibleToken.Withdraw)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection} { 
 			var batchCollection <- create Collection()
 			
@@ -208,6 +238,7 @@ contract MFLPlayer: NonFungibleToken {
 			for id in ids{ 
 				batchCollection.deposit(token: <-self.withdraw(withdrawID: id))
 			}
+			
 			return <-batchCollection
 		}
 		
@@ -219,7 +250,6 @@ contract MFLPlayer: NonFungibleToken {
 			
 			// Add the new token to the dictionary which removes the old one
 			let oldToken <- self.ownedNFTs[id] <- token
-			emit Deposit(id: id, to: self.owner?.address)
 			destroy oldToken
 		}
 		
@@ -232,29 +262,32 @@ contract MFLPlayer: NonFungibleToken {
 		// Gets a reference to an NFT in the collection so that the caller can read its metadata and call its methods
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}? { 
-			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
+			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)
 		}
 		
 		access(all)
 		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}? { 
-			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
-			let playerNFT = nft as! &MFLPlayer.NFT
-			return playerNFT as &{ViewResolver.Resolver}
+			if let nft = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}? {
+                return nft as &{ViewResolver.Resolver}
+            }
+            return nil
 		}
 		
 		access(all)
 		view fun getSupportedNFTTypes():{ Type: Bool} { 
-			panic("implement me")
+			let supportedTypes: {Type: Bool} = {}
+            supportedTypes[Type<@MFLPlayer.NFT>()] = true
+            return supportedTypes
 		}
 		
 		access(all)
 		view fun isSupportedNFTType(type: Type): Bool { 
-			panic("implement me")
+			return type == Type<@MFLPack.NFT>()
 		}
 		
 		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection} { 
-			return <-create Collection()
+			return <-MFLPack.createEmptyCollection(nftType: Type<@MFLPack.NFT>())
 		}
 		
 		init() { 
@@ -279,14 +312,14 @@ contract MFLPlayer: NonFungibleToken {
 		access(all)
 		let name: String
 		
-		init(){ 
+		init() { 
 			self.name = "PlayerAdminClaim"
 		}
 		
 		// Mint a new Player and returns it
 		access(PlayerAdminAction)
 		fun mintPlayer(id: UInt64, metadata: {String: AnyStruct}, season: UInt32, image: {MetadataViews.File}): @MFLPlayer.NFT { 
-			pre { 
+			pre {
 				MFLPlayer.getPlayerData(id: id) == nil:
 					"Player already exists"
 			}

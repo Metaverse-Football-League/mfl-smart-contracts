@@ -6,7 +6,7 @@
 **/
 
 access(all)
-contract MFLPackTemplate{ 
+contract MFLPackTemplate { 
 	
 	// Entitlements
     access(all)
@@ -34,7 +34,7 @@ contract MFLPackTemplate{
 	let packTemplates: @{UInt64: PackTemplate}
 	
 	access(all)
-	struct PackTemplateData{ 
+	struct PackTemplateData { 
 		access(all)
 		let id: UInt64
 		
@@ -88,7 +88,7 @@ contract MFLPackTemplate{
 	}
 	
 	access(all)
-	struct Slot{ 
+	struct Slot { 
 		access(all)
 		let type: String
 		
@@ -106,7 +106,7 @@ contract MFLPackTemplate{
 	}
 	
 	access(all)
-	resource PackTemplate{ 
+	resource PackTemplate { 
 		access(all)
 		let id: UInt64
 		
@@ -140,9 +140,7 @@ contract MFLPackTemplate{
 			maxSupply: UInt32,
 			imageUrl: String,
 			type: String,
-			slots: [
-				Slot
-			]
+			slots: [Slot]
 		) { 
 			self.id = MFLPackTemplate.nextPackTemplateID
 			MFLPackTemplate.nextPackTemplateID = MFLPackTemplate.nextPackTemplateID + 1 as UInt64
@@ -166,7 +164,7 @@ contract MFLPackTemplate{
 		// Increase current supply
 		access(contract)
 		fun increaseCurrentSupply(nbToMint: UInt32) { 
-			pre{ 
+			pre { 
 				nbToMint <= self.maxSupply - self.currentSupply:
 					"Supply exceeded"
 			}
@@ -176,22 +174,32 @@ contract MFLPackTemplate{
 	
 	// Get all packTemplates IDs
 	access(all)
-	fun getPackTemplatesIDs(): [UInt64] { 
+	view fun getPackTemplatesIDs(): [UInt64] { 
 		return self.packTemplates.keys
 	}
 	
 	// Get a data reprensation of a specific packTemplate
 	access(all)
-	fun getPackTemplate(id: UInt64): PackTemplateData? { 
-		if let packTemplate = self.getPackTemplateRef(id: id){ 
-			return PackTemplateData(id: packTemplate.id, name: packTemplate.name, description: packTemplate.description, maxSupply: packTemplate.maxSupply, currentSupply: packTemplate.currentSupply, isOpenable: packTemplate.isOpenable, imageUrl: packTemplate.imageUrl, type: packTemplate.type, slots: *packTemplate.slots)
+	view fun getPackTemplate(id: UInt64): PackTemplateData? { 
+		if let packTemplate = self.getPackTemplateRef(id: id) { 
+			return PackTemplateData(
+				id: packTemplate.id,
+				name: packTemplate.name,
+				description: packTemplate.description,
+				maxSupply: packTemplate.maxSupply,
+				currentSupply: packTemplate.currentSupply,
+				isOpenable: packTemplate.isOpenable,
+				imageUrl: packTemplate.imageUrl,
+				type: packTemplate.type,
+				slots: packTemplate.slots
+			)
 		}
 		return nil
 	}
 	
 	// Get a data reprensation of all packTemplates
 	access(all)
-	fun getPackTemplates(): [PackTemplateData] { 
+	view fun getPackTemplates(): [PackTemplateData] { 
 		var packTemplatesData: [PackTemplateData] = []
 		for id in self.getPackTemplatesIDs() { 
 			if let packTemplate = self.getPackTemplate(id: id){ 
@@ -203,7 +211,7 @@ contract MFLPackTemplate{
 	
 	// Get a specif packTemplate ref (in particular for calling admin methods)
 	access(contract)
-	fun getPackTemplateRef(id: UInt64): &MFLPackTemplate.PackTemplate? { 
+	view fun getPackTemplateRef(id: UInt64): &MFLPackTemplate.PackTemplate? { 
 		return &self.packTemplates[id] as &MFLPackTemplate.PackTemplate?
 	}
 	

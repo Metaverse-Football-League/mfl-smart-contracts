@@ -51,11 +51,11 @@ contract MFLAdmin {
 		}
 		
 		access(all)
-		fun getClaimCapability(name: String): Capability? { 
+		view fun getClaimCapability(name: String): Capability? { 
 			return self.claimsCapabilities[name]
 		}
 		
-		init(){ 
+		init() { 
 			self.claimsCapabilities = {} 
 		}
 	}
@@ -69,7 +69,7 @@ contract MFLAdmin {
 	
 	// Resource that an admin owns to be able to create new AdminRoot or to set Claims
 	access(all)
-	resource AdminRoot{ 
+	resource AdminRoot { 
 		
 		// Create a new AdminRoot resource and returns it
 		// Only if really needed ! One AdminRoot should be enough for all the logic in MFL
