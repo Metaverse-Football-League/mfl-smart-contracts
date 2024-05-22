@@ -350,9 +350,9 @@ contract MFLClub: NonFungibleToken {
 		access(all)
 		fun resolveView(_ view: Type): AnyStruct? {
 			let clubData = MFLClub.getClubData(id: self.id)!
-			switch view{
+			switch view {
 				case Type<MetadataViews.Display>():
-					if clubData.getStatus() == ClubStatus.NOT_FOUNDED{
+					if clubData.getStatus() == ClubStatus.NOT_FOUNDED {
 						return MetadataViews.Display(
 							name: "Club License #".concat(clubData.id.toString()),
 							description: "MFL Club License #".concat(clubData.id.toString()),
@@ -360,7 +360,7 @@ contract MFLClub: NonFungibleToken {
 								url: "https://d13e14gtps4iwl.cloudfront.net/clubs/".concat(clubData.id.toString()).concat("/licenses/foundation.png")
 							)
 						)
-					} else{
+					} else {
 						return MetadataViews.Display(
 							name: clubData.getMetadata()["name"] as! String? ?? "",
 							description: clubData.getMetadata()["description"] as! String? ?? "",
@@ -401,7 +401,7 @@ contract MFLClub: NonFungibleToken {
 						publicPath: MFLClub.CollectionPublicPath,
 						publicCollection: Type<&MFLClub.Collection>(),
 						publicLinkedType: Type<&MFLClub.Collection>(),
-						createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}{
+						createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection} {
 							return <-MFLClub.createEmptyCollection(nftType: Type<@MFLClub.Collection>())
 						}
 					)
@@ -415,22 +415,22 @@ contract MFLClub: NonFungibleToken {
 					let clubMetadata = clubData.getMetadata()
 					var city: String? = nil
 					var country: String? = nil
-					if clubData.getStatus() == ClubStatus.NOT_FOUNDED{
+					if clubData.getStatus() == ClubStatus.NOT_FOUNDED {
 						city = clubMetadata["foundationLicenseCity"] as! String?
 						country = clubMetadata["foundationLicenseCountry"] as! String?
-					} else{
+					} else {
 						city = clubMetadata["foundationLicenseCity"] as! String?? ?? nil
 						country = clubMetadata["foundationLicenseCountry"] as! String?? ?? nil
 					}
 					traits.append(MetadataViews.Trait(name: "city", value: city, displayType: "String", rarity: nil))
 					traits.append(MetadataViews.Trait(name: "country", value: country, displayType: "String", rarity: nil))
 					let squadsIDs = clubData.getSquadIDs()
-					if squadsIDs.length > 0{
+					if squadsIDs.length > 0 {
 						let firstSquadID = squadsIDs[0]
 						if let squadData = MFLClub.getSquadData(id: firstSquadID) {
 							if let globalLeagueMembership = squadData.getCompetitionsMemberships()[1] {
 								if let globalLeagueMembershipDataOptional = globalLeagueMembership as? {String: AnyStruct}? {
-									if let globalLeagueMembershipData = globalLeagueMembershipDataOptional{
+									if let globalLeagueMembershipData = globalLeagueMembershipDataOptional {
 										traits.append(MetadataViews.Trait(
 											name: "division",
 											value: globalLeagueMembershipData["division"] as! UInt32?,
@@ -521,7 +521,7 @@ contract MFLClub: NonFungibleToken {
 		access(all)
 		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}? {
 			if let nft = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}? {
-                return nft as &{ViewResolver.Resolver}
+				return nft as &{ViewResolver.Resolver}
             }
             return nil
 		}

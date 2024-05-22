@@ -16,10 +16,10 @@ access(all)
 contract MFLPack: NonFungibleToken {
 
 	// Entitlements
-    access(all)
+	access(all)
 	entitlement PackAdminAction
 
-    access(all)
+	access(all)
 	entitlement PackAction
 
 	// Events
@@ -124,7 +124,7 @@ contract MFLPack: NonFungibleToken {
 						publicPath: MFLPack.CollectionPublicPath,
 						publicCollection: Type<&MFLPack.Collection>(),
 						publicLinkedType: Type<&MFLPack.Collection>(),
-						createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}{
+						createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection} {
 							return <-MFLPack.createEmptyCollection(nftType: Type<@MFLPack.Collection>())
 						}
 					)
@@ -196,8 +196,8 @@ contract MFLPack: NonFungibleToken {
 
 		access(all)
 		view fun getLength(): Int {
-            return self.ownedNFTs.length
-        }
+			return self.ownedNFTs.length
+		}
 
 		// Gets a reference to an NFT in the collection so that the caller can read its metadata and call its methods
 		access(all)
@@ -208,9 +208,9 @@ contract MFLPack: NonFungibleToken {
 		access(all)
 		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}? {
 			if let nft = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}? {
-                return nft as &{ViewResolver.Resolver}
-            }
-            return nil
+				return nft as &{ViewResolver.Resolver}
+			}
+			return nil
 		}
 
 		// Called by any account that want to open a specific pack
@@ -230,8 +230,8 @@ contract MFLPack: NonFungibleToken {
 		access(all)
 		view fun getSupportedNFTTypes(): {Type: Bool} {
 			let supportedTypes: {Type: Bool} = {}
-            supportedTypes[Type<@MFLPack.NFT>()] = true
-            return supportedTypes
+			supportedTypes[Type<@MFLPack.NFT>()] = true
+			return supportedTypes
 		}
 
 		access(all)
@@ -265,7 +265,7 @@ contract MFLPack: NonFungibleToken {
 			MFLPackTemplate.increasePackTemplateCurrentSupply(id: packTemplateID, nbToMint: nbToMint)
 			let newCollection <- create Collection()
 			var i: UInt32 = 0
-			while i < nbToMint{
+			while i < nbToMint {
 				let pack <- create NFT(packTemplateID: packTemplateID)
 				newCollection.deposit(token: <-pack)
 				i = i + 1 as UInt32

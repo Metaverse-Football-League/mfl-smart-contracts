@@ -15,7 +15,7 @@ access(all)
 contract MFLPlayer: NonFungibleToken {
 
 	// Entitlements
-    access(all)
+	access(all)
 	entitlement PlayerAdminAction
 
 	// Events
@@ -153,7 +153,7 @@ contract MFLPlayer: NonFungibleToken {
 						publicPath: MFLPlayer.CollectionPublicPath,
 						publicCollection: Type<&MFLPlayer.Collection>(),
 						publicLinkedType: Type<&MFLPlayer.Collection>(),
-						createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}{
+						createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection} {
 							return <-MFLPlayer.createEmptyCollection(nftType: Type<@MFLPlayer.Collection>())
 						}
 					)
@@ -260,8 +260,8 @@ contract MFLPlayer: NonFungibleToken {
 
 		access(all)
 		view fun getLength(): Int {
-            return self.ownedNFTs.length
-        }
+			return self.ownedNFTs.length
+		}
 
 		// Gets a reference to an NFT in the collection so that the caller can read its metadata and call its methods
 		access(all)
@@ -272,8 +272,8 @@ contract MFLPlayer: NonFungibleToken {
 		access(all)
 		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}? {
 			if let nft = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}? {
-                return nft as &{ViewResolver.Resolver}
-            }
+				return nft as &{ViewResolver.Resolver}
+			}
             return nil
 		}
 

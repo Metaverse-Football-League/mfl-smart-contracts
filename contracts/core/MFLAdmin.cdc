@@ -6,7 +6,8 @@
 access(all)
 contract MFLAdmin { 
 	
-    access(all) entitlement AdminRootActions
+	access(all)
+	entitlement AdminRootActions
 
 	// Events
 	access(all)
