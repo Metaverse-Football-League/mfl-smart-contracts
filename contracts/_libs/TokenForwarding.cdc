@@ -14,7 +14,7 @@ their tokens to.
 
 */
 
-import "FungibleToken"
+import FungibleToken from "./FungibleToken.cdc"
 
 access(all) contract TokenForwarding {
 
@@ -29,7 +29,7 @@ access(all) contract TokenForwarding {
 
         /// Gets the receiver assigned to a recipient capability.
         /// This is necessary because without it, it is not possible to look under the hood and see if a capability
-        /// is of an expected type or not. This helps guard against infinitely chained TokenForwarding or other invalid 
+        /// is of an expected type or not. This helps guard against infinitely chained TokenForwarding or other invalid
         /// malicious kinds of updates that could prevent listings from being made that are valid on storefronts.
         ///
         /// @return an optional receiver capability for consumers of the TokenForwarding to check/validate on their own
@@ -66,7 +66,7 @@ access(all) contract TokenForwarding {
 
         /// Gets the receiver assigned to a recipient capability.
         /// This is necessary because without it, it is not possible to look under the hood and see if a capability
-        /// is of an expected type or not. This helps guard against infinitely chained TokenForwarding or other invalid 
+        /// is of an expected type or not. This helps guard against infinitely chained TokenForwarding or other invalid
         /// malicious kinds of updates that could prevent listings from being made that are valid on storefronts.
         ///
         /// @return an optional receiver capability for consumers of the TokenForwarding to check/validate on their own

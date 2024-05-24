@@ -1,6 +1,6 @@
 import NonFungibleToken from "../_libs/NonFungibleToken.cdc"
 import ViewResolver from "../_libs/ViewResolver.cdc"
-import FungibleToken from ".../_libs/FungibleToken.cdc"
+import FungibleToken from "../_libs/FungibleToken.cdc"
 import MetadataViews from "../_libs/MetadataViews.cdc"
 import MFLViews from "../views/MFLViews.cdc"
 import MFLAdmin from "../core/MFLAdmin.cdc"
@@ -158,7 +158,6 @@ contract MFLPack: NonFungibleToken {
 		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT} {
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
-			emit Withdraw(id: token.id, from: self.owner?.address)
 			return <-token
 		}
 
@@ -252,6 +251,52 @@ contract MFLPack: NonFungibleToken {
 	}
 
 	access(all)
+	view fun getContractViews(resourceType: Type?): [Type] {
+		return [
+            Type<MetadataViews.NFTCollectionData>(),
+            Type<MetadataViews.NFTCollectionDisplay>()
+        ]
+	}
+
+	access(all)
+	fun resolveContractView(resourceType: Type?, viewType: Type): AnyStruct? {
+        switch viewType {
+            case Type<MetadataViews.NFTCollectionData>():
+                let collectionData = MetadataViews.NFTCollectionData(
+                    storagePath: self.CollectionStoragePath,
+                    publicPath: self.CollectionPublicPath,
+                    publicCollection: Type<&MFLPack.Collection>(),
+                    publicLinkedType: Type<&MFLPack.Collection>(),
+                    createEmptyCollectionFunction: (fun(): @{NonFungibleToken.Collection} {
+                        return <-MFLPack.createEmptyCollection(nftType: Type<@MFLPack.NFT>())
+                    })
+                )
+                return collectionData
+            case Type<MetadataViews.NFTCollectionDisplay>():
+                return MetadataViews.NFTCollectionDisplay(
+                    name: "MFL Pack Collection",
+                    description: "Build your own football club, make strategic decisions, and live the thrill of real competition. Join a universe where the stakes–and your rivals–are real.",
+                    externalURL: MetadataViews.ExternalURL("https://playmfl.com"),
+                    squareImage: MetadataViews.Media(
+						file: MetadataViews.HTTPFile(url: "https://app.playmfl.com/img/mflAvatar.png"),
+						mediaType: "image/png"
+					),
+                    bannerImage: MetadataViews.Media(
+						file: MetadataViews.HTTPFile(url: "https://app.playmfl.com/img/thumbnail.png"),
+						mediaType: "image/png"
+					),
+                    socials: {
+						"twitter": MetadataViews.ExternalURL("https://twitter.com/playMFL"),
+						"discord": MetadataViews.ExternalURL("https://discord.gg/pEDTR4wSPr"),
+						"linkedin": MetadataViews.ExternalURL("https://www.linkedin.com/company/playmfl"),
+						"medium": MetadataViews.ExternalURL("https://medium.com/playmfl")
+					}
+                )
+        }
+        return nil
+    }
+
+	access(all)
 	resource PackAdmin {
 		access(all)
 		let name: String
@@ -289,10 +334,7 @@ contract MFLPack: NonFungibleToken {
 		self.totalSupply = 0
 
 		// Create a Collection and save it to storage
-		self.account.storage.save<@MFLPack.Collection>(
-			<-MFLPack.createEmptyCollection(nftType: Type<@MFLPack.Collection>()),
-			to: MFLPack.CollectionStoragePath
-		)
+		self.account.storage.save<@Collection>(<-create Collection(), to: self.CollectionStoragePath)
 		// Create a public capability for the Collection
 		var capability_1 = self.account.capabilities.storage.issue<&MFLPack.Collection>(MFLPack.CollectionStoragePath)
 		self.account.capabilities.publish(capability_1, at: MFLPack.CollectionPublicPath)

@@ -1,4 +1,4 @@
-import { emulator, getAccountAddress } from "flow-js-testing";
+import { emulator, getAccountAddress } from "@onflow/flow-js-testing";
 import { MFLPackTestsUtils } from "./_utils/MFLPackTests.utils";
 import { testsUtils } from "../_utils/tests.utils";
 import * as matchers from "jest-extended";
@@ -56,7 +56,7 @@ describe("MFLPack", () => {
   let jackAccountAddress = null;
 
   beforeEach(async () => {
-    await testsUtils.initEmulator(8081);
+    await testsUtils.initEmulator();
     addressMap = await MFLPackTestsUtils.deployMFLPackContract("AliceAdminAccount");
     // Create PackTemplate
     await MFLPackTestsUtils.initPackTemplate("AliceAdminAccount", "AliceAdminAccount", argsPackTemplateTx);

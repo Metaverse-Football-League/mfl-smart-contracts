@@ -18,6 +18,9 @@ contract MFLClub: NonFungibleToken {
 	access(all)
 	entitlement SquadAdminAction
 
+	access(all)
+	entitlement ClubAction
+
 	// Global Events
 	access(all)
 	event ContractInitialized()
@@ -48,7 +51,17 @@ contract MFLClub: NonFungibleToken {
 	event ClubInfoUpdateRequested(id: UInt64, info: {String: String})
 
 	access(all)
-	event ClubFounded(id: UInt64, from: Address?, name: String, description: String, foundationDate: UFix64, foundationLicenseSerialNumber: UInt64?, foundationLicenseCity: String?, foundationLicenseCountry: String?, foundationLicenseSeason: UInt32?)
+	event ClubFounded(
+		id: UInt64,
+		from: Address?,
+		name: String,
+		description: String,
+		foundationDate: UFix64,
+		foundationLicenseSerialNumber: UInt64?,
+		foundationLicenseCity: String?,
+		foundationLicenseCountry: String?,
+		foundationLicenseSeason: UInt32?
+	)
 
 	// Squads Events
 	access(all)
@@ -142,7 +155,7 @@ contract MFLClub: NonFungibleToken {
 
 		// Getter for metadata
 		access(all)
-		fun getMetadata(): {String: AnyStruct} {
+		view fun getMetadata(): {String: AnyStruct} {
 			return self.metadata
 		}
 
@@ -155,7 +168,7 @@ contract MFLClub: NonFungibleToken {
 
 		// Getter for competitionsMemberships
 		access(all)
-		fun getCompetitionsMemberships(): {UInt64: AnyStruct} {
+		view fun getCompetitionsMemberships(): {UInt64: AnyStruct} {
 			return self.competitionsMemberships
 		}
 
@@ -186,7 +199,7 @@ contract MFLClub: NonFungibleToken {
 
 		// Getter for status
 		access(all)
-		fun getStatus(): SquadStatus {
+		view fun getStatus(): SquadStatus {
 			return self.status
 		}
 	}
@@ -205,7 +218,14 @@ contract MFLClub: NonFungibleToken {
 		access(self)
 		var metadata: {String: AnyStruct}
 
-		init(id: UInt64, clubID: UInt64, type: String, nftMetadata: {String: AnyStruct}, metadata: {String: AnyStruct}, competitionsMemberships: {UInt64: AnyStruct}) {
+		init(
+			id: UInt64,
+			clubID: UInt64,
+			type: String,
+			nftMetadata: {String: AnyStruct},
+			metadata: {String: AnyStruct},
+			competitionsMemberships: {UInt64: AnyStruct}
+		) {
 			pre {
 				MFLClub.getSquadData(id: id) == nil:
 					"Squad already exists"
@@ -258,7 +278,7 @@ contract MFLClub: NonFungibleToken {
 
 		// Getter for status
 		access(all)
-		fun getStatus(): ClubStatus {
+		view fun getStatus(): ClubStatus {
 			return self.status
 		}
 
@@ -271,7 +291,7 @@ contract MFLClub: NonFungibleToken {
 
 		// Getter for squadsIDs
 		access(all)
-		fun getSquadIDs(): [UInt64] {
+		view fun getSquadIDs(): [UInt64] {
 			return self.squadsIDs
 		}
 
@@ -284,7 +304,7 @@ contract MFLClub: NonFungibleToken {
 
 		// Getter for metadata
 		access(all)
-		fun getMetadata(): {String: AnyStruct} {
+		view fun getMetadata(): {String: AnyStruct} {
 			return self.metadata
 		}
 
@@ -451,7 +471,7 @@ contract MFLClub: NonFungibleToken {
 
 		// Getter for metadata
 		access(contract)
-		fun getMetadata(): {String: AnyStruct} {
+		view fun getMetadata(): {String: AnyStruct} {
 			return self.metadata
 		}
 
@@ -473,7 +493,6 @@ contract MFLClub: NonFungibleToken {
 		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT} {
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
-			emit Withdraw(id: token.id, from: self.owner?.address)
 			return <-token
 		}
 
@@ -527,7 +546,7 @@ contract MFLClub: NonFungibleToken {
 		}
 
 		access(self)
-		fun borrowClubRef(id: UInt64): &MFLClub.NFT? {
+		view fun borrowClubRef(id: UInt64): &MFLClub.NFT? {
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return ref as! &MFLClub.NFT?
 		}
@@ -567,7 +586,7 @@ contract MFLClub: NonFungibleToken {
 			)
 		}
 
-		access(all)
+		access(ClubAction)
 		fun requestClubInfoUpdate(id: UInt64, info: {String: String}) {
 			pre {
 				self.getIDs().contains(id) == true:
@@ -617,6 +636,52 @@ contract MFLClub: NonFungibleToken {
 	view fun getSquadData(id: UInt64): SquadData? {
 		return self.squadsDatas[id]
 	}
+
+	access(all)
+	view fun getContractViews(resourceType: Type?): [Type] {
+		return [
+            Type<MetadataViews.NFTCollectionData>(),
+            Type<MetadataViews.NFTCollectionDisplay>()
+        ]
+	}
+
+	access(all)
+	fun resolveContractView(resourceType: Type?, viewType: Type): AnyStruct? {
+        switch viewType {
+            case Type<MetadataViews.NFTCollectionData>():
+                let collectionData = MetadataViews.NFTCollectionData(
+                    storagePath: self.CollectionStoragePath,
+                    publicPath: self.CollectionPublicPath,
+                    publicCollection: Type<&MFLClub.Collection>(),
+                    publicLinkedType: Type<&MFLClub.Collection>(),
+                    createEmptyCollectionFunction: (fun(): @{NonFungibleToken.Collection} {
+                        return <-MFLClub.createEmptyCollection(nftType: Type<@MFLClub.NFT>())
+                    })
+                )
+                return collectionData
+            case Type<MetadataViews.NFTCollectionDisplay>():
+                return MetadataViews.NFTCollectionDisplay(
+                    name: "MFL Club Collection",
+                    description: "Build your own football club, make strategic decisions, and live the thrill of real competition. Join a universe where the stakes–and your rivals–are real.",
+                    externalURL: MetadataViews.ExternalURL("https://playmfl.com"),
+                    squareImage: MetadataViews.Media(
+						file: MetadataViews.HTTPFile(url: "https://app.playmfl.com/img/mflAvatar.png"),
+						mediaType: "image/png"
+					),
+                    bannerImage: MetadataViews.Media(
+						file: MetadataViews.HTTPFile(url: "https://app.playmfl.com/img/thumbnail.png"),
+						mediaType: "image/png"
+					),
+                    socials: {
+						"twitter": MetadataViews.ExternalURL("https://twitter.com/playMFL"),
+						"discord": MetadataViews.ExternalURL("https://discord.gg/pEDTR4wSPr"),
+						"linkedin": MetadataViews.ExternalURL("https://www.linkedin.com/company/playmfl"),
+						"medium": MetadataViews.ExternalURL("https://medium.com/playmfl")
+					}
+                )
+        }
+        return nil
+    }
 
 	access(all)
 	resource ClubAdmin {

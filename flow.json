@@ -1,8 +1,18 @@
 {
-	"emulators": {
-		"default": {
-		  "port": 3569,
-		  "serviceAccount": "emulator-account"
+	"networks": {
+		"emulator": "127.0.0.1:3569",
+		"mainnet": "access.mainnet.nodes.onflow.org:9000",
+		"previewnet": "access.previewnet.nodes.onflow.org:9000",
+		"testing": "127.0.0.1:3569",
+		"testnet": "access.devnet.nodes.onflow.org:9000"
+	},
+	"accounts": {
+		"emulator-account": {
+			"address": "f8d6e0586b0a20c7",
+			"key": {
+				"type": "file",
+				"location": "emulator-account.pkey"
+			}
 		}
 	},
 	"contracts": {
@@ -43,6 +53,14 @@
 				"testnet": "7e60df042a9c0868"
 			}
 		},
+		"FungibleTokenMetadataViews": {
+			"source": "./contracts/_libs/FungibleTokenMetadataViews.cdc",
+			"aliases": {
+				"emulator": "ee82856bf20e2aa6",
+				"mainnet": "f233dcee88fe0abe",
+				"testnet": "9a0766d93b6608b7"
+			}
+		},
 		"FungibleToken": {
 			"source": "./contracts/_libs/FungibleToken.cdc",
 			"aliases": {
@@ -74,6 +92,20 @@
 				"testnet": "683564e46977788a"
 			}
 		},
+		"MFLPackTemplate": {
+			"source": "./contracts/packs/MFLPackTemplate.cdc",
+			"aliases": {
+				"mainnet": "8ebcbfd516b1da27",
+				"testnet": "683564e46977788a"
+			}
+		},
+		"MFLViews": {
+			"source": "./contracts/views/MFLViews.cdc",
+			"aliases": {
+				"mainnet": "8ebcbfd516b1da27",
+				"testnet": "683564e46977788a"
+			}
+		},
 		"MFLClub": {
 			"source": "./contracts/clubs/MFLClub.cdc",
 			"aliases": {
@@ -88,22 +120,8 @@
 				"testnet": "683564e46977788a"
 			}
 		},
-		"MFLPackTemplate": {
-			"source": "./contracts/packs/MFLPackTemplate.cdc",
-			"aliases": {
-				"mainnet": "8ebcbfd516b1da27",
-				"testnet": "683564e46977788a"
-			}
-		},
 		"MFLPlayer": {
 			"source": "./contracts/players/MFLPlayer.cdc",
-			"aliases": {
-				"mainnet": "8ebcbfd516b1da27",
-				"testnet": "683564e46977788a"
-			}
-		},
-		"MFLViews": {
-			"source": "./contracts/views/MFLViews.cdc",
 			"aliases": {
 				"mainnet": "8ebcbfd516b1da27",
 				"testnet": "683564e46977788a"
@@ -142,38 +160,32 @@
 		"ViewResolver": {
 			"source": "./contracts/_libs/ViewResolver.cdc",
 			"aliases": {
-				"emulator": "0xf8d6e0586b0a20c7",
-				"mainnet": "0xf233dcee88fe0abe",
-				"testnet": "0x631e88ae7f1d7c20"
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "f233dcee88fe0abe",
+				"testnet": "631e88ae7f1d7c20"
 			}
-		}
-	},
-	"networks": {
-		"emulator": "127.0.0.1:3569",
-		"mainnet": "access.mainnet.nodes.onflow.org:9000",
-		"testnet": "access.devnet.nodes.onflow.org:9000"
-	},
-	"accounts": {
-		"emulator-account": {
-			"address": "f8d6e0586b0a20c7",
-			"key": "84f82df6790f07b281adb5bbc848bd6298a2de67f94bdfac7a400d5a1b893de5"
+		},
+		"Burner": {
+			"source": "./contracts/_libs/Burner.cdc",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"mainnet": "f233dcee88fe0abe",
+				"testnet": "9a0766d93b6608b7"
+			}
 		}
 	},
 	"deployments": {
 		"emulator": {
 			"emulator-account": [
 				"FUSD",
-				"NonFungibleToken",
-				"MetadataViews",
 				"DapperUtilityCoin",
 				"FlowUtilityToken",
 				"TokenForwarding",
-				"NFTStorefront",
 				"MFLAdmin",
+				"MFLViews",
 				"MFLPlayer",
 				"MFLPackTemplate",
 				"MFLPack",
-				"MFLViews",
 				"MFLClub"
 			]
 		}

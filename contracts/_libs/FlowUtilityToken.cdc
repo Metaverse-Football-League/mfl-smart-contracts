@@ -1,7 +1,7 @@
-import "FungibleToken"
-import "ViewResolver"
-import "MetadataViews"
-import "FungibleTokenMetadataViews"
+import FungibleToken from "./FungibleToken.cdc"
+import ViewResolver from "./ViewResolver.cdc"
+import MetadataViews from "./MetadataViews.cdc"
+import FungibleTokenMetadataViews from "./FungibleTokenMetadataViews.cdc"
 
 access(all) contract FlowUtilityToken: ViewResolver  {
 
@@ -185,7 +185,7 @@ access(all) contract FlowUtilityToken: ViewResolver  {
         access(contract) fun burnCallback() {
             // Placeholder for a burn callback
         }
-    
+
         access(all) view fun isAvailableToWithdraw(amount: UFix64): Bool {
            return true
         }

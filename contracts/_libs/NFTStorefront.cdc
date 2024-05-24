@@ -1,10 +1,10 @@
-import "FungibleToken"
-import "NonFungibleToken"
+import FungibleToken from "./FungibleToken.cdc"
+import NonFungibleToken from "./NonFungibleToken.cdc"
 
 // NFTStorefront
 //
 // A general purpose sale support contract for Flow NonFungibleTokens.
-// 
+//
 // Each account that wants to list NFTs for sale installs a Storefront,
 // and lists individual sales within that Storefront as Listings.
 // There is one Storefront per account, it handles sales of all NFT types
@@ -15,7 +15,7 @@ import "NonFungibleToken"
 // or other considerations.
 // Each NFT may be listed in one or more Listings, the validity of each
 // Listing can easily be checked.
-// 
+//
 // Purchasers can watch for Listing events and check the NFT type and
 // ID to see if they wish to buy the listed item.
 // Marketplaces and other aggregators can watch for Listing events
@@ -37,7 +37,7 @@ access(all) contract NFTStorefront {
     // ListingAvailable events can be used to determine the address
     // of the owner of the Storefront (...its location) at the time of
     // the listing but only at that precise moment in that precise transaction.
-    // If the seller moves the Storefront while the listing is valid, 
+    // If the seller moves the Storefront while the listing is valid,
     // that is on them.
     //
     access(all) event StorefrontInitialized(storefrontResourceID: UInt64)
@@ -68,8 +68,8 @@ access(all) contract NFTStorefront {
     // The listing has been resolved. It has either been purchased, or removed and destroyed.
     //
     access(all) event ListingCompleted(
-        listingResourceID: UInt64, 
-        storefrontResourceID: UInt64, 
+        listingResourceID: UInt64,
+        storefrontResourceID: UInt64,
         purchased: Bool,
         nftType: Type,
         nftID: UInt64
@@ -201,7 +201,7 @@ access(all) contract NFTStorefront {
     // Listing
     // A resource that allows an NFT to be sold for an amount of a given FungibleToken,
     // and for the proceeds of that sale to be split between several recipients.
-    // 
+    //
     access(all) resource Listing: ListingPublic {
         // The simple (non-Capability, non-complex) details of the sale
         access(self) let details: ListingDetails
@@ -228,12 +228,12 @@ access(all) contract NFTStorefront {
         // getDetails
         // Get the details of the current state of the Listing as a struct.
         // This avoids having more public variables and getter methods for them, and plays
-        // nicely with scripts (which cannot return resources). 
+        // nicely with scripts (which cannot return resources).
         //
         access(all) getDetails(): ListingDetails {
             return self.details
         }
-        
+
         // purchase
         // Purchase the listing, buying the token.
         // This pays the beneficiaries and returns the token to the buyer.
@@ -283,7 +283,7 @@ access(all) contract NFTStorefront {
             residualReceiver!.deposit(from: <-payment)
 
             // If the listing is purchased, we regard it as completed here.
-            // Otherwise we regard it as completed in the destructor.        
+            // Otherwise we regard it as completed in the destructor.
 
             emit ListingCompleted(
                 listingResourceID: self.uuid,
@@ -428,7 +428,7 @@ access(all) contract NFTStorefront {
 
             return listingResourceID
         }
-        
+
 
         // removeListing
         // Remove a Listing that has not yet been purchased from the collection and destroy it.
@@ -436,7 +436,7 @@ access(all) contract NFTStorefront {
         access(all) removeListing(listingResourceID: UInt64) {
             let listing <- self.listings.remove(key: listingResourceID)
                 ?? panic("missing Listing")
-    
+
             // This will emit a ListingCompleted event.
             destroy listing
         }

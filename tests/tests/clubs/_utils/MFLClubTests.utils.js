@@ -1,4 +1,4 @@
-import { getAccountAddress, getServiceAddress } from "flow-js-testing";
+import { getAccountAddress, getServiceAddress } from "@onflow/flow-js-testing";
 import { testsUtils } from "../../_utils/tests.utils";
 
 const FOUNDATION_LICENSE_ARGS = {

@@ -1,6 +1,6 @@
-import "FungibleToken"
-import "MetadataViews"
-import "FungibleTokenMetadataViews"
+import FungibleToken from "./FungibleToken.cdc"
+import MetadataViews from "./MetadataViews.cdc"
+import FungibleTokenMetadataViews from "./FungibleTokenMetadataViews.cdc"
 
 access(all) contract FUSD: FungibleToken {
 

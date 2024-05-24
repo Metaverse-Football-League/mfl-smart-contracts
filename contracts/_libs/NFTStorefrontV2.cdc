@@ -1,10 +1,10 @@
-import "FungibleToken"
-import "NonFungibleToken"
+import FungibleToken from "./FungibleToken.cdc"
+import NonFungibleToken from "./NonFungibleToken.cdc"
 
 /// NFTStorefrontV2
 ///
 /// A general purpose sale support contract for NFTs that implement the Flow NonFungibleToken standard.
-/// 
+///
 /// Each account that wants to list NFTs for sale installs a Storefront,
 /// and lists individual sales within that Storefront as Listings.
 /// There is one Storefront per account, it handles sales of all NFT types
@@ -12,15 +12,15 @@ import "NonFungibleToken"
 ///
 /// Each Listing can have one or more "cuts" of the sale price that
 /// goes to one or more addresses. Cuts can be used to pay listing fees
-/// or other considerations. 
+/// or other considerations.
 /// Each Listing can include a commission amount that is paid to whoever facilitates
-/// the purchase. The seller can also choose to provide an optional list of marketplace 
+/// the purchase. The seller can also choose to provide an optional list of marketplace
 /// receiver capabilities. In this case, the commission amount must be transferred to
 /// one of the capabilities in the list.
 ///
 /// Each NFT may be listed in one or more Listings, the validity of each
 /// Listing can easily be checked.
-/// 
+///
 /// Purchasers can watch for Listing events and check the NFT type and
 /// ID to see if they wish to buy the listed item.
 /// Marketplaces and other aggregators can watch for Listing events
@@ -37,7 +37,7 @@ access(all) contract NFTStorefrontV2 {
     /// ListingAvailable events can be used to determine the address
     /// of the owner of the Storefront (...its location) at the time of
     /// the listing but only at that precise moment in that precise transaction.
-    /// If the seller moves the Storefront while the listing is valid, 
+    /// If the seller moves the Storefront while the listing is valid,
     /// that is on them.
     ///
     access(all) event StorefrontInitialized(storefrontResourceID: UInt64)
@@ -59,7 +59,7 @@ access(all) contract NFTStorefrontV2 {
         storefrontAddress: Address,
         listingResourceID: UInt64,
         nftType: Type,
-        nftUUID: UInt64, 
+        nftUUID: UInt64,
         nftID: UInt64,
         salePaymentVaultType: Type,
         salePrice: UFix64,
@@ -73,8 +73,8 @@ access(all) contract NFTStorefrontV2 {
     /// The listing has been resolved. It has either been purchased, removed or destroyed.
     ///
     access(all) event ListingCompleted(
-        listingResourceID: UInt64, 
-        storefrontResourceID: UInt64, 
+        listingResourceID: UInt64,
+        storefrontResourceID: UInt64,
         purchased: Bool,
         nftType: Type,
         nftUUID: UInt64,
@@ -232,7 +232,7 @@ access(all) contract NFTStorefrontV2 {
         /// This pays the beneficiaries and returns the token to the buyer.
         ///
         access(all) purchase(
-            payment: @FungibleToken.Vault, 
+            payment: @FungibleToken.Vault,
             commissionRecipient: Capability<&{FungibleToken.Receiver}>?,
         ): @NonFungibleToken.NFT
 
@@ -251,7 +251,7 @@ access(all) contract NFTStorefrontV2 {
     /// Listing
     /// A resource that allows an NFT to be sold for an amount of a given FungibleToken,
     /// and for the proceeds of that sale to be split between several recipients.
-    /// 
+    ///
     access(all) resource Listing: ListingPublic {
         /// The simple (non-Capability, non-complex) details of the sale
         access(self) let details: ListingDetails
@@ -262,7 +262,7 @@ access(all) contract NFTStorefrontV2 {
         /// way that it claims.
         access(contract) let nftProviderCapability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.Collection}>
 
-        /// An optional list of marketplaces capabilities that are approved 
+        /// An optional list of marketplaces capabilities that are approved
         /// to receive the marketplace commission.
         access(contract) let marketplacesCapability: [Capability<&{FungibleToken.Receiver}>]?
 
@@ -274,8 +274,8 @@ access(all) contract NFTStorefrontV2 {
         access(all) borrowNFT(): &NonFungibleToken.NFT? {
             let ref = self.nftProviderCapability.borrow()!.borrowNFT(id: self.details.nftID)
             if ref.isInstance(self.details.nftType) && ref.id == self.details.nftID {
-                return ref as! &NonFungibleToken.NFT  
-            } 
+                return ref as! &NonFungibleToken.NFT
+            }
             return nil
         }
 
@@ -298,7 +298,7 @@ access(all) contract NFTStorefrontV2 {
         /// This pays the beneficiaries and commission to the facilitator and returns extra token to the buyer.
         /// This also cleans up duplicate listings for the item being purchased.
         access(all) purchase(
-            payment: @FungibleToken.Vault, 
+            payment: @FungibleToken.Vault,
             commissionRecipient: Capability<&{FungibleToken.Receiver}>?,
         ): @NonFungibleToken.NFT {
 
@@ -310,8 +310,8 @@ access(all) contract NFTStorefrontV2 {
                 self.owner != nil : "Resource doesn't have the assigned owner"
             }
             // Make sure the listing cannot be purchased again.
-            self.details.setToPurchased() 
-            
+            self.details.setToPurchased()
+
             if self.details.commissionAmount > 0.0 {
                 // If commission recipient is nil, Throw panic.
                 let commissionReceiver = commissionRecipient ?? panic("Commission recipient can't be nil")
@@ -352,7 +352,7 @@ access(all) contract NFTStorefrontV2 {
                                         .borrow() ?? panic("Unable to borrow the storeFrontManager resource")
             let duplicateListings = storeFrontPublicRef.getDuplicateListingIDs(nftType: self.details.nftType, nftID: self.details.nftID, listingID: self.uuid)
 
-            // Let's force removal of the listing in this storefront for the NFT that is being purchased. 
+            // Let's force removal of the listing in this storefront for the NFT that is being purchased.
             for listingID in duplicateListings {
                 storeFrontPublicRef.cleanup(listingResourceID: listingID)
             }
@@ -362,7 +362,7 @@ access(all) contract NFTStorefrontV2 {
             // The first receiver should therefore either be the seller, or an agreed recipient for
             // any unpaid cuts.
             var residualReceiver: &{FungibleToken.Receiver}? = nil
-            // Pay the comission 
+            // Pay the comission
             // Pay each beneficiary their amount of the payment.
 
             for cut in self.details.saleCuts {
@@ -540,14 +540,14 @@ access(all) contract NFTStorefrontV2 {
             commissionAmount: UFix64,
             expiry: UInt64
          ): UInt64 {
-            
+
             // let's ensure that the seller does indeed hold the NFT being listed
             let collectionRef = nftProviderCapability.borrow()
                 ?? panic("Could not borrow reference to collection")
             let nftRef = collectionRef.borrowNFT(id: nftID)
 
             // Instead of letting an arbitrary value be set for the UUID of a given NFT, the contract
-            // should fetch it itelf     
+            // should fetch it itelf
             let uuid = nftRef.uuid
             let listing <- create Listing(
                 nftProviderCapability: nftProviderCapability,
@@ -562,7 +562,7 @@ access(all) contract NFTStorefrontV2 {
                 commissionAmount: commissionAmount,
                 expiry: expiry
             )
-        
+
             let listingResourceID = listing.uuid
             let listingPrice = listing.getDetails().salePrice
             // Add the new listing to the dictionary.
@@ -604,7 +604,7 @@ access(all) contract NFTStorefrontV2 {
 
         /// addDuplicateListing
         /// Helper function that allows to add duplicate listing of given nft in a map.
-        /// 
+        ///
         access(contract) fun addDuplicateListing(nftIdentifier: String, nftID: UInt64, listingResourceID: UInt64) {
              if !self.listedNFTs.containsKey(nftIdentifier) {
                 self.listedNFTs.insert(key: nftIdentifier, {nftID: [listingResourceID]})
@@ -613,19 +613,19 @@ access(all) contract NFTStorefrontV2 {
                     self.listedNFTs[nftIdentifier]!.insert(key: nftID, [listingResourceID])
                 } else {
                     self.listedNFTs[nftIdentifier]![nftID]!.append(listingResourceID)
-                } 
+                }
             }
         }
 
         /// removeDuplicateListing
         /// Helper function that allows to remove duplicate listing of given nft from a map.
-        /// 
+        ///
         access(contract) fun removeDuplicateListing(nftIdentifier: String, nftID: UInt64, listingResourceID: UInt64) {
             // Remove the listing from the listedNFTs dictionary.
             let listingIndex = self.listedNFTs[nftIdentifier]![nftID]!.firstIndex(of: listingResourceID) ?? panic("Should contain the index")
             self.listedNFTs[nftIdentifier]![nftID]!.remove(at: listingIndex)
         }
-        
+
         /// removeListing
         /// Remove a Listing that has not yet been purchased from the collection and destroy it.
         /// It can only be executed by the StorefrontManager resource owner.
@@ -691,7 +691,7 @@ access(all) contract NFTStorefrontV2 {
                 }
                 listingIDs.remove(at:index)
                 return listingIDs
-            } 
+            }
            return []
         }
 
@@ -708,15 +708,15 @@ access(all) contract NFTStorefrontV2 {
             while index <= toIndex {
                 // There is a possibility that some index may not have the listing.
                 // becuase of that instead of failing the transaction, Execution moved to next index or listing.
-                
+
                 if let listing = self.borrowListing(listingResourceID: listingsIDs[index]) {
                     if listing.getDetails().expiry <= UInt64(getCurrentBlock().timestamp) {
                         self.cleanup(listingResourceID: listingsIDs[index])
                     }
                 }
-                index = index + UInt64(1) 
+                index = index + UInt64(1)
             }
-        } 
+        }
 
         /// borrowSaleItem
         /// Returns a read-only view of the SaleItem for the given listingID if it is contained by this collection.
@@ -776,4 +776,3 @@ access(all) contract NFTStorefrontV2 {
         self.StorefrontPublicPath = /public/NFTStorefrontV2
     }
 }
- 

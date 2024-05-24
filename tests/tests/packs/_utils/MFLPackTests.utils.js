@@ -1,6 +1,6 @@
-import { getAccountAddress, getServiceAddress } from "flow-js-testing";
+import { getAccountAddress, getServiceAddress } from "@onflow/flow-js-testing";
 import { testsUtils } from "../../_utils/tests.utils";
-import { MFLPackTemplateTestsUtils } from "../../packs/_utils/MFLPackTemplateTests.utils";
+import { MFLPackTemplateTestsUtils } from './MFLPackTemplateTests.utils';
 
 export const MFLPackTestsUtils = {
   async deployMFLPackContract(toAccountName) {

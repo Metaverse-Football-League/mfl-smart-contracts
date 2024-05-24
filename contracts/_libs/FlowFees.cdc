@@ -1,6 +1,6 @@
-import FungibleToken from "FungibleToken"
-import FlowToken from "FlowToken"
-import FlowStorageFees from "FlowStorageFees"
+import FungibleToken from "./FungibleToken.cdc"
+import FlowToken from "./FlowToken.cdc"
+import FlowStorageFees from "./FlowStorageFees.cdc"
 
 access(all) contract FlowFees {
 

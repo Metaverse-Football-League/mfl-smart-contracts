@@ -1,8 +1,8 @@
-import "FungibleToken"
+import FungibleToken from "./FungibleToken.cdc"
 
 //NB NB NB!
 // THis is a local mocked version of USDC FiatToken that is basically a clone of FUSD just to make it easier to test with
-//the paths are copied from the testnet version 
+//the paths are copied from the testnet version
 
 access(all) contract FiatToken {
 
@@ -120,15 +120,15 @@ access(all) contract FiatToken {
             return <-create Vault(balance: 0.0)
         }
 
-    
+
         access(contract) fun burnCallback() {
             // Placeholder for a burn callback
         }
-    
+
         access(all) view fun isAvailableToWithdraw(amount: UFix64): Bool {
            return true
         }
-    
+
         access(all) view fun getViews(): [Type] {
             panic("TODO")
         }

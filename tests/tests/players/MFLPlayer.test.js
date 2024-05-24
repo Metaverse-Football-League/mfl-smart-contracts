@@ -1,4 +1,4 @@
-import {emulator, getAccountAddress} from 'flow-js-testing';
+import {emulator, getAccountAddress} from '@onflow/flow-js-testing';
 import {MFLPlayerTestsUtils} from './_utils/MFLPlayerTests.utils';
 import {testsUtils} from '../_utils/tests.utils';
 import {BORROW_VIEW_RESOLVER} from './_scripts/borrow_view_resolver.script';
@@ -15,7 +15,7 @@ describe('MFLPlayer', () => {
   let addressMap = null;
 
   beforeEach(async () => {
-    await testsUtils.initEmulator(8080);
+    await testsUtils.initEmulator();
     addressMap = await MFLPlayerTestsUtils.deployMFLPlayerContract('AliceAdminAccount');
   });
 

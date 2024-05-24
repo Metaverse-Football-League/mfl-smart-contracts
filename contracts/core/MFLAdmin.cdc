@@ -7,7 +7,7 @@ access(all)
 contract MFLAdmin { 
 	
 	access(all)
-	entitlement AdminRootActions
+	entitlement AdminRootAction
 
 	// Events
 	access(all)
@@ -28,7 +28,7 @@ contract MFLAdmin {
 	
 	// MFL Royalty Address
 	access(all)
-	fun royaltyAddress(): Address { 
+	view fun royaltyAddress(): Address { 
 		return 0xa654669bd96b2014
 	}
 	
@@ -74,14 +74,14 @@ contract MFLAdmin {
 		
 		// Create a new AdminRoot resource and returns it
 		// Only if really needed ! One AdminRoot should be enough for all the logic in MFL
-		access(AdminRootActions)
+		access(AdminRootAction)
 		fun createNewAdminRoot(): @AdminRoot { 
 			emit AdminRootCreated(by: self.owner?.address)
 			return <-create AdminRoot()
 		}
 		
 		// Set a Claim capabability for a given AdminProxy
-		access(AdminRootActions)
+		access(AdminRootAction)
 		fun setAdminProxyClaimCapability(
 			name: String,
 			adminProxyRef: &{MFLAdmin.AdminProxyPublic},

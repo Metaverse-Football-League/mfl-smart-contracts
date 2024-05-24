@@ -36,7 +36,7 @@ Collection to complete the transfer.
 
 */
 
-import "ViewResolver"
+import ViewResolver from "./ViewResolver.cdc"
 
 /// The main NFT contract. Other NFT contracts will
 /// import and implement the interfaces defined in this contract
@@ -55,7 +55,7 @@ access(all) contract interface NonFungibleToken: ViewResolver {
     /// The entitlement prevents spammers from calling this from other users' collections
     /// because only code within a collection or that has special entitled access
     /// to the collections methods will be able to get the entitled reference
-    /// 
+    ///
     /// The event makes it so that third-party indexers can monitor the events
     /// and query the updated metadata from the owners' collections.
     ///
@@ -112,10 +112,10 @@ access(all) contract interface NonFungibleToken: ViewResolver {
         /// Get a reference to an NFT that this NFT owns
         /// Both arguments are optional to allow the NFT to choose
         /// how it returns sub NFTs depending on what arguments are provided
-        /// For example, if `type` has a value, but `id` doesn't, the NFT 
+        /// For example, if `type` has a value, but `id` doesn't, the NFT
         /// can choose which NFT of that type to return if there is a "default"
         /// If both are `nil`, then NFTs that only store a single NFT can just return
-        /// that. This helps callers who aren't sure what they are looking for 
+        /// that. This helps callers who aren't sure what they are looking for
         ///
         /// @param type: The Type of the desired NFT
         /// @param id: The id of the NFT to borrow
@@ -213,7 +213,7 @@ access(all) contract interface NonFungibleToken: ViewResolver {
         /// @return An optional reference to the NFT
         access(all) view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}? {
             post {
-                (result == nil) || (result?.id == id): 
+                (result == nil) || (result?.id == id):
                     "Cannot borrow NFT reference: The ID of the returned reference does not match the ID that was specified"
             }
         }

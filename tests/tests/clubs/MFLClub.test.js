@@ -1,4 +1,4 @@
-import {emulator, getAccountAddress} from 'flow-js-testing';
+import {emulator, getAccountAddress} from '@onflow/flow-js-testing';
 import {MFLClubTestsUtils} from './_utils/MFLClubTests.utils';
 import {testsUtils} from '../_utils/tests.utils';
 import * as matchers from 'jest-extended';
@@ -19,7 +19,7 @@ describe('MFLClub', () => {
   let aliceAdminAccountAddress = null;
 
   beforeEach(async () => {
-    await testsUtils.initEmulator(8084);
+    await testsUtils.initEmulator();
     addressMap = await MFLClubTestsUtils.deployMFLClubContract('AliceAdminAccount');
     aliceAdminAccountAddress = await MFLClubTestsUtils.createClubAndSquadAdmin(
       'AliceAdminAccount',

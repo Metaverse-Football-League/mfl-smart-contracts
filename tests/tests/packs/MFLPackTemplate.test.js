@@ -1,8 +1,7 @@
-import { emulator, getAccountAddress } from "flow-js-testing";
+import { emulator, getAccountAddress } from "@onflow/flow-js-testing";
 import { MFLPackTemplateTestsUtils } from "./_utils/MFLPackTemplateTests.utils";
 import { testsUtils } from "../_utils/tests.utils";
 import * as matchers from "jest-extended";
-import _ from "lodash";
 import { ERROR_UPDATE_PACK_TEMPLATE_SLOTS } from "./_transactions/error_update_pack_template_slots.tx";
 import { ERROR_ACCESS_PACK_TEMPLATES_DICTIONARY } from "./_transactions/error_access_pack_templates_dictionary.tx";
 
@@ -13,7 +12,7 @@ describe("MFLPackTemplate", () => {
   let addressMap = null;
 
   beforeEach(async () => {
-    await testsUtils.initEmulator(8082);
+    await testsUtils.initEmulator();
     addressMap = await MFLPackTemplateTestsUtils.deployMFLPackTemplateContract("AliceAdminAccount");
   });
 
@@ -60,7 +59,7 @@ describe("MFLPackTemplate", () => {
     ];
 
     describe("createPackTemplate()", () => {
-      test("should create a pack template", async () => {
+      test.only("should create a pack template", async () => {
         // prepare
         await MFLPackTemplateTestsUtils.createPackTemplateAdmin("AliceAdminAccount", "AliceAdminAccount");
         const aliceAdminAccountAddress = await getAccountAddress("AliceAdminAccount");

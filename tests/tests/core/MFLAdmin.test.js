@@ -1,4 +1,4 @@
-import {emulator, getAccountAddress} from 'flow-js-testing';
+import {emulator, getAccountAddress} from '@onflow/flow-js-testing';
 import {MFLAdminTestsUtils} from './_utils/MFLAdminTests.utils';
 import {testsUtils} from '../_utils/tests.utils';
 import * as matchers from 'jest-extended';
@@ -13,7 +13,7 @@ describe('MFLAdmin', () => {
   let addressMap = null;
 
   beforeEach(async () => {
-    await testsUtils.initEmulator(8083);
+    await testsUtils.initEmulator();
     addressMap = await MFLAdminTestsUtils.deployMFLAdminContract('AliceAdminAccount');
   });
 

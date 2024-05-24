@@ -71,9 +71,7 @@ contract MFLPackTemplate {
 			isOpenable: Bool,
 			imageUrl: String,
 			type: String,
-			slots: [
-				Slot
-			]
+			slots: [Slot]
 		) {
 			self.id = id
 			self.name = name
@@ -180,8 +178,11 @@ contract MFLPackTemplate {
 
 	// Get a data reprensation of a specific packTemplate
 	access(all)
-	view fun getPackTemplate(id: UInt64): PackTemplateData? {
+	fun getPackTemplate(id: UInt64): PackTemplateData? {
 		if let packTemplate = self.getPackTemplateRef(id: id) {
+			let dereferenceSlot = fun (_ slot: Slot): Slot {
+				return slot
+			}
 			return PackTemplateData(
 				id: packTemplate.id,
 				name: packTemplate.name,
@@ -191,7 +192,7 @@ contract MFLPackTemplate {
 				isOpenable: packTemplate.isOpenable,
 				imageUrl: packTemplate.imageUrl,
 				type: packTemplate.type,
-				slots: packTemplate.slots
+				slots: packTemplate.slots.map(dereferenceSlot)
 			)
 		}
 		return nil
@@ -199,7 +200,7 @@ contract MFLPackTemplate {
 
 	// Get a data reprensation of all packTemplates
 	access(all)
-	view fun getPackTemplates(): [PackTemplateData] {
+	fun getPackTemplates(): [PackTemplateData] {
 		var packTemplatesData: [PackTemplateData] = []
 		for id in self.getPackTemplatesIDs() {
 			if let packTemplate = self.getPackTemplate(id: id) {

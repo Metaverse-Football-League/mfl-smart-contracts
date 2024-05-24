@@ -286,12 +286,12 @@ contract MFLPlayer: NonFungibleToken {
 
 		access(all)
 		view fun isSupportedNFTType(type: Type): Bool {
-			return type == Type<@MFLPack.NFT>()
+			return type == Type<@MFLPlayer.NFT>()
 		}
 
 		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection} {
-			return <-MFLPack.createEmptyCollection(nftType: Type<@MFLPack.NFT>())
+			return <-MFLPlayer.createEmptyCollection(nftType: Type<@MFLPlayer.NFT>())
 		}
 	}
 
@@ -306,6 +306,52 @@ contract MFLPlayer: NonFungibleToken {
 	view fun getPlayerData(id: UInt64): PlayerData? {
 		return self.playersDatas[id]
 	}
+
+	access(all)
+	view fun getContractViews(resourceType: Type?): [Type] {
+		return [
+            Type<MetadataViews.NFTCollectionData>(),
+            Type<MetadataViews.NFTCollectionDisplay>()
+        ]
+	}
+
+	access(all)
+	fun resolveContractView(resourceType: Type?, viewType: Type): AnyStruct? {
+        switch viewType {
+            case Type<MetadataViews.NFTCollectionData>():
+                let collectionData = MetadataViews.NFTCollectionData(
+                    storagePath: self.CollectionStoragePath,
+                    publicPath: self.CollectionPublicPath,
+                    publicCollection: Type<&MFLPlayer.Collection>(),
+                    publicLinkedType: Type<&MFLPlayer.Collection>(),
+                    createEmptyCollectionFunction: (fun(): @{NonFungibleToken.Collection} {
+                        return <-MFLPlayer.createEmptyCollection(nftType: Type<@MFLPlayer.NFT>())
+                    })
+                )
+                return collectionData
+            case Type<MetadataViews.NFTCollectionDisplay>():
+                return MetadataViews.NFTCollectionDisplay(
+                    name: "MFL Player Collection",
+                    description: "Build your own football club, make strategic decisions, and live the thrill of real competition. Join a universe where the stakes–and your rivals–are real.",
+                    externalURL: MetadataViews.ExternalURL("https://playmfl.com"),
+                    squareImage: MetadataViews.Media(
+						file: MetadataViews.HTTPFile(url: "https://app.playmfl.com/img/mflAvatar.png"),
+						mediaType: "image/png"
+					),
+                    bannerImage: MetadataViews.Media(
+						file: MetadataViews.HTTPFile(url: "https://app.playmfl.com/img/thumbnail.png"),
+						mediaType: "image/png"
+					),
+                    socials: {
+						"twitter": MetadataViews.ExternalURL("https://twitter.com/playMFL"),
+						"discord": MetadataViews.ExternalURL("https://discord.gg/pEDTR4wSPr"),
+						"linkedin": MetadataViews.ExternalURL("https://www.linkedin.com/company/playmfl"),
+						"medium": MetadataViews.ExternalURL("https://medium.com/playmfl")
+					}
+                )
+        }
+        return nil
+    }
 
 	access(all)
 	resource PlayerAdmin {

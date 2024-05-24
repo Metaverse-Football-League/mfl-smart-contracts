@@ -1,23 +1,11 @@
-import {deployContract, emulator, executeScript, getContractCode, init, sendTransaction} from 'flow-js-testing';
+import {deployContract, emulator, executeScript, getContractCode, init, sendTransaction} from '@onflow/flow-js-testing';
 import path from 'path';
 
 export const testsUtils = {
-  async initEmulator(port, logging) {
+  async initEmulator() {
     const basePath = path.resolve(__dirname, '../../../');
-    await init(basePath, {port});
-
-    let logFn;
-    if (!logging) {
-      logFn = console.log;
-      console.log = () => {
-      };
-    }
-
-    await emulator.start(port, logging);
-
-    if (!logging) {
-      console.log = logFn;
-    }
+    await init(basePath);
+    await emulator.start();
   },
 
   async deployContract(name, to, path, addressMap) {
@@ -29,10 +17,12 @@ export const testsUtils = {
       addressMap,
       update: true,
     });
+
     if (error) {
       console.error(`Error deploying ${name} contract: `, error);
       throw error;
     }
+
     addressMap[name] = to;
     return result;
   },

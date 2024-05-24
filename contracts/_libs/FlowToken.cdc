@@ -1,6 +1,6 @@
-import FungibleToken from "FungibleToken"
-import MetadataViews from "MetadataViews"
-import FungibleTokenMetadataViews from "FungibleTokenMetadataViews"
+import FungibleToken from "./FungibleToken.cdc"
+import MetadataViews from "./MetadataViews.cdc"
+import FungibleTokenMetadataViews from "./FungibleTokenMetadataViews.cdc"
 
 access(all) contract FlowToken: FungibleToken {
 

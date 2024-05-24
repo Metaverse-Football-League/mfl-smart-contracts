@@ -40,8 +40,8 @@ to the Provider interface.
 
 */
 
-import "ViewResolver"
-import "Burner"
+import ViewResolver from "./ViewResolver.cdc"
+import Burner from "./Burner.cdc"
 
 /// FungibleToken
 ///
@@ -88,7 +88,7 @@ access(all) contract interface FungibleToken: ViewResolver {
         /// Additionally, if the provider is pulling from multiple vaults
         /// it only needs to check some of the vaults until the desired amount
         /// is reached, potentially helping with performance.
-        /// 
+        ///
         access(all) view fun isAvailableToWithdraw(amount: UFix64): Bool
 
         /// withdraw subtracts tokens from the implementing resource
@@ -165,7 +165,7 @@ access(all) contract interface FungibleToken: ViewResolver {
         /// for this function
         access(all) view fun getSupportedVaultTypes(): {Type: Bool} {
             // Below check is implemented to make sure that run-time type would
-            // only get returned when the parent resource conforms with `FungibleToken.Vault`. 
+            // only get returned when the parent resource conforms with `FungibleToken.Vault`.
             if self.getType().isSubtype(of: Type<@{FungibleToken.Vault}>()) {
                 return {self.getType(): true}
             } else {
@@ -212,7 +212,7 @@ access(all) contract interface FungibleToken: ViewResolver {
             // Assert that the concrete type of the deposited vault is the same
             // as the vault that is accepting the deposit
             pre {
-                from.isInstance(self.getType()): 
+                from.isInstance(self.getType()):
                     "Cannot deposit an incompatible token type"
             }
             post {
