@@ -1,18 +1,22 @@
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 
-/** 
-  This tx creates an admin proxy which will allow 
+/**
+  This tx creates an admin proxy which will allow
   to receive capabilities from an admin root to perform admin actions.
 **/
 
 transaction() {
 
-    prepare(acct: AuthAccount) {
-        if acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) == nil {
-            acct.save(<-MFLAdmin.createAdminProxy(), to: MFLAdmin.AdminProxyStoragePath)
+    prepare(acct: auth(BorrowValue, SaveValue, PublishCapability, UnpublishCapability, IssueStorageCapabilityController) &Account) {
+        if acct.storage.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) != nil {
+            return
         }
-        acct.unlink(MFLAdmin.AdminProxyPublicPath)
-        acct.link<&{MFLAdmin.AdminProxyPublic}>(MFLAdmin.AdminProxyPublicPath, target: MFLAdmin.AdminProxyStoragePath)
+
+        acct.storage.save(<-MFLAdmin.createAdminProxy(), to: MFLAdmin.AdminProxyStoragePath)
+
+        acct.capabilities.unpublish(MFLAdmin.AdminProxyPublicPath)
+        let adminProxyCap = acct.capabilities.storage.issue<&MFLAdmin.AdminProxy>(MFLAdmin.AdminProxyStoragePath)
+        acct.capabilities.publish(adminProxyCap, at: MFLAdmin.AdminProxyPublicPath)
     }
 
     execute {

@@ -28,9 +28,6 @@ contract MFLPlayer: NonFungibleToken {
 	access(all)
 	event Updated(id: UInt64)
 
-	access(all)
-	event Destroyed(id: UInt64)
-
 	// Named Paths
 	access(all)
 	let CollectionStoragePath: StoragePath
@@ -353,8 +350,12 @@ contract MFLPlayer: NonFungibleToken {
         return nil
     }
 
+	// Deprecated: Only here for backward compatibility.
 	access(all)
-	resource PlayerAdmin {
+	resource interface PlayerAdminClaim {}
+
+	access(all)
+	resource PlayerAdmin: PlayerAdminClaim {
 		access(all)
 		let name: String
 

@@ -25,13 +25,6 @@ contract MFLClub: NonFungibleToken {
 	access(all)
 	event ContractInitialized()
 
-	// Clubs Events
-	access(all)
-	event Withdraw(id: UInt64, from: Address?)
-
-	access(all)
-	event Deposit(id: UInt64, to: Address?)
-
 	access(all)
 	event ClubMinted(id: UInt64)
 
@@ -43,9 +36,6 @@ contract MFLClub: NonFungibleToken {
 
 	access(all)
 	event ClubSquadsIDsUpdated(id: UInt64, squadsIDs: [UInt64])
-
-	access(all)
-	event ClubDestroyed(id: UInt64)
 
 	access(all)
 	event ClubInfoUpdateRequested(id: UInt64, info: {String: String})
@@ -66,9 +56,6 @@ contract MFLClub: NonFungibleToken {
 	// Squads Events
 	access(all)
 	event SquadMinted(id: UInt64)
-
-	access(all)
-	event SquadDestroyed(id: UInt64)
 
 	access(all)
 	event SquadMetadataUpdated(id: UInt64)
@@ -516,7 +503,6 @@ contract MFLClub: NonFungibleToken {
 
 			// Add the new token to the dictionary which removes the old one
 			let oldToken <- self.ownedNFTs[id] <- token
-			emit Deposit(id: id, to: self.owner?.address)
 			destroy oldToken
 		}
 
@@ -683,8 +669,12 @@ contract MFLClub: NonFungibleToken {
         return nil
     }
 
+	// Deprecated: Only here for backward compatibility.
 	access(all)
-	resource ClubAdmin {
+	resource interface ClubAdminClaim {}
+
+	access(all)
+	resource ClubAdmin: ClubAdminClaim {
 		access(all)
 		let name: String
 
@@ -731,8 +721,12 @@ contract MFLClub: NonFungibleToken {
 		}
 	}
 
+	// Deprecated: Only here for backward compatibility.
 	access(all)
-	resource SquadAdmin {
+	resource interface SquadAdminClaim {}
+
+	access(all)
+	resource SquadAdmin: SquadAdminClaim {
 		access(all)
 		let name: String
 

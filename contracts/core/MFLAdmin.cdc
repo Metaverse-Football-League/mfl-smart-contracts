@@ -7,6 +7,9 @@ access(all)
 contract MFLAdmin { 
 	
 	access(all)
+	entitlement AdminProxyAction
+
+	access(all)
 	entitlement AdminRootAction
 
 	// Events
@@ -32,18 +35,15 @@ contract MFLAdmin {
 		return 0xa654669bd96b2014
 	}
 	
-	// Interface that an AdminProxy will expose to be able to receive Claims capabilites from an AdminRoot
+	// Deprecated: Only here for backward compatibility.
 	access(all)
-	resource interface AdminProxyPublic { 
-		access(contract)
-		fun setClaimCapability(name: String, capability: Capability)
-	}
+	resource interface AdminProxyPublic {}
 	
 	access(all)
 	resource AdminProxy: AdminProxyPublic { 
 		
 		// Dictionary of all Claims Capabilities stored in an AdminProxy
-		access(contract)
+		access(self)
 		let claimsCapabilities: {String: Capability}
 		
 		access(contract)
@@ -51,7 +51,7 @@ contract MFLAdmin {
 			self.claimsCapabilities[name] = capability
 		}
 		
-		access(all)
+		access(AdminProxyAction)
 		view fun getClaimCapability(name: String): Capability? { 
 			return self.claimsCapabilities[name]
 		}
@@ -84,7 +84,7 @@ contract MFLAdmin {
 		access(AdminRootAction)
 		fun setAdminProxyClaimCapability(
 			name: String,
-			adminProxyRef: &{MFLAdmin.AdminProxyPublic},
+			adminProxyRef: &MFLAdmin.AdminProxy,
 			newCapability: Capability
 		) { 
 			adminProxyRef.setClaimCapability(name: name, capability: newCapability)

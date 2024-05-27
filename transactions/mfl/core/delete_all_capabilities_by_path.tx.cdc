@@ -1,14 +1,16 @@
 import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 
 /**
-  This tx disables the storage capability
+  This tx delete all capability controllers by path_
 **/
 
 transaction(path: StoragePath) {
 
   prepare(acct: auth(GetStorageCapabilityController) &Account) {
-    let storageCapabilityController = acct.capabilities.storage.forEachController(byCapabilityID: capabilityID) ?? panic("No capability controller found")
-    storageCapabilityController.delete()
+    let controllers = acct.capabilities.storage.getControllers(forPath: path)
+    for controller in controllers {
+        controller.delete()
+    }
   }
 
   execute {

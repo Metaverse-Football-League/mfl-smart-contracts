@@ -219,11 +219,16 @@ contract MFLPackTemplate {
 	// Called from MFLPack batchMintPack fct
 	access(account)
 	fun increasePackTemplateCurrentSupply(id: UInt64, nbToMint: UInt32) {
-		self.getPackTemplateRef(id: id)?.increaseCurrentSupply(nbToMint: nbToMint)
+		let packTemplate = self.getPackTemplateRef(id: id) ?? panic("PackTemplate does not exist")
+		packTemplate.increaseCurrentSupply(nbToMint: nbToMint)
 	}
 
+	// Deprecated: Only here for backward compatibility.
 	access(all)
-	resource PackTemplateAdmin {
+	resource interface PackTemplateAdminClaim {}
+
+	access(all)
+	resource PackTemplateAdmin: PackTemplateAdminClaim {
 		access(all)
 		let name: String
 

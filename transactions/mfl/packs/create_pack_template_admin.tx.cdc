@@ -7,10 +7,10 @@ import MFLPackTemplate from "../../../contracts/packs/MFLPackTemplate.cdc"
 
 transaction() {
 
-    prepare(adminAcct: AuthAccount, futureAdminAcct: AuthAccount) {
-        let packTemplateAdminRef = adminAcct.borrow<&MFLPackTemplate.PackTemplateAdmin>(from: MFLPackTemplate.PackTemplateAdminStoragePath) ?? panic("Could not borrow packTemplate admin ref")
+    prepare(adminAcct: auth(BorrowValue) &Account, futureAdminAcct: auth(SaveValue) &Account) {
+        let packTemplateAdminRef = adminAcct.storage.borrow<auth(MFLPackTemplate.PackTemplateAdminAction) &MFLPackTemplate.PackTemplateAdmin>(from: MFLPackTemplate.PackTemplateAdminStoragePath) ?? panic("Could not borrow packTemplate admin ref")
         let newPackTemplateAdmin <- packTemplateAdminRef.createPackTemplateAdmin()
-        futureAdminAcct.save(<- newPackTemplateAdmin, to: MFLPackTemplate.PackTemplateAdminStoragePath)
+        futureAdminAcct.storage.save(<- newPackTemplateAdmin, to: MFLPackTemplate.PackTemplateAdminStoragePath)
     }
 
     execute {

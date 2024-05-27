@@ -9,21 +9,19 @@ import MFLPackTemplate from "../../../contracts/packs/MFLPackTemplate.cdc"
 
 transaction(packTemplateID: UInt64,  receiverAddr: Address, nbToMint: UInt32){
     
-    let packTemplateAdminProxyRef: &MFLAdmin.AdminProxy
-    let receiverCollectionRef: &MFLPack.Collection{NonFungibleToken.CollectionPublic} 
+    let adminProxyRef: auth(MFLAdmin.AdminProxyAction) &MFLAdmin.AdminProxy
+    let receiverCollectionRef: &MFLPack.Collection
 
-    prepare(acct: AuthAccount) {
-        self.packTemplateAdminProxyRef = acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
-        self.receiverCollectionRef = getAccount(receiverAddr).getCapability<&MFLPack.Collection{NonFungibleToken.CollectionPublic}>(MFLPack.CollectionPublicPath).borrow() ?? panic("Could not borrow receiver collection ref")
-    }
-
-    pre {
-        MFLPackTemplate.getPackTemplate(id: packTemplateID) != nil: "PackTemplate does not exist"
+    prepare(acct: auth(BorrowValue) &Account) {
+        self.adminProxyRef = acct.storage.borrow<auth(MFLAdmin.AdminProxyAction) &MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")       
+        self.receiverCollectionRef = getAccount(receiverAddr).capabilities.borrow<&MFLPack.Collection>(
+                MFLPack.CollectionPublicPath
+            ) ?? panic("Could not get receiver reference to the NFT Collection")
     }
 
     execute {
-        let packAdminClaimCap = self.packTemplateAdminProxyRef.getClaimCapability(name: "PackAdminClaim") ?? panic("PackAdminClaim capability not found")
-        let packAdminClaimRef = packAdminClaimCap.borrow<&{MFLPack.PackAdminClaim}>() ?? panic("Could not borrow PackAdminClaim")
+        let packAdminClaimCap = self.adminProxyRef.getClaimCapability(name: "PackAdminClaim") ?? panic("PackAdminClaim capability not found")
+        let packAdminClaimRef = packAdminClaimCap.borrow<auth(MFLPack.PackAdminAction) &MFLPack.PackAdmin>() ?? panic("Could not borrow PackAdmin")
         let packs <- packAdminClaimRef.batchMintPack(packTemplateID: packTemplateID, nbToMint: nbToMint)
         let ids = packs.getIDs()
         for id in ids {

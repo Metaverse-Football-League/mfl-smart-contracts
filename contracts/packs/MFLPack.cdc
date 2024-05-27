@@ -4,7 +4,7 @@ import FungibleToken from "../_libs/FungibleToken.cdc"
 import MetadataViews from "../_libs/MetadataViews.cdc"
 import MFLViews from "../views/MFLViews.cdc"
 import MFLAdmin from "../core/MFLAdmin.cdc"
-import MFLPackTemplate from "../packs/MFLPackTemplate.cdc"
+import MFLPackTemplate from "./MFLPackTemplate.cdc"
 
 /**
   This contract is based on the NonFungibleToken standard on Flow.
@@ -32,9 +32,6 @@ contract MFLPack: NonFungibleToken {
 
 	access(all)
 	event Minted(id: UInt64, packTemplateID: UInt64, from: Address?)
-
-	access(all)
-	event Destroyed(id: UInt64)
 
 	// Named Paths
 	access(all)
@@ -296,8 +293,12 @@ contract MFLPack: NonFungibleToken {
         return nil
     }
 
+	// Deprecated: Only here for backward compatibility.
 	access(all)
-	resource PackAdmin {
+	resource interface PackAdminClaim {}
+
+	access(all)
+	resource PackAdmin: PackAdminClaim {
 		access(all)
 		let name: String
 
