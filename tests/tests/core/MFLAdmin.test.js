@@ -4,7 +4,6 @@ import {testsUtils} from '../_utils/tests.utils';
 import * as matchers from 'jest-extended';
 import adminClaim from './_transactions/check_admin_claim.tx';
 import {GET_ROYALTY_ADDRESS} from './_scripts/get_royalty_address.script';
-import {GET_CLUB_ROYALTIES_VIEW} from '../clubs/_scripts/get_club_royalties_view.script';
 
 expect.extend(matchers);
 jest.setTimeout(40000);
@@ -67,13 +66,12 @@ describe('MFLAdmin', () => {
         // prepare
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
-        const privatePath = `/private/${bobAccountAddress}-playerAdminClaim`;
         await testsUtils.shallPass({name: 'mfl/core/create_admin_proxy.tx', signers: [bobAccountAddress]});
 
         // execute
         await testsUtils.shallPass({
           name: 'mfl/players/give_player_admin_claim.tx',
-          args: [bobAccountAddress, privatePath],
+          args: [bobAccountAddress],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -89,13 +87,12 @@ describe('MFLAdmin', () => {
         // prepare
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
-        const privatePath = `/private/${bobAccountAddress}-packAdminClaim`;
         await testsUtils.shallPass({name: 'mfl/core/create_admin_proxy.tx', signers: [bobAccountAddress]});
 
         // execute
         await testsUtils.shallPass({
           name: 'mfl/packs/give_pack_admin_claim.tx',
-          args: [bobAccountAddress, privatePath],
+          args: [bobAccountAddress],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -111,13 +108,12 @@ describe('MFLAdmin', () => {
         // prepare
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
-        const privatePath = `/private/${bobAccountAddress}-packTemplateAdminClaim`;
         await testsUtils.shallPass({name: 'mfl/core/create_admin_proxy.tx', signers: [bobAccountAddress]});
 
         // execute
         await testsUtils.shallPass({
           name: 'mfl/packs/give_pack_template_admin_claim.tx',
-          args: [bobAccountAddress, privatePath],
+          args: [bobAccountAddress],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -133,13 +129,12 @@ describe('MFLAdmin', () => {
         // prepare
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
-        const privatePath = `/private/${bobAccountAddress}-clubAdminClaim`;
         await testsUtils.shallPass({name: 'mfl/core/create_admin_proxy.tx', signers: [bobAccountAddress]});
 
         // execute
         await testsUtils.shallPass({
           name: 'mfl/clubs/give_club_admin_claim.tx',
-          args: [bobAccountAddress, privatePath],
+          args: [bobAccountAddress],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -155,13 +150,12 @@ describe('MFLAdmin', () => {
         // prepare
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
-        const privatePath = `/private/${bobAccountAddress}-squadAdminClaim`;
         await testsUtils.shallPass({name: 'mfl/core/create_admin_proxy.tx', signers: [bobAccountAddress]});
 
         // execute
         await testsUtils.shallPass({
           name: 'mfl/clubs/squads/give_squad_admin_claim.tx',
-          args: [bobAccountAddress, privatePath],
+          args: [bobAccountAddress],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -179,18 +173,17 @@ describe('MFLAdmin', () => {
         // prepare
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
-        const privatePath = `/private/${bobAccountAddress}-playerAdminClaim`;
         await testsUtils.shallPass({name: 'mfl/core/create_admin_proxy.tx', signers: [bobAccountAddress]});
-        await testsUtils.shallPass({
+        const result = await testsUtils.shallPass({
           name: 'mfl/players/give_player_admin_claim.tx',
-          args: [bobAccountAddress, privatePath],
+          args: [bobAccountAddress],
           signers: [aliceAdminAccountAddress],
         });
 
         // execute
         await testsUtils.shallPass({
-          name: 'mfl/players/revoke_player_admin_claim.tx',
-          args: [privatePath],
+          name: 'mfl/core/delete_all_capabilities_by_path.tx',
+          args: ["/storage/MFLPlayerAdmin"],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -207,18 +200,17 @@ describe('MFLAdmin', () => {
         // prepare
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
-        const privatePath = `/private/${bobAccountAddress}-packAdminClaim`;
         await testsUtils.shallPass({name: 'mfl/core/create_admin_proxy.tx', signers: [bobAccountAddress]});
         await testsUtils.shallPass({
           name: 'mfl/packs/give_pack_admin_claim.tx',
-          args: [bobAccountAddress, privatePath],
+          args: [bobAccountAddress],
           signers: [aliceAdminAccountAddress],
         });
 
         // execute
         await testsUtils.shallPass({
-          name: 'mfl/packs/revoke_pack_admin_claim.tx',
-          args: [privatePath],
+          name: 'mfl/core/delete_all_capabilities_by_path.tx',
+          args: ["/storage/MFLPackAdmin"],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -235,18 +227,17 @@ describe('MFLAdmin', () => {
         // prepare
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
-        const privatePath = `/private/${bobAccountAddress}-packTemplateAdminClaim`;
         await testsUtils.shallPass({name: 'mfl/core/create_admin_proxy.tx', signers: [bobAccountAddress]});
         await testsUtils.shallPass({
           name: 'mfl/packs/give_pack_template_admin_claim.tx',
-          args: [bobAccountAddress, privatePath],
+          args: [bobAccountAddress],
           signers: [aliceAdminAccountAddress],
         });
 
         // execute
         await testsUtils.shallPass({
-          name: 'mfl/packs/revoke_pack_template_admin_claim.tx',
-          args: [privatePath],
+          name: 'mfl/core/delete_all_capabilities_by_path.tx',
+          args: ["/storage/MFLPackTemplateAdmin"],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -263,18 +254,17 @@ describe('MFLAdmin', () => {
         // prepare
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
-        const privatePath = `/private/${bobAccountAddress}-clubAdminClaim`;
         await testsUtils.shallPass({name: 'mfl/core/create_admin_proxy.tx', signers: [bobAccountAddress]});
         await testsUtils.shallPass({
           name: 'mfl/clubs/give_club_admin_claim.tx',
-          args: [bobAccountAddress, privatePath],
+          args: [bobAccountAddress],
           signers: [aliceAdminAccountAddress],
         });
 
         // execute
         await testsUtils.shallPass({
-          name: 'mfl/clubs/revoke_club_admin_claim.tx',
-          args: [privatePath],
+          name: 'mfl/core/delete_all_capabilities_by_path.tx',
+          args: ["/storage/MFLClubAdmin"],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -291,18 +281,17 @@ describe('MFLAdmin', () => {
         // prepare
         const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
         const bobAccountAddress = await getAccountAddress('BobAccount');
-        const privatePath = `/private/${bobAccountAddress}-squadAdminClaim`;
         await testsUtils.shallPass({name: 'mfl/core/create_admin_proxy.tx', signers: [bobAccountAddress]});
         await testsUtils.shallPass({
           name: 'mfl/clubs/squads/give_squad_admin_claim.tx',
-          args: [bobAccountAddress, privatePath],
+          args: [bobAccountAddress],
           signers: [aliceAdminAccountAddress],
         });
 
         // execute
         await testsUtils.shallPass({
-          name: 'mfl/clubs/squads/revoke_squad_admin_claim.tx',
-          args: [privatePath],
+          name: 'mfl/core/delete_all_capabilities_by_path.tx',
+          args: ["/storage/MFLSquadAdmin"],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -313,23 +302,6 @@ describe('MFLAdmin', () => {
           signers: [bobAccountAddress],
         });
         expect(error).toContain('Could not borrow SquadAdminClaim');
-      });
-
-      test('should panic if revoke capability path does not exist', async () => {
-        // prepare
-        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
-        const bobAccountAddress = await getAccountAddress('BobAccount');
-        const privatePath = `/private/${bobAccountAddress}-playerAdminClaim`;
-
-        // execute
-        const error = await testsUtils.shallRevert({
-          name: 'mfl/players/revoke_player_admin_claim.tx',
-          args: [privatePath],
-          signers: [aliceAdminAccountAddress],
-        });
-
-        // assert
-        expect(error).toContain('Capability path does not exist');
       });
     });
   });
@@ -348,12 +320,14 @@ describe('MFLAdmin', () => {
           code: `
             import MFLAdmin from "../../../../contracts/core/MFLAdmin.cdc"
 
-            pub fun main(address: Address,): Bool {
-              return getAccount(address).getCapability<&{MFLAdmin.AdminProxyPublic}>(MFLAdmin.AdminProxyPublicPath).check()
+            access(all)
+            fun main(address: Address): Bool {
+              return getAccount(address).capabilities.get<&MFLAdmin.AdminProxy>(MFLAdmin.AdminProxyPublicPath).check()
             }
           `,
           args: [aliceAdminAccountAddress],
         });
+
         expect(adminProxyExists).toBe(true);
       });
     });

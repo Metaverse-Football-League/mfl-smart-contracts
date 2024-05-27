@@ -3,12 +3,12 @@ export const BATCH_WITHDRAW_PACK = `
     import MFLPack from "../../../contracts/packs/MFLPack.cdc"
 
     transaction(receiverAddr: Address, ids: [UInt64]) {
-        let receiverRef: &{NonFungibleToken.CollectionPublic}
-        let senderRef: &MFLPack.Collection
+        let receiverRef: &MFLPack.Collection
+        let senderRef: auth(NonFungibleToken.Withdraw) &MFLPack.Collection
 
-        prepare(acct: AuthAccount) {
-            self.receiverRef = getAccount(receiverAddr).getCapability<&{NonFungibleToken.CollectionPublic}>(MFLPack.CollectionPublicPath).borrow() ??  panic("Could not borrow receiver collection reference")
-            self.senderRef = acct.borrow<&MFLPack.Collection>(from: MFLPack.CollectionStoragePath) ?? panic("Could not borrow sender collection reference")
+        prepare(acct: auth(BorrowValue) &Account) {
+            self.receiverRef = getAccount(receiverAddr).capabilities.borrow<&MFLPack.Collection>(MFLPack.CollectionPublicPath) ??  panic("Could not borrow receiver collection reference")
+            self.senderRef = acct.storage.borrow<auth(NonFungibleToken.Withdraw) &MFLPack.Collection>(from: MFLPack.CollectionStoragePath) ?? panic("Could not borrow sender collection reference")
         }
 
         execute {

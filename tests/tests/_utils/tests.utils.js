@@ -5,7 +5,7 @@ export const testsUtils = {
   async initEmulator() {
     const basePath = path.resolve(__dirname, '../../../');
     await init(basePath);
-    await emulator.start();
+    await emulator.start({logging: true});
   },
 
   async deployContract(name, to, path, addressMap) {
@@ -28,7 +28,7 @@ export const testsUtils = {
   },
 
   async shallRevert(props) {
-    const [, error] = await sendTransaction(props);
+    const [a, error] = await sendTransaction(props);
     if (!error) {
       throw `Should have thrown an error for ${props.name}`;
     }

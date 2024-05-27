@@ -16,10 +16,9 @@ export const MFLPackTemplateTestsUtils = {
     const receiverAcctAddress = await getAccountAddress(receiverAccountName);
 
     await testsUtils.shallPass({name: 'mfl/core/create_admin_proxy.tx', signers: [receiverAcctAddress]});
-    const args = [receiverAcctAddress, `/private/${receiverAccountName}-packTemplateAdminClaim`];
     await testsUtils.shallPass({
       name: 'mfl/packs/give_pack_template_admin_claim.tx',
-      args,
+      args: [receiverAcctAddress],
       signers: [rootAdminAcctAddress],
     });
   },
