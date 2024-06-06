@@ -1,17 +1,27 @@
 import MetadataViews from "../../../contracts/_libs/MetadataViews.cdc"
 import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 
-/** 
+/**
   This script returns a data representation array of players
   given a collection address, a list of players ids and following the Display view defined in the MedataViews contract.
 **/
 
-pub struct PlayerNFT {
-    pub let name: String
-    pub let description: String
-    pub let thumbnail: String
-    pub let owner: Address
-    pub let type: String
+access(all)
+struct PlayerNFT {
+    access(all)
+    let name: String
+
+    access(all)
+    let description: String
+
+    access(all)
+    let thumbnail: String
+
+    access(all)
+    let owner: Address
+
+    access(all)
+    let type: String
 
     init(
         name: String,
@@ -28,31 +38,34 @@ pub struct PlayerNFT {
     }
 }
 
-pub fun main(address: Address, playersIds: [UInt64]): [PlayerNFT] {
+access(all)
+fun main(address: Address, playersIds: [UInt64]): [PlayerNFT] {
 
-    let collection = getAccount(address)
-        .getCapability(MFLPlayer.CollectionPublicPath)
-        .borrow<&{MetadataViews.ResolverCollection}>()
-        ?? panic("Could not borrow a reference to MFLPlayer collection")
+  let collection = getAccount(address)
+                           .capabilities.borrow<&MFLPlayer.Collection>(MFLPlayer.CollectionPublicPath)
+                           ?? panic("Could not borrow a reference to MFLPlayer collection")
 
-    let players: [PlayerNFT] = []
-    
-    for id in playersIds {
-        let nft = collection.borrowViewResolver(id: id)
-        // Get the basic display information for this NFT
-        let view = nft.resolveView(Type<MetadataViews.Display>())!
-        let display = view as! MetadataViews.Display
-        let owner: Address = nft.owner!.address
-        let nftType = nft.getType()
-        players.append(PlayerNFT(
-            name: display.name,
-            description: display.description,
-            thumbnail: display.thumbnail.uri(),
-            owner: owner,
-            nftType: nftType.identifier,
-            )
-        )
-    }
+  let players: [PlayerNFT] = []
 
-    return players
+  let ids = collection.getIDs()
+
+  for id in ids {
+      let nft = collection.borrowViewResolver(id: id)
+      // Get the basic display information for this NFT
+      let view = nft!.resolveView(Type<MetadataViews.Display>())!
+      let display = view as! MetadataViews.Display
+      let owner: Address = nft!.owner!.address
+      let nftType = nft!.getType()
+
+      players.append(PlayerNFT(
+          name: display.name,
+          description: display.description,
+          thumbnail: display.thumbnail.uri(),
+          owner: owner,
+          nftType: nftType.identifier,
+          )
+      )
+  }
+
+  return players
 }

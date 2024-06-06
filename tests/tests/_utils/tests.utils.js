@@ -5,6 +5,7 @@ export const testsUtils = {
   async initEmulator() {
     const basePath = path.resolve(__dirname, '../../../');
     await init(basePath);
+    // await emulator.start({logging: true, grpcPort: 3569, restPort: 8888, adminPort: 8080, debuggerPort: 2345});
     await emulator.start({logging: true});
   },
 
@@ -70,5 +71,39 @@ export const testsUtils = {
   withPrefix(address) {
     if (address == null) return null;
     return '0x' + testsUtils.sansPrefix(address);
+  },
+
+  createExpectedWithdrawEvent(contract, id, from) {
+    if (!id || from === undefined) throw new Error('id and from are required');
+    return {
+      type: 'A.f8d6e0586b0a20c7.NonFungibleToken.Withdrawn',
+      transactionId: expect.toBeString(),
+      transactionIndex: expect.toBeNumber(),
+      eventIndex: expect.toBeNumber(),
+      data: {
+        id,
+        from,
+        providerUUID: expect.any(String),
+        type: 'A.179b6b1cb6755e31.' + contract + '.NFT',
+        uuid: expect.any(String),
+      },
+    };
+  },
+
+  createExpectedDepositedEvent(contract, id, to) {
+    if (!id || to === undefined) throw new Error('id and to are required');
+    return {
+      type: 'A.f8d6e0586b0a20c7.NonFungibleToken.Deposited',
+      transactionId: expect.toBeString(),
+      transactionIndex: expect.toBeNumber(),
+      eventIndex: expect.toBeNumber(),
+      data: {
+        id,
+        to,
+        collectionUUID: expect.any(String),
+        type: 'A.179b6b1cb6755e31.' + contract + '.NFT',
+        uuid: expect.any(String),
+      },
+    };
   },
 };

@@ -364,14 +364,14 @@ describe('MFLPack', () => {
         expect(result.events).toHaveLength(8);
         expect(result.events).toEqual(
           expect.arrayContaining([
-            MFLPackTestsUtils.createExpectedWithdrawEvent('1', bobAccountAddress),
-            MFLPackTestsUtils.createExpectedDepositedEvent('1', null),
-            MFLPackTestsUtils.createExpectedWithdrawEvent('2', bobAccountAddress),
-            MFLPackTestsUtils.createExpectedDepositedEvent('2', null),
-            MFLPackTestsUtils.createExpectedWithdrawEvent('2', null),
-            MFLPackTestsUtils.createExpectedDepositedEvent('2', jackAccountAddress),
-            MFLPackTestsUtils.createExpectedWithdrawEvent('1', null),
-            MFLPackTestsUtils.createExpectedDepositedEvent('1', jackAccountAddress),
+            testsUtils.createExpectedWithdrawEvent('MFLPack', '1', bobAccountAddress),
+            testsUtils.createExpectedDepositedEvent('MFLPack', '1', null),
+            testsUtils.createExpectedWithdrawEvent('MFLPack', '2', bobAccountAddress),
+            testsUtils.createExpectedDepositedEvent('MFLPack', '2', null),
+            testsUtils.createExpectedWithdrawEvent('MFLPack', '2', null),
+            testsUtils.createExpectedDepositedEvent('MFLPack', '2', jackAccountAddress),
+            testsUtils.createExpectedWithdrawEvent('MFLPack', '1', null),
+            testsUtils.createExpectedDepositedEvent('MFLPack', '1', jackAccountAddress),
           ]),
         );
         const bobPackIds = await testsUtils.executeValidScript({
@@ -509,7 +509,7 @@ describe('MFLPack', () => {
         });
         expect(packIds).toEqual(['1']);
         expect(result.events).toHaveLength(3);
-        expect(result.events[0]).toEqual(MFLPackTestsUtils.createExpectedWithdrawEvent('2', bobAccountAddress));
+        expect(result.events[0]).toEqual(testsUtils.createExpectedWithdrawEvent('MFLPack', '2', bobAccountAddress));
         expect(result.events[1]).toEqual(
           expect.objectContaining({
             type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Opened`,

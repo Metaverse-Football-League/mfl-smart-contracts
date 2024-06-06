@@ -12,15 +12,15 @@ export const ADD_SQUAD_COMPETITION_MEMBERSHIP = `
         competitionMembershipDataName: String,
         competitionMembershipDataReward: UInt32
     ) {
-        let adminProxyRef: &MFLAdmin.AdminProxy
+        let adminProxyRef: auth(MFLAdmin.AdminProxyAction) &MFLAdmin.AdminProxy
 
-        prepare(acct: AuthAccount) {
-            self.adminProxyRef = acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
+        prepare(acct: auth(BorrowValue) &Account) {
+            self.adminProxyRef = acct.storage.borrow<auth(MFLAdmin.AdminProxyAction) &MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
         }
 
         execute {
             let squadAdminClaimCap = self.adminProxyRef.getClaimCapability(name: "SquadAdminClaim") ?? panic("SquadAdminClaim capability not found")
-            let squadAdminClaimRef = squadAdminClaimCap.borrow<&{MFLClub.SquadAdminClaim}>() ?? panic("Could not borrow SquadAdminClaim")
+            let squadAdminClaimRef = squadAdminClaimCap.borrow<auth(MFLClub.SquadAdminAction) &MFLClub.SquadAdmin>() ?? panic("Could not borrow SquadAdmin")
 
             let competitionMembershipData: {String: AnyStruct} = {}
             competitionMembershipData.insert(key: "name", competitionMembershipDataName)

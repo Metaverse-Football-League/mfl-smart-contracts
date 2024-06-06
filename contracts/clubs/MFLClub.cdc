@@ -537,7 +537,7 @@ contract MFLClub: NonFungibleToken {
 			return ref as! &MFLClub.NFT?
 		}
 
-		access(all)
+		access(ClubAction)
 		fun foundClub(id: UInt64, name: String, description: String) {
 			let clubRef = self.borrowClubRef(id: id) ?? panic("Club not found")
 			let clubData = MFLClub.getClubData(id: id) ?? panic("Club data not found")

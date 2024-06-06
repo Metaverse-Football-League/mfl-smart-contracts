@@ -1,23 +1,23 @@
 import NonFungibleToken from "../../../contracts/_libs/NonFungibleToken.cdc"
 import MFLClub from "../../../contracts/clubs/MFLClub.cdc"
 
-/** 
+/**
   This tx batch withdraws clubs NFTs and deposits them
   in another collection.
 **/
 
-transaction(receiverAddr: Address, clubsIds: [UInt64]) {
+transaction(receiverAddr: Address, ids: [UInt64]) {
 
-    let receiverRef: &{NonFungibleToken.CollectionPublic}
-    let senderRef: &MFLClub.Collection
+    let receiverRef: &MFLClub.Collection
+    let senderRef: auth(NonFungibleToken.Withdraw) &MFLClub.Collection
 
-    prepare(acct: AuthAccount) {
-        self.receiverRef = getAccount(receiverAddr).getCapability<&{NonFungibleToken.CollectionPublic}>(MFLClub.CollectionPublicPath).borrow() ??  panic("Could not borrow receiver collection reference")
-        self.senderRef = acct.borrow<&MFLClub.Collection>(from: MFLClub.CollectionStoragePath) ?? panic("Could not borrow sender collection reference")
+    prepare(acct: auth(BorrowValue) &Account) {
+        self.receiverRef = getAccount(receiverAddr).capabilities.borrow<&MFLClub.Collection>(MFLClub.CollectionPublicPath) ??  panic("Could not borrow receiver collection reference")
+        self.senderRef = acct.storage.borrow<auth(NonFungibleToken.Withdraw) &MFLClub.Collection>(from: MFLClub.CollectionStoragePath) ?? panic("Could not borrow sender collection reference")
     }
 
     execute {
-        let tokens <- self.senderRef.batchWithdraw(ids: clubsIds)
+        let tokens <- self.senderRef.batchWithdraw(ids: ids)
 
         let ids = tokens.getIDs()
 

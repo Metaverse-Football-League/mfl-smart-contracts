@@ -42,38 +42,4 @@ export const MFLPackTestsUtils = {
       signers: [rootAdminAcctAddress],
     });
   },
-
-  createExpectedWithdrawEvent(packId, from) {
-    if (!packId || from === undefined) throw new Error('packId and from are required');
-    return {
-      type: 'A.f8d6e0586b0a20c7.NonFungibleToken.Withdrawn',
-      transactionId: expect.toBeString(),
-      transactionIndex: expect.toBeNumber(),
-      eventIndex: expect.toBeNumber(),
-      data: {
-        id: packId,
-        from,
-        providerUUID: expect.any(String),
-        type: 'A.179b6b1cb6755e31.MFLPack.NFT',
-        uuid: expect.any(String),
-      },
-    };
-  },
-
-  createExpectedDepositedEvent(packId, to) {
-    if (!packId || to === undefined) throw new Error('packId and to are required');
-    return {
-      type: 'A.f8d6e0586b0a20c7.NonFungibleToken.Deposited',
-      transactionId: expect.toBeString(),
-      transactionIndex: expect.toBeNumber(),
-      eventIndex: expect.toBeNumber(),
-      data: {
-        id: packId,
-        to,
-        collectionUUID: expect.any(String),
-        type: 'A.179b6b1cb6755e31.MFLPack.NFT',
-        uuid: expect.any(String),
-      },
-    };
-  },
 };

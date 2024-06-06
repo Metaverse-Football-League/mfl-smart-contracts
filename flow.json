@@ -13,6 +13,13 @@
 				"type": "file",
 				"location": "emulator-account.pkey"
 			}
+		},
+		"testnet-deploy-account": {
+			"address": "683564e46977788a",
+			"key": {
+				"type": "file",
+				"location": "../keys/testnet-account.pkey"
+			}
 		}
 	},
 	"contracts": {
@@ -188,7 +195,16 @@
 				"MFLPack",
 				"MFLClub"
 			]
+		},
+		"testnet": {
+			"testnet-deploy-account": [
+				"MFLAdmin",
+				"MFLPackTemplate",
+				"MFLViews",
+				"MFLPlayer",
+				"MFLPack",
+				"MFLClub"
+			]
 		}
-
 	}
 }

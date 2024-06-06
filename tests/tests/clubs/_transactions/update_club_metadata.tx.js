@@ -7,15 +7,15 @@ export const UPDATE_CLUB_METADATA = `
     **/
 
     transaction(clubID: UInt64, clubName: String, clubDescription: String) {
-        let adminProxyRef: &MFLAdmin.AdminProxy
-
-        prepare(acct: AuthAccount) {
-            self.adminProxyRef = acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
+        let adminProxyRef: auth(MFLAdmin.AdminProxyAction) &MFLAdmin.AdminProxy
+    
+        prepare(acct: auth(BorrowValue) &Account) {
+            self.adminProxyRef = acct.storage.borrow<auth(MFLAdmin.AdminProxyAction) &MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
         }
 
         execute {
             let clubAdminClaimCap = self.adminProxyRef.getClaimCapability(name: "ClubAdminClaim") ?? panic("ClubAdminClaim capability not found")
-            let clubAdminClaimRef = clubAdminClaimCap.borrow<&{MFLClub.ClubAdminClaim}>() ?? panic("Could not borrow ClubAdminClaim")
+            let clubAdminClaimRef = clubAdminClaimCap.borrow<auth(MFLClub.ClubAdminAction) &MFLClub.ClubAdmin>() ?? panic("Could not borrow ClubAdmin")
 
             let metadata : {String: AnyStruct} = {}
 

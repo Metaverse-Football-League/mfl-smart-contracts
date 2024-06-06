@@ -2,10 +2,10 @@ import { getAccountAddress, getServiceAddress } from "@onflow/flow-js-testing";
 import { testsUtils } from "../../_utils/tests.utils";
 
 const FOUNDATION_LICENSE_ARGS = {
-  foundationLicenseSerialNumber: 123,
+  foundationLicenseSerialNumber: "123",
   foundationLicenseCity: "Paris",
   foundationLicenseCountry: "France",
-  foundationLicenseSeason: 1,
+  foundationLicenseSeason: "1",
   foundationLicenseCID: "Qabcdef",
 };
 
@@ -33,7 +33,7 @@ export const MFLClubTestsUtils = {
 
     await testsUtils.shallPass({ name: "mfl/core/create_admin_proxy.tx", signers: [receiverAcctAddress] });
     if (isClubAdmin) {
-      const argsClubAdmin = [receiverAcctAddress, `/private/${receiverAccountName}-clubAdminClaim`];
+      const argsClubAdmin = [receiverAcctAddress];
       await testsUtils.shallPass({
         name: "mfl/clubs/give_club_admin_claim.tx",
         args: argsClubAdmin,
@@ -42,7 +42,7 @@ export const MFLClubTestsUtils = {
     }
 
     if (isSquadAdmin) {
-      const argsSquadAdmin = [receiverAcctAddress, `/private/${receiverAccountName}-squadAdminClaim`];
+      const argsSquadAdmin = [receiverAcctAddress];
       await testsUtils.shallPass({
         name: "mfl/clubs/squads/give_squad_admin_claim.tx",
         args: argsSquadAdmin,
@@ -52,10 +52,10 @@ export const MFLClubTestsUtils = {
     return receiverAcctAddress;
   },
 
-  async createClubNFT(clubID, squadID, shallPass = true, clubAdminAccountName = "AliceAdminAccount", competitionId = 42) {
+  async createClubNFT(clubID, squadID, shallPass = true, clubAdminAccountName = "AliceAdminAccount", competitionId = "42") {
     const adminAccountAddress = await getAccountAddress(clubAdminAccountName);
     const signers = [adminAccountAddress];
-    const args = [clubID, ...Object.values(FOUNDATION_LICENSE_ARGS), squadID, "squadType", competitionId, 1, adminAccountAddress];
+    const args = [clubID, ...Object.values(FOUNDATION_LICENSE_ARGS), squadID, "squadType", competitionId, "1", adminAccountAddress];
     if (shallPass) {
       return await testsUtils.shallPass({ name: "mfl/clubs/mint_club_and_squad.tx", args, signers });
     } else {
@@ -88,12 +88,12 @@ export const MFLClubTestsUtils = {
   },
 
   CLUB_STATUS_RAW_VALUES: {
-    NOT_FOUNDED: 0,
-    PENDING_VALIDATION: 1,
-    FOUNDED: 2,
+    NOT_FOUNDED: "0",
+    PENDING_VALIDATION: "1",
+    FOUNDED: "2",
   },
 
   SQUAD_STATUS_RAW_VALUES: {
-    ACTIVE: 0,
+    ACTIVE: "0",
   },
 };

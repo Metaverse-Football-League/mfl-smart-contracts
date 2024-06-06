@@ -1,7 +1,7 @@
 import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
 import MFLAdmin from "../../../contracts/core/MFLAdmin.cdc"
 
-/** 
+/**
   This tx updates a player NFT metadata.
 **/
 
@@ -25,15 +25,15 @@ transaction(
     longevity: String,
     resistance: UInt32,
 ) {
-    let playerAdminProxyRef: &MFLAdmin.AdminProxy
+    let adminProxyRef: auth(MFLAdmin.AdminProxyAction) &MFLAdmin.AdminProxy
 
-    prepare(acct: AuthAccount) {
-        self.playerAdminProxyRef = acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
+    prepare(acct: auth(BorrowValue) &Account) {
+        self.adminProxyRef = acct.storage.borrow<auth(MFLAdmin.AdminProxyAction) &MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
     }
 
     execute {
-        let playerAdminClaimCap = self.playerAdminProxyRef.getClaimCapability(name: "PlayerAdminClaim") ?? panic("PlayerAdminClaim capability not found")
-        let playerAdminClaimRef = playerAdminClaimCap.borrow<&{MFLPlayer.PlayerAdminClaim}>() ?? panic("Could not borrow PlayerAdminClaim")
+        let playerAdminClaimCap = self.adminProxyRef.getClaimCapability(name: "PlayerAdminClaim") ?? panic("PlayerAdminClaim capability not found")
+        let playerAdminClaimRef = playerAdminClaimCap.borrow<auth(MFLPlayer.PlayerAdminAction) &MFLPlayer.PlayerAdmin>() ?? panic("Could not borrow PlayerAdmin")
 
         let metadata: {String: AnyStruct} = {}
         metadata.insert(key: "name", name)
