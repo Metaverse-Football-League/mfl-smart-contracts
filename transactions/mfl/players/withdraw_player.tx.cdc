@@ -12,8 +12,8 @@ transaction(receiverAddr: Address, id: UInt64) {
     let senderRef: auth(NonFungibleToken.Withdraw) &MFLPlayer.Collection
 
     prepare(acct: auth(BorrowValue) &Account) {
-        self.receiverRef = getAccount(receiverAddr).capabilities.borrow<&MFLPlayer.Collection>(MFLPlayer.CollectionPublicPath) ??  panic("Could not borrow receiver collection reference")
-        self.senderRef = acct.storage.borrow<auth(NonFungibleToken.Withdraw) &MFLPlayer.Collection>(from: MFLPlayer.CollectionStoragePath) ?? panic("Could not borrow sender collection reference")
+            self.receiverRef = getAccount(receiverAddr).capabilities.borrow<&MFLPlayer.Collection>(MFLPlayer.CollectionPublicPath) ??  panic("Could not borrow receiver collection reference")
+            self.senderRef = acct.storage.borrow<auth(NonFungibleToken.Withdraw) &MFLPlayer.Collection>(from: MFLPlayer.CollectionStoragePath) ?? panic("Could not borrow sender collection reference")
     }
 
     execute {
