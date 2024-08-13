@@ -7,6 +7,31 @@ import {BATCH_WITHDRAW_PACK} from './_transactions/batch_withdaw_pack.tx';
 import {BORROW_NFT} from './_scripts/borrow_nft.script';
 import {BORROW_VIEW_RESOLVER} from './_scripts/borrow_view_resolver.script';
 import {GET_PACK_ROYALTIES_VIEW} from './_scripts/get_pack_royalties_view.script';
+import {MFLClubTestsUtils} from '../clubs/_utils/MFLClubTests.utils';
+import {WITHDRAW_CLUB_FROM_GIVEN_ADDRESS} from '../clubs/_transactions/withdraw_club_from_given_address_malicious.tx';
+import {
+  WITHDRAW_CLUB_FROM_GIVEN_ADDRESS_V2
+} from '../clubs/_transactions/withdraw_club_from_given_address_v2_malicious.tx';
+import {
+  BATCH_WITHDRAW_CLUB_FROM_GIVEN_ADDRESS
+} from '../clubs/_transactions/batch_withdraw_club_from_given_address_malicious.tx';
+import {
+  BATCH_WITHDRAW_CLUB_FROM_GIVEN_ADDRESS_V2
+} from '../clubs/_transactions/batch_withdraw_club_from_given_address_malicious_v2.tx';
+import {
+  WITHDRAW_CLUB_FROM_GIVEN_ADDRESS_V3
+} from '../clubs/_transactions/withdraw_club_from_given_address_v3_malicious.tx';
+import {WITHDRAW_PACK_FROM_GIVEN_ADDRESS} from './_transactions/withdraw_pack_from_given_address_malicious.tx';
+import {WITHDRAW_PACK_FROM_GIVEN_ADDRESS_V2} from './_transactions/withdraw_pack_from_given_address_v2_malicious.tx';
+import {
+  BATCH_WITHDRAW_PACK_FROM_GIVEN_ADDRESS
+} from './_transactions/batch_withdraw_pack_from_given_address_malicious.tx';
+import {
+  BATCH_WITHDRAW_PACK_FROM_GIVEN_ADDRESS_V2
+} from './_transactions/batch_withdraw_pack_from_given_address_malicious_v2.tx';
+import {WITHDRAW_PACK_FROM_GIVEN_ADDRESS_V3} from './_transactions/withdraw_pack_from_given_address_v3_malicious.tx';
+import {OPEN_PACK_MALICIOUS} from '../clubs/_transactions/open_pack_malicious.tx';
+import {OPEN_PACK_MALICIOUS_V2} from '../clubs/_transactions/open_pack_malicious_v2.tx';
 
 expect.extend(matchers);
 jest.setTimeout(40000);
@@ -333,6 +358,87 @@ describe('MFLPack', () => {
         // assert
         expect(error).toContain('missing NFT');
       });
+
+      test('should not be able to withdraw a pack NFT from a collection that the user don\'t own', async () => {
+        // prepare
+        await testsUtils.shallPass({
+          name: 'mfl/packs/create_and_link_pack_collection.tx',
+          signers: [bobAccountAddress],
+        });
+        await testsUtils.shallPass({
+          name: 'mfl/packs/create_and_link_pack_collection.tx',
+          signers: [jackAccountAddress],
+        });
+        const argsMint = ['1', jackAccountAddress, '1'];
+        await testsUtils.shallPass({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // execute
+        const err1 = await testsUtils.shallRevert({
+          code: WITHDRAW_PACK,
+          signers: [bobAccountAddress],
+          args: [bobAccountAddress, '1'],
+        });
+        const err2 = await testsUtils.shallRevert({
+          code: WITHDRAW_PACK_FROM_GIVEN_ADDRESS,
+          signers: [bobAccountAddress],
+          args: [jackAccountAddress, bobAccountAddress, '1'],
+        });
+        const err3 = await testsUtils.shallRevert({
+          code: WITHDRAW_PACK_FROM_GIVEN_ADDRESS_V2,
+          signers: [bobAccountAddress],
+          args: [jackAccountAddress, bobAccountAddress, '1'],
+        });
+        await testsUtils.shallPass({
+          code: WITHDRAW_PACK,
+          signers: [jackAccountAddress],
+          args: [bobAccountAddress, '1'],
+        });
+        const err4 = await testsUtils.shallRevert({
+          code: WITHDRAW_PACK,
+          signers: [jackAccountAddress],
+          args: [jackAccountAddress, '1'],
+        });
+        const err5 = await testsUtils.shallRevert({
+          code: WITHDRAW_PACK_FROM_GIVEN_ADDRESS,
+          signers: [jackAccountAddress],
+          args: [bobAccountAddress, jackAccountAddress, '1'],
+        });
+        const err6 = await testsUtils.shallRevert({
+          code: WITHDRAW_PACK_FROM_GIVEN_ADDRESS_V2,
+          signers: [bobAccountAddress],
+          args: [bobAccountAddress, jackAccountAddress, '1'],
+        });
+        const err7 = await testsUtils.shallRevert({
+          code: BATCH_WITHDRAW_PACK_FROM_GIVEN_ADDRESS,
+          signers: [aliceAdminAccountAddress],
+          args: [bobAccountAddress, jackAccountAddress, ['1']],
+        });
+        const err8 = await testsUtils.shallRevert({
+          code: BATCH_WITHDRAW_PACK_FROM_GIVEN_ADDRESS_V2,
+          signers: [bobAccountAddress],
+          args: [bobAccountAddress, jackAccountAddress, ['1']],
+        });
+        const err9 = await testsUtils.shallRevert({
+          code: WITHDRAW_PACK_FROM_GIVEN_ADDRESS_V3,
+          signers: [bobAccountAddress],
+          args: [bobAccountAddress, jackAccountAddress, '1'],
+        });
+
+        // assert
+        expect(err1).toContain('missing NFT');
+        expect(err2).toContain('Could not borrow the collection reference');
+        expect(err3).toContain('function requires `Withdraw` authorization, but reference is unauthorized');
+        expect(err4).toContain('missing NFT');
+        expect(err5).toContain('Could not borrow the collection reference');
+        expect(err6).toContain('function requires `Withdraw` authorization, but reference is unauthorized');
+        expect(err7).toContain('Could not borrow the collection reference');
+        expect(err8).toContain('function requires `Withdraw` authorization, but reference is unauthorized');
+        expect(err9).toContain('function requires `Storage | BorrowValue` authorization, but reference is unauthorized');
+      })
     });
 
     describe('batchWithdraw()', () => {
@@ -525,6 +631,47 @@ describe('MFLPack', () => {
             data: {id: '2', uuid: expect.toBeString()},
           }),
         );
+      });
+
+      test('should throw an error when opening a pack not owned', async () => {
+        // prepare
+        const argsMint = ['1', bobAccountAddress, '2'];
+        await testsUtils.shallPass({
+          name: 'mfl/packs/create_and_link_pack_collection.tx',
+          signers: [bobAccountAddress],
+        });
+        const jackAccountAddress = await getAccountAddress('JackAccount');
+        await testsUtils.shallPass({
+          name: 'mfl/packs/create_and_link_pack_collection.tx',
+          signers: [jackAccountAddress],
+        });
+        await testsUtils.shallPass({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
+
+        await testsUtils.shallPass({
+          name: 'mfl/packs/set_allow_to_open_packs.tx',
+          args: ['1'],
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // execute
+        const err1 = await testsUtils.shallRevert({
+          code: OPEN_PACK_MALICIOUS,
+          args: [bobAccountAddress, '2'],
+          signers: [jackAccountAddress],
+        });
+        const err2 = await testsUtils.shallRevert({
+          code: OPEN_PACK_MALICIOUS_V2,
+          args: [bobAccountAddress, '2'],
+          signers: [jackAccountAddress],
+        });
+
+        // assert
+        expect(err1).toContain("Could not borrow the collection reference");
+        expect(err2).toContain("function requires `PackAction` authorization, but reference is unauthorized");
       });
 
       test('should panic when opening a pack while the pack template is not openable', async () => {

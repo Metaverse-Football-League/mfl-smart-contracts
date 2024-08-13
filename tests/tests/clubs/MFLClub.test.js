@@ -10,6 +10,17 @@ import {ADD_SQUAD_COMPETITION_MEMBERSHIP} from './_transactions/add_squad_compet
 import {UPDATE_SQUAD_COMPETITION_MEMBERSHIP} from './_transactions/update_squad_competition_membership.tx';
 import {GET_CLUB_SERIAL_VIEW} from './_scripts/get_club_serial_view.script';
 import {GET_CLUB_ROYALTIES_VIEW} from './_scripts/get_club_royalties_view.script';
+import {WITHDRAW_CLUB_FROM_GIVEN_ADDRESS} from './_transactions/withdraw_club_from_given_address_malicious.tx';
+import {WITHDRAW_CLUB_FROM_GIVEN_ADDRESS_V2} from './_transactions/withdraw_club_from_given_address_v2_malicious.tx';
+import {
+  BATCH_WITHDRAW_CLUB_FROM_GIVEN_ADDRESS,
+} from './_transactions/batch_withdraw_club_from_given_address_malicious.tx';
+import {
+  BATCH_WITHDRAW_CLUB_FROM_GIVEN_ADDRESS_V2,
+} from './_transactions/batch_withdraw_club_from_given_address_malicious_v2.tx';
+import {WITHDRAW_CLUB_FROM_GIVEN_ADDRESS_V3} from './_transactions/withdraw_club_from_given_address_v3_malicious.tx';
+import {FOUND_CLUB_MALICIOUS} from './_transactions/found_club_malicious.tx';
+import {REQUEST_CLUB_INFO_UPDATE_MALICIOUS} from './_transactions/request_club_info_update_malicious.tx';
 
 expect.extend(matchers);
 jest.setTimeout(40000);
@@ -91,7 +102,7 @@ describe('MFLClub', () => {
       });
 
       // assert
-      expect(error.message).toContain('cannot access `squadDatas`: field requires `self` authorization');
+      expect(error.message).toContain('cannot access `squadsDatas`: field requires `self` authorization');
     });
   });
 
@@ -129,6 +140,79 @@ describe('MFLClub', () => {
           args: [bobAccountAddress],
         });
         expect(bobClubsIds).toEqual(['1']);
+      });
+
+      test('should not be able to withdraw a club NFT from a collection that the user don\'t own', async () => {
+        // prepare
+        await MFLClubTestsUtils.createClubNFT('1', '1');
+        const bobAccountAddress = await getAccountAddress('BobAccount');
+        await testsUtils.shallPass({
+          name: 'mfl/clubs/create_and_link_club_collection.tx',
+          signers: [bobAccountAddress],
+        });
+
+        // execute
+        const err1 = await testsUtils.shallRevert({
+          name: 'mfl/clubs/withdraw_club.tx',
+          signers: [bobAccountAddress],
+          args: [bobAccountAddress, '1'],
+        });
+        const err2 = await testsUtils.shallRevert({
+          code: WITHDRAW_CLUB_FROM_GIVEN_ADDRESS,
+          signers: [bobAccountAddress],
+          args: [aliceAdminAccountAddress, bobAccountAddress, '1'],
+        });
+        const err3 = await testsUtils.shallRevert({
+          code: WITHDRAW_CLUB_FROM_GIVEN_ADDRESS_V2,
+          signers: [bobAccountAddress],
+          args: [aliceAdminAccountAddress, bobAccountAddress, '1'],
+        });
+        await testsUtils.shallPass({
+          name: 'mfl/clubs/withdraw_club.tx',
+          signers: [aliceAdminAccountAddress],
+          args: [bobAccountAddress, '1'],
+        });
+        const err4 = await testsUtils.shallRevert({
+          name: 'mfl/clubs/withdraw_club.tx',
+          signers: [aliceAdminAccountAddress],
+          args: [aliceAdminAccountAddress, '1'],
+        });
+        const err5 = await testsUtils.shallRevert({
+          code: WITHDRAW_CLUB_FROM_GIVEN_ADDRESS,
+          signers: [aliceAdminAccountAddress],
+          args: [bobAccountAddress, aliceAdminAccountAddress, '1'],
+        });
+        const err6 = await testsUtils.shallRevert({
+          code: WITHDRAW_CLUB_FROM_GIVEN_ADDRESS_V2,
+          signers: [bobAccountAddress],
+          args: [bobAccountAddress, aliceAdminAccountAddress, '1'],
+        });
+        const err7 = await testsUtils.shallRevert({
+          code: BATCH_WITHDRAW_CLUB_FROM_GIVEN_ADDRESS,
+          signers: [aliceAdminAccountAddress],
+          args: [bobAccountAddress, aliceAdminAccountAddress, ['1']],
+        });
+        const err8 = await testsUtils.shallRevert({
+          code: BATCH_WITHDRAW_CLUB_FROM_GIVEN_ADDRESS_V2,
+          signers: [bobAccountAddress],
+          args: [bobAccountAddress, aliceAdminAccountAddress, ['1']],
+        });
+        const err9 = await testsUtils.shallRevert({
+          code: WITHDRAW_CLUB_FROM_GIVEN_ADDRESS_V3,
+          signers: [bobAccountAddress],
+          args: [bobAccountAddress, aliceAdminAccountAddress, '1'],
+        });
+
+        // assert
+        expect(err1).toContain('missing NFT');
+        expect(err2).toContain('Could not borrow the collection reference');
+        expect(err3).toContain('function requires `Withdraw` authorization, but reference is unauthorized');
+        expect(err4).toContain('missing NFT');
+        expect(err5).toContain('Could not borrow the collection reference');
+        expect(err6).toContain('function requires `Withdraw` authorization, but reference is unauthorized');
+        expect(err7).toContain('Could not borrow the collection reference');
+        expect(err8).toContain('function requires `Withdraw` authorization, but reference is unauthorized');
+        expect(err9).toContain('function requires `Storage | BorrowValue` authorization, but reference is unauthorized');
       });
     });
 
@@ -327,6 +411,34 @@ describe('MFLClub', () => {
         });
       });
 
+      test('should throw an error when trying to found a club the wallet doesn\'t own', async () => {
+        // prepare
+        const clubId = '42';
+        const clubName = 'Yax FC';
+        const clubDescription = 'Hello world';
+        const squadId = '101';
+        await MFLClubTestsUtils.createClubNFT(clubId, squadId);
+        const aliceAdminAccountAddress = await getAccountAddress('AliceAdminAccount');
+        const bobAccountAddress = await getAccountAddress('BobAccount');
+        await testsUtils.shallPass({
+          name: 'mfl/clubs/create_and_link_club_collection.tx',
+          signers: [bobAccountAddress],
+        });
+
+        // execute
+        const err1 = await MFLClubTestsUtils.foundClub(clubId, clubName, clubDescription, false, 'BobAccount');
+        // const er = await MFLClubTestsUtils.foundClub(clubId, clubName, clubDescription, true, 'AliceAdminAccount');
+        const err2 = await testsUtils.shallRevert({
+          code: FOUND_CLUB_MALICIOUS,
+          args: [aliceAdminAccountAddress, clubId, clubName, clubDescription],
+          signers: [bobAccountAddress],
+        });
+
+        // assert
+        expect(err1).toContain('Club not found');
+        expect(err2).toContain('function requires `ClubAction` authorization, but reference is unauthorized');
+      });
+
       test('should throw an error when the club nft does not exist', async () => {
         // prepare
 
@@ -409,6 +521,32 @@ describe('MFLClub', () => {
           transactionId: expect.any(String),
           transactionIndex: expect.any(Number),
         });
+      });
+
+      test('should throw an error when the wallet doesn\'t own the club', async () => {
+        // prepare
+        const bobAccountAddress = await getAccountAddress('BobAccount');
+        const clubId = '1';
+        const clubInfo = {
+          name: 'The MFL Club',
+          description: 'The club number 1',
+        };
+        await MFLClubTestsUtils.createClubNFT(clubId, 1);
+        await testsUtils.shallPass({
+          name: 'mfl/clubs/update_club_status.tx',
+          signers: [aliceAdminAccountAddress],
+          args: [clubId, '2'],
+        });
+
+        // execute
+        const err = await testsUtils.shallRevert({
+          code: REQUEST_CLUB_INFO_UPDATE_MALICIOUS,
+          signers: [bobAccountAddress],
+          args: [aliceAdminAccountAddress, clubId, clubInfo.name, clubInfo.description],
+        });
+
+        // assert
+        expect(err).toContain("function requires `ClubAction` authorization, but reference is unauthorized");
       });
 
       test('should throw an error when club nft does not exist', async () => {
@@ -575,7 +713,7 @@ describe('MFLClub', () => {
           expect(clubRoyaltiesView).toEqual({
             cutInfos: [{
               receiver: {
-                id: "0",
+                id: '0',
                 address: '0xa654669bd96b2014',
                 borrowType: {
                   type: {
@@ -604,8 +742,8 @@ describe('MFLClub', () => {
 
         test('should resolve Traits view for a specific club', async () => {
           // prepare
-          const clubId = "1000";
-          await MFLClubTestsUtils.createClubNFT(clubId, "2", true, 'AliceAdminAccount', 1);
+          const clubId = '1000';
+          await MFLClubTestsUtils.createClubNFT(clubId, '2', true, 'AliceAdminAccount', 1);
 
           // execute
           const clubTraitsView = await testsUtils.executeValidScript({
@@ -632,7 +770,7 @@ describe('MFLClub', () => {
                 displayType: 'Number',
                 name: 'division',
                 rarity: null,
-                value: "1",
+                value: '1',
               },
             ],
           });
@@ -640,8 +778,8 @@ describe('MFLClub', () => {
 
         test('should resolve Traits view for a specific founded club', async () => {
           // prepare
-          const clubId = "1000";
-          await MFLClubTestsUtils.createClubNFT(clubId, "2", true, 'AliceAdminAccount', 1);
+          const clubId = '1000';
+          await MFLClubTestsUtils.createClubNFT(clubId, '2', true, 'AliceAdminAccount', 1);
           await MFLClubTestsUtils.foundClub(clubId, 'Some Club', 'Some Description');
 
           // execute
@@ -669,7 +807,7 @@ describe('MFLClub', () => {
                 displayType: 'Number',
                 name: 'division',
                 rarity: null,
-                value: "1",
+                value: '1',
               },
             ],
           });
@@ -677,8 +815,8 @@ describe('MFLClub', () => {
 
         test('should resolve Traits view for a specific club without a division for global league', async () => {
           // prepare
-          const clubId = "1000";
-          await MFLClubTestsUtils.createClubNFT(clubId, "1");
+          const clubId = '1000';
+          await MFLClubTestsUtils.createClubNFT(clubId, '1');
 
           // execute
           const clubTraitsView = await testsUtils.executeValidScript({
@@ -707,8 +845,8 @@ describe('MFLClub', () => {
 
         test('should resolve Serial view for a specific club', async () => {
           // prepare
-          const clubId = "1000";
-          await MFLClubTestsUtils.createClubNFT(clubId, "1");
+          const clubId = '1000';
+          await MFLClubTestsUtils.createClubNFT(clubId, '1');
 
           // execute
           const clubSerialView = await testsUtils.executeValidScript({
@@ -722,10 +860,10 @@ describe('MFLClub', () => {
 
         test('should resolve Display view for all clubs', async () => {
           // prepare
-          const clubId1 = "450";
-          const clubId2 = "578";
-          await MFLClubTestsUtils.createClubNFT(clubId1, "1");
-          await MFLClubTestsUtils.createClubNFT(clubId2, "2");
+          const clubId1 = '450';
+          const clubId2 = '578';
+          await MFLClubTestsUtils.createClubNFT(clubId1, '1');
+          await MFLClubTestsUtils.createClubNFT(clubId2, '2');
 
           // execute
           const clubsDisplayView = await testsUtils.executeValidScript({
@@ -758,8 +896,8 @@ describe('MFLClub', () => {
       describe('destroy()', () => {
         test('should destroy the NFT', async () => {
           // prepare
-          const clubId = "450";
-          const squadId = "1";
+          const clubId = '450';
+          const squadId = '1';
           await MFLClubTestsUtils.createClubNFT(clubId, squadId);
 
           // execute
@@ -786,8 +924,8 @@ describe('MFLClub', () => {
   describe('getClubData()', () => {
     test('should get club data for a not founded club', async () => {
       // prepare
-      const clubId = "42";
-      const squadId = "101";
+      const clubId = '42';
+      const squadId = '101';
       await MFLClubTestsUtils.createClubNFT(clubId, squadId);
 
       // execute
@@ -807,10 +945,10 @@ describe('MFLClub', () => {
 
     test('should get club data for a founded club', async () => {
       // prepare
-      const clubId = "42";
+      const clubId = '42';
       const clubName = 'Wax FC';
       const clubDescription = 'Hello world';
-      const squadId = "101";
+      const squadId = '101';
       await MFLClubTestsUtils.createClubNFT(clubId, squadId);
       await MFLClubTestsUtils.foundClub(clubId, clubName, clubDescription);
 
@@ -840,7 +978,7 @@ describe('MFLClub', () => {
       // execute
       const clubData = await testsUtils.executeValidScript({
         name: 'mfl/clubs/get_club_data.script',
-        args: ["4"],
+        args: ['4'],
       });
 
       // assert
@@ -849,8 +987,8 @@ describe('MFLClub', () => {
 
     test('should throw an error when updating club metadata', async () => {
       // prepare
-      const clubId = "1";
-      await MFLClubTestsUtils.createClubNFT(clubId, "1");
+      const clubId = '1';
+      await MFLClubTestsUtils.createClubNFT(clubId, '1');
 
       // execute
       const error = await testsUtils.shallRevert({
@@ -866,8 +1004,8 @@ describe('MFLClub', () => {
   describe('getSquadData()', () => {
     test('should get squad data for a not founded club', async () => {
       // prepare
-      const clubId = "42";
-      const squadId = "101";
+      const clubId = '42';
+      const squadId = '101';
       await MFLClubTestsUtils.createClubNFT(clubId, squadId);
 
       // execute
@@ -883,7 +1021,7 @@ describe('MFLClub', () => {
         type: 'squadType',
         status: {rawValue: MFLClubTestsUtils.SQUAD_STATUS_RAW_VALUES.ACTIVE.toString()},
         metadata: {},
-        competitionsMemberships: {"42": {division: "1"}},
+        competitionsMemberships: {'42': {division: '1'}},
       });
     });
 
@@ -893,7 +1031,7 @@ describe('MFLClub', () => {
       // execute
       const squadData = await testsUtils.executeValidScript({
         name: 'mfl/clubs/squads/get_squad_data.script',
-        args: ["4"],
+        args: ['4'],
       });
 
       // assert
@@ -902,8 +1040,8 @@ describe('MFLClub', () => {
 
     test('should throw an error when updating squad metadata', async () => {
       // prepare
-      const squadId = "1";
-      await MFLClubTestsUtils.createClubNFT("1", squadId);
+      const squadId = '1';
+      await MFLClubTestsUtils.createClubNFT('1', squadId);
 
       // execute
       const error = await testsUtils.shallRevert({
@@ -920,8 +1058,8 @@ describe('MFLClub', () => {
     describe('mintClub()', () => {
       test('should mint a club', async () => {
         // prepare
-        const clubId = "1";
-        const squadId = "1";
+        const clubId = '1';
+        const squadId = '1';
 
         // execute
         const result = await MFLClubTestsUtils.createClubNFT(clubId, squadId);
@@ -932,7 +1070,7 @@ describe('MFLClub', () => {
           expect.arrayContaining([
             {
               type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.SquadCompetitionMembershipAdded`,
-              data: {competitionID: "42", id: squadId},
+              data: {competitionID: '42', id: squadId},
               eventIndex: expect.any(Number),
               transactionId: expect.any(String),
               transactionIndex: expect.any(Number),
@@ -980,19 +1118,19 @@ describe('MFLClub', () => {
           type: 'squadType',
           status: {rawValue: MFLClubTestsUtils.SQUAD_STATUS_RAW_VALUES.ACTIVE.toString()},
           metadata: {},
-          competitionsMemberships: {"42": {division: "1"}},
+          competitionsMemberships: {'42': {division: '1'}},
         });
-        expect(totalSupply).toBe("1");
-        expect(squadsTotalSupply).toBe("1");
+        expect(totalSupply).toBe('1');
+        expect(squadsTotalSupply).toBe('1');
       });
 
       test('should panic when minting a club id already minted', async () => {
         // prepare
-        const clubId = "1";
+        const clubId = '1';
 
         // execute
-        await MFLClubTestsUtils.createClubNFT(clubId, "1");
-        const error = await MFLClubTestsUtils.createClubNFT(clubId, "2", false);
+        await MFLClubTestsUtils.createClubNFT(clubId, '1');
+        const error = await MFLClubTestsUtils.createClubNFT(clubId, '2', false);
 
         // assert
         expect(error).toContain('Club already exists');
@@ -1002,8 +1140,8 @@ describe('MFLClub', () => {
     describe('updateClubStatus()', () => {
       test('should update club status', async () => {
         // prepare
-        const clubId = "1";
-        const squadId = "10";
+        const clubId = '1';
+        const squadId = '10';
         await MFLClubTestsUtils.createClubNFT(clubId, squadId);
 
         // execute
@@ -1040,7 +1178,7 @@ describe('MFLClub', () => {
         // execute
         const error = await testsUtils.shallRevert({
           name: 'mfl/clubs/update_club_status.tx',
-          args: ["208", MFLClubTestsUtils.CLUB_STATUS_RAW_VALUES.FOUNDED],
+          args: ['208', MFLClubTestsUtils.CLUB_STATUS_RAW_VALUES.FOUNDED],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -1052,8 +1190,8 @@ describe('MFLClub', () => {
     describe('updateClubMetadata()', () => {
       test('should update club metadata', async () => {
         // prepare
-        const clubId = "1";
-        const squadId = "10";
+        const clubId = '1';
+        const squadId = '10';
         const updatedClubName = 'New Club Name';
         const updatedClubDescription = 'New Club Description';
         await MFLClubTestsUtils.createClubNFT(clubId, squadId);
@@ -1092,7 +1230,7 @@ describe('MFLClub', () => {
         // execute
         const error = await testsUtils.shallRevert({
           code: UPDATE_CLUB_METADATA,
-          args: ["208", 'New name', 'New description'],
+          args: ['208', 'New name', 'New description'],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -1104,14 +1242,14 @@ describe('MFLClub', () => {
     describe('updateClubSquadsIDs()', () => {
       test('should update club squads ids', async () => {
         // prepare
-        const clubId = "1";
-        const squadId = "10";
+        const clubId = '1';
+        const squadId = '10';
         await MFLClubTestsUtils.createClubNFT(clubId, squadId);
 
         // execute
         const result = await testsUtils.shallPass({
           name: 'mfl/clubs/update_club_squads_ids.tx',
-          args: [clubId, [squadId, "42"]],
+          args: [clubId, [squadId, '42']],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -1119,7 +1257,7 @@ describe('MFLClub', () => {
         expect(result.events).toHaveLength(1);
         expect(result.events[0]).toEqual({
           type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.ClubSquadsIDsUpdated`,
-          data: {id: clubId, squadsIDs: [squadId, "42"]},
+          data: {id: clubId, squadsIDs: [squadId, '42']},
           eventIndex: expect.any(Number),
           transactionId: expect.any(String),
           transactionIndex: expect.any(Number),
@@ -1131,7 +1269,7 @@ describe('MFLClub', () => {
         expect(clubData).toEqual({
           id: clubId,
           status: {rawValue: MFLClubTestsUtils.CLUB_STATUS_RAW_VALUES.NOT_FOUNDED.toString()},
-          squadsIDs: [squadId, "42"],
+          squadsIDs: [squadId, '42'],
           metadata: MFLClubTestsUtils.FOUNDATION_LICENSE,
         });
       });
@@ -1142,7 +1280,7 @@ describe('MFLClub', () => {
         // execute
         const error = await testsUtils.shallRevert({
           name: 'mfl/clubs/update_club_squads_ids.tx',
-          args: ["208", ["42"]],
+          args: ['208', ['42']],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -1194,8 +1332,8 @@ describe('MFLClub', () => {
     describe('updateSquadMetadata()', () => {
       test('should update squad metadata', async () => {
         // prepare
-        const clubId = "1";
-        const squadId = "10";
+        const clubId = '1';
+        const squadId = '10';
         const updatedSquadName = 'My squad';
         const updatedSquadDescription = 'My squad description';
         await MFLClubTestsUtils.createClubNFT(clubId, squadId);
@@ -1229,7 +1367,7 @@ describe('MFLClub', () => {
             name: updatedSquadName,
             description: updatedSquadDescription,
           },
-          competitionsMemberships: {"42": {division: "1"}},
+          competitionsMemberships: {'42': {division: '1'}},
         });
       });
 
@@ -1239,7 +1377,7 @@ describe('MFLClub', () => {
         // execute
         const error = await testsUtils.shallRevert({
           code: UPDATE_SQUAD_METADATA,
-          args: ["208", 'New name', 'New description'],
+          args: ['208', 'New name', 'New description'],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -1251,11 +1389,11 @@ describe('MFLClub', () => {
     describe('addSquadCompetitionMembership()', () => {
       test('should add competitionMembership', async () => {
         // prepare
-        const clubId = "1";
-        const squadId = "10";
-        const competitionId = "567";
+        const clubId = '1';
+        const squadId = '10';
+        const competitionId = '567';
         const competitionMembershipDataName = 'The competition';
-        const competitionMembershipDataReward = "10000";
+        const competitionMembershipDataReward = '10000';
         await MFLClubTestsUtils.createClubNFT(clubId, squadId);
 
         // execute
@@ -1285,7 +1423,7 @@ describe('MFLClub', () => {
           status: {rawValue: MFLClubTestsUtils.SQUAD_STATUS_RAW_VALUES.ACTIVE.toString()},
           metadata: {},
           competitionsMemberships: {
-            "42": {division: "1"},
+            '42': {division: '1'},
             [`${competitionId}`]: {name: competitionMembershipDataName, reward: competitionMembershipDataReward},
           },
         });
@@ -1297,7 +1435,7 @@ describe('MFLClub', () => {
         // execute
         const error = await testsUtils.shallRevert({
           code: ADD_SQUAD_COMPETITION_MEMBERSHIP,
-          args: ["208", "42", 'The competition', "900"],
+          args: ['208', '42', 'The competition', '900'],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -1309,11 +1447,11 @@ describe('MFLClub', () => {
     describe('updateSquadCompetitionMembership()', () => {
       test('should update competitionMembership', async () => {
         // prepare
-        const clubId = "1";
-        const squadId = "10";
-        const competitionId = "567";
+        const clubId = '1';
+        const squadId = '10';
+        const competitionId = '567';
         const competitionMembershipDataName = 'The competition';
-        const competitionMembershipDataReward = "10000";
+        const competitionMembershipDataReward = '10000';
         await MFLClubTestsUtils.createClubNFT(clubId, squadId);
         await testsUtils.shallPass({
           code: ADD_SQUAD_COMPETITION_MEMBERSHIP,
@@ -1324,7 +1462,7 @@ describe('MFLClub', () => {
         // execute
         const result = await testsUtils.shallPass({
           code: UPDATE_SQUAD_COMPETITION_MEMBERSHIP,
-          args: [squadId, competitionId, 'updated competition name', "400"],
+          args: [squadId, competitionId, 'updated competition name', '400'],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -1348,8 +1486,8 @@ describe('MFLClub', () => {
           status: {rawValue: MFLClubTestsUtils.SQUAD_STATUS_RAW_VALUES.ACTIVE.toString()},
           metadata: {},
           competitionsMemberships: {
-            "42": {division: "1"},
-            [`${competitionId}`]: {name: 'updated competition name', reward: "400"},
+            '42': {division: '1'},
+            [`${competitionId}`]: {name: 'updated competition name', reward: '400'},
           },
         });
       });
@@ -1360,7 +1498,7 @@ describe('MFLClub', () => {
         // execute
         const error = await testsUtils.shallRevert({
           code: UPDATE_SQUAD_COMPETITION_MEMBERSHIP,
-          args: ["208", "42", 'The competition', "900"],
+          args: ['208', '42', 'The competition', '900'],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -1370,11 +1508,11 @@ describe('MFLClub', () => {
 
       test('should throw an error when squad does not have the competition membership', async () => {
         // prepare
-        const clubId = "1";
-        const squadId = "10";
-        const competitionId = "567";
+        const clubId = '1';
+        const squadId = '10';
+        const competitionId = '567';
         const competitionMembershipDataName = 'The competition';
-        const competitionMembershipDataReward = "10000";
+        const competitionMembershipDataReward = '10000';
         await MFLClubTestsUtils.createClubNFT(clubId, squadId);
         await testsUtils.shallPass({
           code: ADD_SQUAD_COMPETITION_MEMBERSHIP,
@@ -1385,7 +1523,7 @@ describe('MFLClub', () => {
         // execute
         const error = await testsUtils.shallRevert({
           code: UPDATE_SQUAD_COMPETITION_MEMBERSHIP,
-          args: ["10", "43", 'The competition', "900"],
+          args: ['10', '43', 'The competition', '900'],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -1397,13 +1535,13 @@ describe('MFLClub', () => {
     describe('removeSquadCompetitionMembership()', () => {
       test('should remove competitionMembership', async () => {
         // prepare
-        const clubId = "1";
-        const squadId = "10";
-        const competitionId = "10089";
+        const clubId = '1';
+        const squadId = '10';
+        const competitionId = '10089';
         await MFLClubTestsUtils.createClubNFT(clubId, squadId);
         await testsUtils.shallPass({
           code: ADD_SQUAD_COMPETITION_MEMBERSHIP,
-          args: [squadId, competitionId, 'The competition', "900"],
+          args: [squadId, competitionId, 'The competition', '900'],
           signers: [aliceAdminAccountAddress],
         });
 
@@ -1433,7 +1571,7 @@ describe('MFLClub', () => {
           type: 'squadType',
           status: {rawValue: MFLClubTestsUtils.SQUAD_STATUS_RAW_VALUES.ACTIVE.toString()},
           metadata: {},
-          competitionsMemberships: {"42": {division: "1"}},
+          competitionsMemberships: {'42': {division: '1'}},
         });
       });
 
@@ -1443,7 +1581,7 @@ describe('MFLClub', () => {
         // execute
         const error = await testsUtils.shallRevert({
           name: 'mfl/clubs/squads/remove_squad_competition_membership.tx',
-          args: ["208", "31"],
+          args: ['208', '31'],
           signers: [aliceAdminAccountAddress],
         });
 
