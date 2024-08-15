@@ -48,7 +48,7 @@ struct ListingDetails {
 
 
 access(all)
-fun main(account: Address): [ListingDetails] {
+fun main(address: Address): [ListingDetails] {
     let storefrontRef = getAccount(address).capabilities.borrow<NFTStorefront.Storefront>(
             NFTStorefront.StorefrontPublicPath
         )

@@ -5,7 +5,7 @@ import NFTStorefront from "../../../contracts/_libs/NFTStorefront.cdc"
 **/
 
 access(all)
-fun main(account: Address): [UInt64] {
+fun main(address: Address): [UInt64] {
     let storefrontRef = getAccount(address).capabilities.borrow<NFTStorefront.Storefront>(
             NFTStorefront.StorefrontPublicPath
         ) ?? panic("Could not borrow public storefront from address")
