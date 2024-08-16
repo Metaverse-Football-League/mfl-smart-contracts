@@ -7,21 +7,6 @@ import {omit} from 'lodash';
 import * as matchers from 'jest-extended';
 import {GET_PLAYER_SERIAL_VIEW} from './_scripts/get_player_serial_view.script';
 import {GET_PLAYER_ROYALTIES_VIEW} from './_scripts/get_player_royalties_view.script';
-import {MFLClubTestsUtils} from '../clubs/_utils/MFLClubTests.utils';
-import {WITHDRAW_CLUB_FROM_GIVEN_ADDRESS} from '../clubs/_transactions/withdraw_club_from_given_address_malicious.tx';
-import {
-  WITHDRAW_CLUB_FROM_GIVEN_ADDRESS_V2
-} from '../clubs/_transactions/withdraw_club_from_given_address_v2_malicious.tx';
-import {
-  BATCH_WITHDRAW_CLUB_FROM_GIVEN_ADDRESS
-} from '../clubs/_transactions/batch_withdraw_club_from_given_address_malicious.tx';
-import {
-  BATCH_WITHDRAW_CLUB_FROM_GIVEN_ADDRESS_V2
-} from '../clubs/_transactions/batch_withdraw_club_from_given_address_malicious_v2.tx';
-import {
-  WITHDRAW_CLUB_FROM_GIVEN_ADDRESS_V3
-} from '../clubs/_transactions/withdraw_club_from_given_address_v3_malicious.tx';
-import {WITHDRAW_PACK_FROM_GIVEN_ADDRESS} from '../packs/_transactions/withdraw_pack_from_given_address_malicious.tx';
 import {
   WITHDRAW_PLAYER_FROM_GIVEN_ADDRESS_V2
 } from './_transactions/withdraw_player_from_given_address_v2_malicious.tx';
@@ -35,6 +20,7 @@ import {
 import {
   WITHDRAW_PLAYER_FROM_GIVEN_ADDRESS_V3
 } from './_transactions/withdraw_player_from_given_address_v3_malicious.tx';
+import {CREATE_PLAYER_LISTING} from './_transactions/create_player_listing.tx';
 
 expect.extend(matchers);
 jest.setTimeout(40000);
@@ -958,4 +944,38 @@ describe('MFLPlayer', () => {
       });
     });
   });
+
+  describe('Storefornt', () => {
+    test.only('should list a player for sale', async () => {
+      // prepare
+      const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
+        'AliceAdminAccount',
+        'AliceAdminAccount',
+      );
+      await MFLPlayerTestsUtils.createPlayerNFT(1);
+      const bobAccountAddress = await getAccountAddress('BobAccount');
+      await testsUtils.shallPass({
+        name: 'mfl/players/create_and_link_player_collection.tx',
+        signers: [bobAccountAddress],
+      });
+      await testsUtils.shallPass({
+        name: 'mfl/players/withdraw_player.tx',
+        signers: [aliceAdminAccountAddress],
+        args: [bobAccountAddress, '1'],
+      });
+      await testsUtils.shallPass({
+        name: 'storefront/initialize_duc_receiver.tx',
+        signers: [bobAccountAddress],
+      });
+      await testsUtils.shallPass({
+        name: 'storefront/initialize_duc_receiver.tx',
+        signers: [aliceAdminAccountAddress],
+      });
+
+      // execute
+      const result = await testsUtils.shallPass({code: CREATE_PLAYER_LISTING, args: ['1', '100', '0.2'], signers: [aliceAdminAccountAddress, bobAccountAddress]})
+
+      console.log(result);
+    })
+  })
 });

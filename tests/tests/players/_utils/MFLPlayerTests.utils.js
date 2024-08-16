@@ -29,6 +29,8 @@ export const MFLPlayerTestsUtils = {
 
     const addressMap = {};
     await testsUtils.deployContract('NonFungibleToken', serviceAddress, '_libs/NonFungibleToken', addressMap);
+    await testsUtils.deployContract('DapperUtilityCoin', serviceAddress, '_libs/DapperUtilityCoin', addressMap);
+    await testsUtils.deployContract('NFTStorefront', serviceAddress, '_libs/NFTStorefront', addressMap);
     await testsUtils.deployContract('MetadataViews', serviceAddress, '_libs/MetadataViews', addressMap);
     await testsUtils.deployContract('FUSD', serviceAddress, '_libs/FUSD', addressMap);
     await testsUtils.deployContract('MFLAdmin', to, 'core/MFLAdmin', addressMap);
