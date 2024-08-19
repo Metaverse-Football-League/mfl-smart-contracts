@@ -100,8 +100,7 @@ transaction(saleItemID: UInt64, saleItemPrice: UFix64, royaltyPercent: UFix64) {
             nftType: Type<@MFLPlayer.NFT>(),
             nftID: saleItemID,
             salePaymentVaultType: Type<@DapperUtilityCoin.Vault>(),
-            // saleCuts: [saleCutSeller, saleCutRoyalty]
-            saleCuts: [saleCutSeller]
+            saleCuts: [saleCutSeller, saleCutRoyalty]
         )
     }
 }
