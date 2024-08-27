@@ -48,7 +48,7 @@ contract MFLPack: NonFungibleToken {
 	var totalSupply: UInt64
 
 	access(all)
-	resource NFT: NonFungibleToken.NFT {
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver {
 
 		// Unique ID across all packs
 		access(all)
@@ -114,7 +114,7 @@ contract MFLPack: NonFungibleToken {
 
 	// Main Collection to manage all the Packs NFT
 	access(all)
-	resource Collection: NonFungibleToken.Collection {
+	resource Collection: NonFungibleToken.Collection, ViewResolver.ResolverCollection {
 		// dictionary of NFT conforming tokens
 		// NFT is a resource type with an `UInt64` ID field
 		access(all)

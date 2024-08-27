@@ -305,7 +305,7 @@ contract MFLClub: NonFungibleToken {
 
 	// The resource that represents the Club NFT
 	access(all)
-	resource NFT: NonFungibleToken.NFT {
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver {
 		access(all)
 		let id: UInt64
 
@@ -441,7 +441,7 @@ contract MFLClub: NonFungibleToken {
 
 	// A collection of Club NFTs owned by an account
 	access(all)
-	resource Collection: NonFungibleToken.Collection {
+	resource Collection: NonFungibleToken.Collection, ViewResolver.ResolverCollection {
 
 		// Dictionary of NFT conforming tokens
 		access(all)

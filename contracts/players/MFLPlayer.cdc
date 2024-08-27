@@ -71,7 +71,7 @@ contract MFLPlayer: NonFungibleToken {
 
 	// The resource that represents the Player NFT
 	access(all)
-	resource NFT: NonFungibleToken.NFT {
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver {
 
 		// The unique ID for the Player
 		access(all)
@@ -181,7 +181,7 @@ contract MFLPlayer: NonFungibleToken {
 
 	// A collection of Player NFTs owned by an account
 	access(all)
-	resource Collection: NonFungibleToken.Collection {
+	resource Collection: NonFungibleToken.Collection, ViewResolver.ResolverCollection {
 
 		// Dictionary of NFT conforming tokens
 		access(all)
