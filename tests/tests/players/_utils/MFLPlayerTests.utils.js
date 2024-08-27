@@ -7,7 +7,7 @@ const PLAYER_METADATA_DICTIONARY = {
   positions: ['ST', 'CAM'],
   preferredFoot: 'left',
   ageAtMint: "17",
-  height: "180",
+  height: "18",
   overall: "87",
   pace: "56",
   shooting: "66",

@@ -1639,11 +1639,6 @@
     eslint "^8.34.0"
     eslint-plugin-jsdoc "^46.9.0"
 
-"@onflow/fcl-config@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@onflow/fcl-config/-/fcl-config-0.0.1.tgz#e983f6bdad96a09753ca2000633d7bfed7587527"
-  integrity sha512-umvYsAwejX2yGJ5OFxM1dEaKmFEXf+34f4rJfVkfEYztgJqLkUbBkEB8HQsI8M78QUpWkWuNArqwbFvFerBbHA==
-
 "@onflow/fcl-core@1.9.1":
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/@onflow/fcl-core/-/fcl-core-1.9.1.tgz#56054f310d1396d3a0b953aaffed7173c5e6884f"
@@ -1721,13 +1716,12 @@
     rlp "^3.0.0"
     sha3 "^2.1.4"
 
-"@onflow/flow-js-testing@^0.6.0-stable-cadence.3":
-  version "0.6.0-stable-cadence.3"
-  resolved "https://registry.yarnpkg.com/@onflow/flow-js-testing/-/flow-js-testing-0.6.0-stable-cadence.3.tgz#5f6e22c9050f08a34da0a320b592f333595df6e5"
-  integrity sha512-Z85EdIowdZxSIMOUQv3uz8EYiBfcvkVwy98z4t72uC5eEK5I71Uc/VpxEqra6ItF47cKUEXocV230X91Q/lxJQ==
+"@onflow/flow-js-testing@^0.6.0-stable-cadence.4":
+  version "0.6.0-stable-cadence.4"
+  resolved "https://registry.yarnpkg.com/@onflow/flow-js-testing/-/flow-js-testing-0.6.0-stable-cadence.4.tgz#2ada2f53641ed2bc7f7b59f4fbebc6151b7bae59"
+  integrity sha512-/PYVV0jyujW/zlqP7UxF02WuFTwle767k3Y1jfE1zf3+T3NVivzz2o4HMeCZmYQ0OaiaTTeeuX7HfL/Ae7HH6Q==
   dependencies:
     "@onflow/fcl" "1.3.2"
-    "@onflow/fcl-config" "^0.0.1"
     "@onflow/flow-cadut" "^0.3.0-stable-cadence.1"
     elliptic "^6.5.4"
     esm "^3.2.25"

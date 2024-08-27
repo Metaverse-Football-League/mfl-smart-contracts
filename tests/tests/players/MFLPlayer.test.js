@@ -436,30 +436,22 @@ describe('MFLPlayer', () => {
 
         // assert
         expect(playerRoyaltiesView).toEqual({
-          cutInfos: [{
-            receiver: {
-              path: {
-                value: {
-                  domain: 'public',
-                  identifier: 'GenericFTReceiver',
-                }, type: 'Path',
-              },
-              address: '0xa654669bd96b2014',
-              borrowType: {
-                type: {
-                  kind: 'Restriction',
-                  typeID: 'AnyResource{A.ee82856bf20e2aa6.FungibleToken.Receiver}',
-                  type: {kind: 'AnyResource'},
-                  restrictions: [{
-                    type: '',
-                    kind: 'ResourceInterface',
-                    typeID: 'A.ee82856bf20e2aa6.FungibleToken.Receiver',
-                    fields: [{type: {kind: 'UInt64'}, id: 'uuid'}],
-                    initializers: [],
+          'cutInfos': [{
+            'receiver': {
+              'borrowType': {
+                'type': {
+                  'kind': 'Intersection',
+                  'typeID': '{A.ee82856bf20e2aa6.FungibleToken.Receiver}',
+                  'types': [{
+                    'type': '',
+                    'kind': 'ResourceInterface',
+                    'typeID': 'A.ee82856bf20e2aa6.FungibleToken.Receiver',
+                    'fields': [{'type': {'kind': 'UInt64'}, 'id': 'uuid'}],
+                    'initializers': [],
                   }],
-                }, kind: 'Reference', authorized: false,
-              },
-            }, cut: '0.05000000', description: 'Creator Royalty',
+                }, 'kind': 'Reference', 'authorization': {'kind': 'Unauthorized', 'entitlements': null},
+              }, 'address': '0xa654669bd96b2014', 'id': '0',
+            }, 'cut': '0.05000000', 'description': 'Creator Royalty',
           }],
         });
       });
@@ -885,19 +877,21 @@ describe('MFLPlayer', () => {
 
       test('should panic when updating a player metadata for an unknown player', async () => {
         // prepare
+        console.log('ooo');
         const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
           'AliceAdminAccount',
           'AliceAdminAccount',
         );
+        console.log('oazaz');
         const signers = [aliceAdminAccountAddress];
-
+        console.log('mma');
         // execute
         const error = await testsUtils.shallRevert({
           name: 'mfl/players/update_player_metadata.tx',
           args: ['1201', ...Object.values(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY)],
           signers,
         });
-
+        console.log('aazaz');
         // assert
         expect(error).toContain('Data not found');
       });
@@ -981,7 +975,10 @@ describe('MFLPlayer', () => {
       });
       const listingEvent = result.events.find((event) => event.type === 'A.f8d6e0586b0a20c7.NFTStorefront.ListingAvailable');
       const listingResourceId = listingEvent.data.listingResourceID;
-      const output = await testsUtils.executeValidScript({code: GET_PLAYER_METADATA_FOR_LISTING, args:[bobAccountAddress, listingResourceId]})
+      const output = await testsUtils.executeValidScript({
+        code: GET_PLAYER_METADATA_FOR_LISTING,
+        args: [bobAccountAddress, listingResourceId],
+      });
 
       // assert
       expect(output.amount).toEqual('100.00000000');
