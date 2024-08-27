@@ -71,7 +71,7 @@ contract MFLPlayer: NonFungibleToken {
 
 	// The resource that represents the Player NFT
 	access(all)
-	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver {
+	resource NFT: NonFungibleToken.NFT {
 
 		// The unique ID for the Player
 		access(all)
@@ -124,36 +124,9 @@ contract MFLPlayer: NonFungibleToken {
 					royalties.append(MetadataViews.Royalty(receiver: royaltyReceiverCap!, cut: 0.05, description: "Creator Royalty"))
 					return MetadataViews.Royalties(royalties)
 				case Type<MetadataViews.NFTCollectionDisplay>():
-					let socials = {
-						"twitter": MetadataViews.ExternalURL("https://twitter.com/playMFL"),
-						"discord": MetadataViews.ExternalURL("https://discord.gg/pEDTR4wSPr"),
-						"linkedin": MetadataViews.ExternalURL("https://www.linkedin.com/company/playmfl"),
-						"medium": MetadataViews.ExternalURL("https://medium.com/playmfl")
-					}
-					return MetadataViews.NFTCollectionDisplay(
-						name: "MFL Player Collection",
-						description: "MFL is a unique Web3 Football (Soccer) Management game & ecosystem where you\u{2019}ll be able to own and develop your football players as well as build a club from the ground up. As in real football, you\u{2019}ll be able to : Be a recruiter (Scout, find, and trade players\u{2026}), be an agent (Find the best clubs for your players, negotiate contracts with club owners\u{2026}), be a club owner (Develop your club, recruit players, compete in leagues and tournaments\u{2026}) and be a coach (Train and develop your players, play matches, and define your match tactics...). This collection allows you to collect Players.",
-						externalURL: MetadataViews.ExternalURL("https://playmfl.com"),
-						squareImage: MetadataViews.Media(
-							file: MetadataViews.HTTPFile(url: "https://d13e14gtps4iwl.cloudfront.net/branding/logos/mfl_logo_black_square_small.svg"),
-							mediaType: "image/svg+xml"
-						),
-						bannerImage: MetadataViews.Media(
-							file: MetadataViews.HTTPFile(url: "https://d13e14gtps4iwl.cloudfront.net/branding/players/banner_1900_X_600.png"),
-							mediaType: "image/png"
-						),
-						socials: socials
-					)
+                     return MFLPlayer.resolveContractView(resourceType: Type<@MFLPlayer.NFT>(), viewType: Type<MetadataViews.NFTCollectionDisplay>())
 				case Type<MetadataViews.NFTCollectionData>():
-					return MetadataViews.NFTCollectionData(
-						storagePath: MFLPlayer.CollectionStoragePath,
-						publicPath: MFLPlayer.CollectionPublicPath,
-						publicCollection: Type<&MFLPlayer.Collection>(),
-						publicLinkedType: Type<&MFLPlayer.Collection>(),
-						createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection} {
-							return <-MFLPlayer.createEmptyCollection(nftType: Type<@MFLPlayer.Collection>())
-						}
-					)
+                     return MFLPlayer.resolveContractView(resourceType: Type<@MFLPlayer.NFT>(), viewType: Type<MetadataViews.NFTCollectionData>())
 				case Type<MetadataViews.ExternalURL>():
 					return MetadataViews.ExternalURL("https://playmfl.com")
 				case Type<MetadataViews.Traits>():
@@ -208,7 +181,7 @@ contract MFLPlayer: NonFungibleToken {
 
 	// A collection of Player NFTs owned by an account
 	access(all)
-	resource Collection: NonFungibleToken.Collection, ViewResolver.ResolverCollection {
+	resource Collection: NonFungibleToken.Collection {
 
 		// Dictionary of NFT conforming tokens
 		access(all)

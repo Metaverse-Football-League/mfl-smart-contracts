@@ -305,7 +305,7 @@ contract MFLClub: NonFungibleToken {
 
 	// The resource that represents the Club NFT
 	access(all)
-	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver {
+	resource NFT: NonFungibleToken.NFT {
 		access(all)
 		let id: UInt64
 
@@ -324,12 +324,10 @@ contract MFLClub: NonFungibleToken {
 			self.squads <-{}
 			self.metadata = nftMetadata
 			let squadsIDs: [UInt64] = []
-			var i = 0
-			while i < squads.length {
-				squadsIDs.append(squads[i].id)
-				let oldSquad <- self.squads[squads[i].id] <- squads.remove(at: i)
+			while squads.length > 0 {
+				squadsIDs.append(squads[0].id)
+				let oldSquad <- self.squads[squads[0].id] <- squads.remove(at: 0)
 				destroy oldSquad
-				i = i + 1
 			}
 			destroy squads
 			MFLClub.totalSupply = MFLClub.totalSupply + 1 as UInt64
@@ -382,36 +380,9 @@ contract MFLClub: NonFungibleToken {
 					royalties.append(MetadataViews.Royalty(receiver: royaltyReceiverCap!, cut: 0.05, description: "Creator Royalty"))
 					return MetadataViews.Royalties(royalties)
 				case Type<MetadataViews.NFTCollectionDisplay>():
-					let socials = {
-						"twitter": MetadataViews.ExternalURL("https://twitter.com/playMFL"),
-						"discord": MetadataViews.ExternalURL("https://discord.gg/pEDTR4wSPr"),
-						"linkedin": MetadataViews.ExternalURL("https://www.linkedin.com/company/playmfl"),
-						"medium": MetadataViews.ExternalURL("https://medium.com/playmfl")
-					}
-					return MetadataViews.NFTCollectionDisplay(
-						name: "MFL Club Collection",
-						description: "MFL is a unique Web3 Football (Soccer) Management game & ecosystem where you\u{2019}ll be able to own and develop your football players as well as build a club from the ground up. As in real football, you\u{2019}ll be able to : Be a recruiter (Scout, find, and trade players\u{2026}), be an agent (Find the best clubs for your players, negotiate contracts with club owners\u{2026}), be a club owner (Develop your club, recruit players, compete in leagues and tournaments\u{2026}) and be a coach (Train and develop your players, play matches, and define your match tactics...). This collection allows you to collect Clubs.",
-						externalURL: MetadataViews.ExternalURL("https://playmfl.com"),
-						squareImage: MetadataViews.Media(
-							file: MetadataViews.HTTPFile(url: "https://d13e14gtps4iwl.cloudfront.net/branding/logos/mfl_logo_black_square_small.svg"),
-							mediaType: "image/svg+xml"
-						),
-						bannerImage: MetadataViews.Media(
-							file: MetadataViews.HTTPFile(url: "https://d13e14gtps4iwl.cloudfront.net/branding/players/banner_1900_X_600.png"),
-							mediaType: "image/png"
-						),
-						socials: socials
-					)
+					 return MFLClub.resolveContractView(resourceType: Type<@MFLClub.NFT>(), viewType: Type<MetadataViews.NFTCollectionDisplay>())
 				case Type<MetadataViews.NFTCollectionData>():
-					return MetadataViews.NFTCollectionData(
-						storagePath: MFLClub.CollectionStoragePath,
-						publicPath: MFLClub.CollectionPublicPath,
-						publicCollection: Type<&MFLClub.Collection>(),
-						publicLinkedType: Type<&MFLClub.Collection>(),
-						createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection} {
-							return <-MFLClub.createEmptyCollection(nftType: Type<@MFLClub.Collection>())
-						}
-					)
+					 return MFLClub.resolveContractView(resourceType: Type<@MFLClub.NFT>(), viewType: Type<MetadataViews.NFTCollectionData>())
 				case Type<MetadataViews.ExternalURL>():
 					return MetadataViews.ExternalURL("https://playmfl.com")
 				case Type<MetadataViews.Traits>():
@@ -470,7 +441,7 @@ contract MFLClub: NonFungibleToken {
 
 	// A collection of Club NFTs owned by an account
 	access(all)
-	resource Collection: NonFungibleToken.Collection, ViewResolver.ResolverCollection {
+	resource Collection: NonFungibleToken.Collection {
 
 		// Dictionary of NFT conforming tokens
 		access(all)
