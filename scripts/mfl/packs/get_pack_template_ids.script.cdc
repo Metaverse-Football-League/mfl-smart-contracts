@@ -5,8 +5,7 @@ import MFLPackTemplate from "../../../contracts/packs/MFLPackTemplate.cdc"
   living in MFLPackTemplate contract.
 **/
 
-pub fun main(): [UInt64] {
-
-    return MFLPackTemplate.getPackTemplatesIDs()
-    
+access(all)
+fun main(): [UInt64] {
+  return MFLPackTemplate.getPackTemplatesIDs()  
 }

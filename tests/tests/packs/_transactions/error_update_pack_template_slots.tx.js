@@ -5,7 +5,8 @@ export const ERROR_UPDATE_PACK_TEMPLATE_SLOTS = `
         This tx tries to update a packTemplate slots.
     **/
 
-    pub fun transform(packTemplate: MFLPackTemplate.PackTemplateData ): MFLPackTemplate.PackTemplateData {
+  access(all)
+  fun transform(packTemplate: MFLPackTemplate.PackTemplateData ): MFLPackTemplate.PackTemplateData {
         packTemplate.slots[0] = MFLPackTemplate.Slot("fakeType", {"i": "i"}, 424242)
         return packTemplate
     }

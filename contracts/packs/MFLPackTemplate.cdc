@@ -5,202 +5,271 @@
   and whether or not packs linked to a packTemplate can be opened.
 **/
 
-pub contract MFLPackTemplate {
+access(all)
+contract MFLPackTemplate {
 
-    // Events
-    pub event ContractInitialized()
-    pub event Minted(id: UInt64)
-    pub event AllowToOpenPacks(id: UInt64)
+	// Entitlements
+	access(all)
+	entitlement PackTemplateAdminAction
 
-    // Named Paths
-    pub let PackTemplateAdminStoragePath: StoragePath
+	// Events
+	access(all)
+	event ContractInitialized()
 
-    pub var nextPackTemplateID :UInt64
-    // All packTemplates  are stored in this dictionary
-    access(self) let packTemplates : @{UInt64: PackTemplate}
+	access(all)
+	event Minted(id: UInt64)
 
-    pub struct PackTemplateData {
+	access(all)
+	event AllowToOpenPacks(id: UInt64)
 
-        pub let id: UInt64
-        pub let name: String
-        pub let description: String?
-        pub let maxSupply: UInt32
-        pub let currentSupply: UInt32
-        pub let isOpenable: Bool
-        pub let imageUrl: String
-        pub let type: String
-        access(contract) let slots: [Slot]
+	// Named Paths
+	access(all)
+	let PackTemplateAdminStoragePath: StoragePath
 
-        init(
-            id: UInt64,
-            name: String,
-            description: String?,
-            maxSupply: UInt32,
-            currentSupply: UInt32,
-            isOpenable: Bool,
-            imageUrl: String,
-            type: String,
-            slots: [Slot]
-        ) {
-            self.id = id
-            self.name = name
-            self.description = description
-            self.maxSupply = maxSupply
-            self.currentSupply = currentSupply
-            self.isOpenable = isOpenable
-            self.imageUrl = imageUrl
-            self.type = type
-            self.slots = slots
-        }
-    }
+	access(all)
+	var nextPackTemplateID: UInt64
 
-    pub struct Slot {
-        pub let type: String
-        access(contract) let chances: {String: String}
-        pub let count: UInt32
+	// All packTemplates  are stored in this dictionary
+	access(self)
+	let packTemplates: @{UInt64: PackTemplate}
 
-        init(type: String, chances: {String: String}, count: UInt32) {
-            self.type = type
-            self.chances = chances
-            self.count = count
-        }
-    }
+	access(all)
+	struct PackTemplateData {
+		access(all)
+		let id: UInt64
 
-    pub resource PackTemplate {
-        pub let id: UInt64
-        access(contract) let name: String
-        access(contract) let description: String?
-        access(contract) let maxSupply: UInt32
-        access(contract) var currentSupply: UInt32
-        access(contract) var isOpenable: Bool
-        access(contract) var imageUrl: String
-        access(contract) let type: String
-        access(contract) let slots: [Slot]
+		access(all)
+		let name: String
 
-        init(name: String, description: String?, maxSupply: UInt32, imageUrl: String, type: String, slots: [Slot]) {
-            self.id = MFLPackTemplate.nextPackTemplateID
-            MFLPackTemplate.nextPackTemplateID = MFLPackTemplate.nextPackTemplateID + (1 as UInt64)
-            self.name = name
-            self.description = description
-            self.maxSupply = maxSupply
-            self.currentSupply = 0
-            self.isOpenable = false
-            self.imageUrl = imageUrl
-            self.type = type
-            self.slots = slots
-            emit Minted(id: self.id)
-        }
+		access(all)
+		let description: String?
 
-        // Enable accounts to open their packs
-        access(contract) fun allowToOpenPacks() {
-            self.isOpenable = true
-        }
+		access(all)
+		let maxSupply: UInt32
 
-        // Increase current supply
-        access(contract) fun increaseCurrentSupply(nbToMint: UInt32) {
-            pre {
-                nbToMint <=  self.maxSupply - self.currentSupply : "Supply exceeded"
-            }
-            self.currentSupply = self.currentSupply + nbToMint
-        }
-    }
+		access(all)
+		let currentSupply: UInt32
 
-    // Get all packTemplates IDs
-    pub fun getPackTemplatesIDs(): [UInt64] {
-        return self.packTemplates.keys
-    }
+		access(all)
+		let isOpenable: Bool
 
-    // Get a data reprensation of a specific packTemplate
-    pub fun getPackTemplate(id: UInt64): PackTemplateData? {
-        if let packTemplate = self.getPackTemplateRef(id: id) {
-            return PackTemplateData(
-                id: packTemplate.id,
-                name: packTemplate.name,
-                description : packTemplate.description,
-                maxSupply : packTemplate.maxSupply,
-                currentSupply : packTemplate.currentSupply,
-                isOpenable: packTemplate.isOpenable,
-                imageUrl: packTemplate.imageUrl,
-                type: packTemplate.type,
-                slots: packTemplate.slots
-            )
-        }
-        return nil
-    }
+		access(all)
+		let imageUrl: String
 
-    // Get a data reprensation of all packTemplates
-    pub fun getPackTemplates(): [PackTemplateData] {
-        var packTemplatesData: [PackTemplateData] = []
-        for id in self.getPackTemplatesIDs() {
-            if let packTemplate = self.getPackTemplate(id: id) {
-                packTemplatesData.append(packTemplate)
-            }
-        }
-        return packTemplatesData
-    }
+		access(all)
+		let type: String
 
-    // Get a specif packTemplate ref (in particular for calling admin methods)
-    access(contract) fun getPackTemplateRef(id: UInt64): &MFLPackTemplate.PackTemplate? {
-        return &self.packTemplates[id] as auth &MFLPackTemplate.PackTemplate?
-    }
+		access(contract)
+		let slots: [Slot]
 
-    // Called from MFLPack batchMintPack fct
-    access(account) fun increasePackTemplateCurrentSupply(id: UInt64, nbToMint: UInt32) {
-        self.getPackTemplateRef(id: id)?.increaseCurrentSupply(nbToMint: nbToMint)
-    }
+		init(
+			id: UInt64,
+			name: String,
+			description: String?,
+			maxSupply: UInt32,
+			currentSupply: UInt32,
+			isOpenable: Bool,
+			imageUrl: String,
+			type: String,
+			slots: [Slot]
+		) {
+			self.id = id
+			self.name = name
+			self.description = description
+			self.maxSupply = maxSupply
+			self.currentSupply = currentSupply
+			self.isOpenable = isOpenable
+			self.imageUrl = imageUrl
+			self.type = type
+			self.slots = slots
+		}
+	}
 
-    // This interface allows any account that has a private capability to a PackTemplateAdminClaim to call the methods below
-    pub resource interface PackTemplateAdminClaim {
-        pub let name: String
-        pub fun allowToOpenPacks(id: UInt64)
-        pub fun createPackTemplate(name: String, description: String?, maxSupply: UInt32, imageUrl: String, type: String, slots: [Slot])
-    }
+	access(all)
+	struct Slot {
+		access(all)
+		let type: String
 
-    pub resource PackTemplateAdmin: PackTemplateAdminClaim {
-        pub let name: String
+		access(contract)
+		let chances: {String: String}
 
-        init() {
-            self.name = "PackTemplateAdminClaim"
-        }
+		access(all)
+		let count: UInt32
 
-        pub fun allowToOpenPacks(id: UInt64) {
-            if let packTemplate = MFLPackTemplate.getPackTemplateRef(id: id) {
-                packTemplate.allowToOpenPacks()
-                emit AllowToOpenPacks(id: id)
-            }
-        }
+		init(type: String, chances: {String: String}, count: UInt32) {
+			self.type = type
+			self.chances = chances
+			self.count = count
+		}
+	}
 
-        pub fun createPackTemplate(name: String, description: String?, maxSupply: UInt32, imageUrl: String, type: String, slots: [Slot]) {
-            let newPackTemplate <- create PackTemplate(
-                name: name,
-                description: description,
-                maxSupply: maxSupply,
-                imageUrl: imageUrl,
-                type: type,
-                slots: slots
-            )
-            let oldPackTemplate <- MFLPackTemplate.packTemplates[newPackTemplate.id] <- newPackTemplate
-            destroy oldPackTemplate
-        }
+	access(all)
+	resource PackTemplate {
+		access(all)
+		let id: UInt64
 
-        pub fun createPackTemplateAdmin(): @PackTemplateAdmin {
-            return <- create PackTemplateAdmin()
-        }
-    }
+		access(contract)
+		let name: String
 
+		access(contract)
+		let description: String?
 
+		access(contract)
+		let maxSupply: UInt32
 
-    init() {
-        // Set our named paths
-        self.PackTemplateAdminStoragePath = /storage/MFLPackTemplateAdmin
+		access(contract)
+		var currentSupply: UInt32
 
-        // Initialize contract fields
-        self.nextPackTemplateID = 1
-        self.packTemplates <- {}
+		access(contract)
+		var isOpenable: Bool
 
-        // Create PackTemplateAdmin resource and save it to storage
-        self.account.save(<- create PackTemplateAdmin() , to: self.PackTemplateAdminStoragePath)
+		access(contract)
+		var imageUrl: String
 
-        emit ContractInitialized()
-    }
+		access(contract)
+		let type: String
+
+		access(contract)
+		let slots: [Slot]
+
+		init(
+			name: String,
+			description: String?,
+			maxSupply: UInt32,
+			imageUrl: String,
+			type: String,
+			slots: [Slot]
+		) {
+			self.id = MFLPackTemplate.nextPackTemplateID
+			MFLPackTemplate.nextPackTemplateID = MFLPackTemplate.nextPackTemplateID + 1 as UInt64
+			self.name = name
+			self.description = description
+			self.maxSupply = maxSupply
+			self.currentSupply = 0
+			self.isOpenable = false
+			self.imageUrl = imageUrl
+			self.type = type
+			self.slots = slots
+			emit Minted(id: self.id)
+		}
+
+		// Enable accounts to open their packs
+		access(contract)
+		fun allowToOpenPacks() {
+			self.isOpenable = true
+		}
+
+		// Increase current supply
+		access(contract)
+		fun increaseCurrentSupply(nbToMint: UInt32) {
+			pre {
+				nbToMint <= self.maxSupply - self.currentSupply:
+					"Supply exceeded"
+			}
+			self.currentSupply = self.currentSupply + nbToMint
+		}
+	}
+
+	// Get all packTemplates IDs
+	access(all)
+	view fun getPackTemplatesIDs(): [UInt64] {
+		return self.packTemplates.keys
+	}
+
+	// Get a data reprensation of a specific packTemplate
+	access(all)
+	fun getPackTemplate(id: UInt64): PackTemplateData? {
+		if let packTemplate = self.getPackTemplateRef(id: id) {
+			let dereferenceSlot = fun (_ slot: Slot): Slot {
+				return slot
+			}
+			return PackTemplateData(
+				id: packTemplate.id,
+				name: packTemplate.name,
+				description: packTemplate.description,
+				maxSupply: packTemplate.maxSupply,
+				currentSupply: packTemplate.currentSupply,
+				isOpenable: packTemplate.isOpenable,
+				imageUrl: packTemplate.imageUrl,
+				type: packTemplate.type,
+				slots: packTemplate.slots.map(dereferenceSlot)
+			)
+		}
+		return nil
+	}
+
+	// Get a data reprensation of all packTemplates
+	access(all)
+	fun getPackTemplates(): [PackTemplateData] {
+		var packTemplatesData: [PackTemplateData] = []
+		for id in self.getPackTemplatesIDs() {
+			if let packTemplate = self.getPackTemplate(id: id) {
+				packTemplatesData.append(packTemplate)
+			}
+		}
+		return packTemplatesData
+	}
+
+	// Get a specif packTemplate ref (in particular for calling admin methods)
+	access(contract)
+	view fun getPackTemplateRef(id: UInt64): &MFLPackTemplate.PackTemplate? {
+		return &self.packTemplates[id] as &MFLPackTemplate.PackTemplate?
+	}
+
+	// Called from MFLPack batchMintPack fct
+	access(account)
+	fun increasePackTemplateCurrentSupply(id: UInt64, nbToMint: UInt32) {
+		let packTemplate = self.getPackTemplateRef(id: id) ?? panic("PackTemplate does not exist")
+		packTemplate.increaseCurrentSupply(nbToMint: nbToMint)
+	}
+
+	// Deprecated: Only here for backward compatibility.
+	access(all)
+	resource interface PackTemplateAdminClaim {}
+
+	access(all)
+	resource PackTemplateAdmin: PackTemplateAdminClaim {
+		access(all)
+		let name: String
+
+		init() {
+			self.name = "PackTemplateAdminClaim"
+		}
+
+		access(PackTemplateAdminAction)
+		fun allowToOpenPacks(id: UInt64) {
+			if let packTemplate = MFLPackTemplate.getPackTemplateRef(id: id) {
+				packTemplate.allowToOpenPacks()
+				emit AllowToOpenPacks(id: id)
+			}
+		}
+
+		access(PackTemplateAdminAction)
+		fun createPackTemplate(name: String, description: String?, maxSupply: UInt32, imageUrl: String, type: String, slots: [Slot]) {
+			let newPackTemplate <- create PackTemplate(name: name, description: description, maxSupply: maxSupply, imageUrl: imageUrl, type: type, slots: slots)
+			let oldPackTemplate <- MFLPackTemplate.packTemplates[newPackTemplate.id] <- newPackTemplate
+			destroy oldPackTemplate
+		}
+
+		access(PackTemplateAdminAction)
+		fun createPackTemplateAdmin(): @PackTemplateAdmin {
+			return <-create PackTemplateAdmin()
+		}
+	}
+
+	init() {
+		// Set our named paths
+		self.PackTemplateAdminStoragePath = /storage/MFLPackTemplateAdmin
+
+		// Initialize contract fields
+		self.nextPackTemplateID = 1
+		self.packTemplates <-{}
+
+		// Create PackTemplateAdmin resource and save it to storage
+		self.account.storage.save(
+			<-create PackTemplateAdmin(),
+			to: self.PackTemplateAdminStoragePath
+		)
+		emit ContractInitialized()
+	}
 }

@@ -6,15 +6,33 @@ import MFLClub from "../../../contracts/clubs/MFLClub.cdc"
   If the storefront does not exist, it returns an empty array.
 **/
 
-pub struct ListingDetails {
-    pub let listingResourceID: UInt64;
-    pub let storefrontID: UInt64
-    pub let purchased: Bool
-    pub let nftType: Type
-    pub let nftID: UInt64
-    pub let salePaymentVaultType: Type
-    pub let salePrice: UFix64
-    pub let saleCuts: [NFTStorefront.SaleCut]
+
+access(all)
+struct ListingDetails {
+
+    access(all)
+    let listingResourceID: UInt64;
+
+    access(all)
+    let storefrontID: UInt64
+
+    access(all)
+    let purchased: Bool
+
+    access(all)
+    let nftType: Type
+
+    access(all)
+    let nftID: UInt64
+
+    access(all)
+    let salePaymentVaultType: Type
+
+    access(all)
+    let salePrice: UFix64
+
+    access(all)
+    let saleCuts: [NFTStorefront.SaleCut]
 
     init(_ storefrontListingDetails:NFTStorefront.ListingDetails, _ listingResourceId: UInt64) {
         self.listingResourceID = listingResourceId
@@ -28,12 +46,12 @@ pub struct ListingDetails {
     }
 }
 
-pub fun main(account: Address): [ListingDetails] {
-    let storefrontRef = getAccount(account)
-        .getCapability<&NFTStorefront.Storefront{NFTStorefront.StorefrontPublic}>(
+
+access(all)
+fun main(address: Address): [ListingDetails] {
+    let storefrontRef = getAccount(address).capabilities.borrow<&NFTStorefront.Storefront>(
             NFTStorefront.StorefrontPublicPath
         )
-        .borrow()
 
     if storefrontRef == nil {
         return []

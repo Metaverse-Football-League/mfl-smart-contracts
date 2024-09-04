@@ -7,16 +7,16 @@ export const GET_CLUB_ROYALTIES_VIEW = `
     given a collection address and a club id,
   **/
   
-  pub fun main(address: Address, id: UInt64): MetadataViews.Royalties {
+  access(all)
+  fun main(address: Address, id: UInt64): MetadataViews.Royalties {
   
       let collection = getAccount(address)
-          .getCapability(MFLClub.CollectionPublicPath)
-          .borrow<&{MetadataViews.ResolverCollection}>()
-          ?? panic("Could not borrow a reference to MFLClub collection")
+        .capabilities.borrow<&MFLClub.Collection>(MFLClub.CollectionPublicPath)
+        ?? panic("Could not borrow a reference to MFLClub collection")
   
       let nft = collection.borrowViewResolver(id: id)!
   
-      let view = nft.resolveView(Type<MetadataViews.Royalties>())!
+      let view = nft!.resolveView(Type<MetadataViews.Royalties>())!
       let royaltiesView = view as! MetadataViews.Royalties
       return royaltiesView
   }

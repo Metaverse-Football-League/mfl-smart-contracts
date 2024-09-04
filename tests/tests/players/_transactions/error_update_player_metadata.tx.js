@@ -5,7 +5,8 @@ export const ERROR_UPDATE_PLAYER_METADATA = `
         This tx tries to update a player metadata.
     **/
 
-    pub fun transform(player: MFLPlayer.PlayerData ): MFLPlayer.PlayerData {
+    access(all)
+    fun transform(player: MFLPlayer.PlayerData ): MFLPlayer.PlayerData {
         player.metadata = { "fakeMetadata": "" }
         return player
     }

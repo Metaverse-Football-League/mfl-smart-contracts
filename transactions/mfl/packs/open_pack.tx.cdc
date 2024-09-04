@@ -10,23 +10,29 @@ import MFLClub from "../../../contracts/clubs/MFLClub.cdc"
  **/
  
  transaction(revealID: UInt64) {
-    let collectionRef: &MFLPack.Collection
+    let collectionRef: auth(MFLPack.PackAction) &MFLPack.Collection
 
-    prepare(owner: AuthAccount) {
-        self.collectionRef = owner.borrow<&MFLPack.Collection>(from: MFLPack.CollectionStoragePath)!
-        if !owner.getCapability<&MFLPlayer.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(MFLPlayer.CollectionPublicPath).check() {
-            if owner.borrow<&MFLPlayer.Collection>(from: MFLPlayer.CollectionStoragePath) == nil {
-                owner.save(<- MFLPlayer.createEmptyCollection(), to: MFLPlayer.CollectionStoragePath)
+    prepare(owner: auth(BorrowValue, SaveValue, IssueStorageCapabilityController, PublishCapability, UnpublishCapability) &Account) {
+        self.collectionRef = owner.storage.borrow<auth(MFLPack.PackAction) &MFLPack.Collection>(from: MFLPack.CollectionStoragePath)!
+
+        if owner.capabilities.borrow<&MFLPlayer.Collection>(MFLPlayer.CollectionPublicPath) == nil {
+            if owner.storage.borrow<&MFLPlayer.Collection>(from: MFLPlayer.CollectionStoragePath) == nil {
+                owner.storage.save(<- MFLPlayer.createEmptyCollection(nftType: Type<@MFLPlayer.NFT>()), to: MFLPlayer.CollectionStoragePath)
             }
-            owner.unlink(MFLPlayer.CollectionPublicPath)
-            owner.link<&MFLPlayer.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(MFLPlayer.CollectionPublicPath, target: MFLPlayer.CollectionStoragePath)
+
+            owner.capabilities.unpublish(MFLPlayer.CollectionPublicPath)
+            let playerCollectionCap = owner.capabilities.storage.issue<&MFLPlayer.Collection>(MFLPlayer.CollectionStoragePath)
+            owner.capabilities.publish(playerCollectionCap, at: MFLPlayer.CollectionPublicPath)
         }
-        if !owner.getCapability<&MFLClub.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(MFLClub.CollectionPublicPath).check() {
-            if owner.borrow<&MFLClub.Collection>(from: MFLClub.CollectionStoragePath) == nil {
-                owner.save(<- MFLClub.createEmptyCollection(), to: MFLClub.CollectionStoragePath)
+
+        if owner.capabilities.borrow<&MFLClub.Collection>(MFLClub.CollectionPublicPath) == nil {
+            if owner.storage.borrow<&MFLClub.Collection>(from: MFLClub.CollectionStoragePath) == nil {
+                owner.storage.save(<- MFLClub.createEmptyCollection(nftType: Type<@MFLClub.NFT>()), to: MFLClub.CollectionStoragePath)
             }
-            owner.unlink(MFLClub.CollectionPublicPath)
-            owner.link<&MFLClub.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(MFLClub.CollectionPublicPath, target: MFLClub.CollectionStoragePath)
+
+            owner.capabilities.unpublish(MFLClub.CollectionPublicPath)
+            let playerCollectionCap = owner.capabilities.storage.issue<&MFLClub.Collection>(MFLClub.CollectionStoragePath)
+            owner.capabilities.publish(playerCollectionCap, at: MFLClub.CollectionPublicPath)
         }
     }
 

@@ -21,23 +21,23 @@ transaction(
     squadType: String,
     competitionID: UInt64,
     leagueDivision: UInt32,
-    receiverAddress: Address
+    receiverAddr: Address
 ) {
-    let adminProxyRef: &MFLAdmin.AdminProxy
-    let receiverRef: &{NonFungibleToken.CollectionPublic}
+    let adminProxyRef: auth(MFLAdmin.AdminProxyAction) &MFLAdmin.AdminProxy
+    let receiverCollectionRef: &MFLClub.Collection
 
-    prepare(acct: AuthAccount) {
-        self.adminProxyRef = acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
-        let clubCollectionCap = getAccount(receiverAddress).getCapability<&{NonFungibleToken.CollectionPublic}>(MFLClub.CollectionPublicPath)
-
-        self.receiverRef = clubCollectionCap.borrow() ?? panic("Could not borrow receiver reference")
+    prepare(acct: auth(BorrowValue) &Account) {
+        self.adminProxyRef = acct.storage.borrow<auth(MFLAdmin.AdminProxyAction) &MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
+        self.receiverCollectionRef = getAccount(receiverAddr).capabilities.borrow<&MFLClub.Collection>(
+                MFLClub.CollectionPublicPath
+            ) ?? panic("Could not get receiver reference to the NFT Collection")
     }
 
     execute {
         let clubAdminClaimCap = self.adminProxyRef.getClaimCapability(name: "ClubAdminClaim") ?? panic("ClubAdminClaim capability not found")
+        let clubAdminClaimRef = clubAdminClaimCap.borrow<auth(MFLClub.ClubAdminAction) &MFLClub.ClubAdmin>() ?? panic("Could not borrow ClubAdmin")
         let squadAdminClaimCap = self.adminProxyRef.getClaimCapability(name: "SquadAdminClaim") ?? panic("SquadAdminClaim capability not found")
-        let clubAdminClaimRef = clubAdminClaimCap.borrow<&{MFLClub.ClubAdminClaim}>() ?? panic("Could not borrow ClubAdminClaim")
-        let squadAdminClaimRef = squadAdminClaimCap.borrow<&{MFLClub.SquadAdminClaim}>() ?? panic("Could not borrow SquadAdminClaim")
+        let squadAdminClaimRef = squadAdminClaimCap.borrow<auth(MFLClub.SquadAdminAction) &MFLClub.SquadAdmin>() ?? panic("Could not borrow SquadAdmin")
 
         let competitionsMemberships: {UInt64: AnyStruct} = {}
         let leagueMembership: {String: AnyStruct} = {}
@@ -67,11 +67,11 @@ transaction(
             nftMetadata: metadata,
             metadata: metadata
         )
-        self.receiverRef.deposit(token: <- clubNFT)
+        self.receiverCollectionRef.deposit(token: <- clubNFT)
     }
 
     post {
-        self.receiverRef.getIDs().contains(clubID) : "Could not find club in post"
+        self.receiverCollectionRef.getIDs().contains(clubID) : "Could not find club in post"
         MFLClub.getClubData(id: clubID) != nil : "Could not find club data in post"
         MFLClub.getSquadData(id: squadID) != nil : "Could not find squad data in post"
     }

@@ -7,12 +7,12 @@ export const GET_CLUB_SERIAL_VIEW = `
     given a collection address and a club id,
   **/
   
-  pub fun main(address: Address, id: UInt64): MetadataViews.Serial {
+  access(all)
+  fun main(address: Address, id: UInt64): MetadataViews.Serial {
   
-      let collection = getAccount(address)
-          .getCapability(MFLClub.CollectionPublicPath)
-          .borrow<&{MetadataViews.ResolverCollection}>()
-          ?? panic("Could not borrow a reference to MFLClub collection")
+      let collection = getAccount(address).capabilities.borrow<&MFLClub.Collection>(
+          MFLClub.CollectionPublicPath
+      ) ?? panic("Could not borrow the collection reference")
   
       let nft = collection.borrowViewResolver(id: id)!
   

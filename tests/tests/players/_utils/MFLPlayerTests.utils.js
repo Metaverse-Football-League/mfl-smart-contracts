@@ -1,4 +1,4 @@
-import {getAccountAddress, getServiceAddress} from 'flow-js-testing';
+import {getAccountAddress, getServiceAddress} from '@onflow/flow-js-testing';
 import {testsUtils} from '../../_utils/tests.utils';
 
 const PLAYER_METADATA_DICTIONARY = {
@@ -6,19 +6,19 @@ const PLAYER_METADATA_DICTIONARY = {
   nationalities: ['FR', 'DE'],
   positions: ['ST', 'CAM'],
   preferredFoot: 'left',
-  ageAtMint: 17,
-  height: 180,
-  overall: 87,
-  pace: 56,
-  shooting: 66,
-  passing: 62,
-  dribbling: 61,
-  defense: 60,
-  physical: 59,
-  goalkeeping: 1,
+  ageAtMint: "17",
+  height: "18",
+  overall: "87",
+  pace: "56",
+  shooting: "66",
+  passing: "62",
+  dribbling: "61",
+  defense: "60",
+  physical: "59",
+  goalkeeping: "1",
   potential: 'someHash',
   longevity: 'someHash',
-  resistance: 65,
+  resistance: "65",
 };
 
 export const MFLPlayerTestsUtils = {
@@ -29,6 +29,8 @@ export const MFLPlayerTestsUtils = {
 
     const addressMap = {};
     await testsUtils.deployContract('NonFungibleToken', serviceAddress, '_libs/NonFungibleToken', addressMap);
+    await testsUtils.deployContract('DapperUtilityCoin', serviceAddress, '_libs/DapperUtilityCoin', addressMap);
+    await testsUtils.deployContract('NFTStorefront', serviceAddress, '_libs/NFTStorefront', addressMap);
     await testsUtils.deployContract('MetadataViews', serviceAddress, '_libs/MetadataViews', addressMap);
     await testsUtils.deployContract('FUSD', serviceAddress, '_libs/FUSD', addressMap);
     await testsUtils.deployContract('MFLAdmin', to, 'core/MFLAdmin', addressMap);
@@ -43,7 +45,7 @@ export const MFLPlayerTestsUtils = {
     const receiverAcctAddress = await getAccountAddress(receiverAccountName);
 
     await testsUtils.shallPass({name: 'mfl/core/create_admin_proxy.tx', signers: [receiverAcctAddress]});
-    const args = [receiverAcctAddress, `/private/${receiverAccountName}-playerAdminClaim`];
+    const args = [receiverAcctAddress];
     await testsUtils.shallPass({
       name: 'mfl/players/give_player_admin_claim.tx',
       args,
@@ -57,7 +59,7 @@ export const MFLPlayerTestsUtils = {
     const adminAccountAddress = await getAccountAddress(playerAdminAccountName);
     const signers = [adminAccountAddress];
     const args = [
-      id, MFLPlayerTestsUtils.PLAYER_DATA.season, MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
+      id.toString(), MFLPlayerTestsUtils.PLAYER_DATA.season, MFLPlayerTestsUtils.PLAYER_DATA.folderCID,
       ...Object.values(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY),
       adminAccountAddress
     ];
@@ -67,8 +69,8 @@ export const MFLPlayerTestsUtils = {
   PLAYER_METADATA_DICTIONARY,
 
   PLAYER_DATA: {
-    id: 1,
-    season: 1,
+    id: "1",
+    season: "1",
     folderCID: 'QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
     metadata: PLAYER_METADATA_DICTIONARY,
   },

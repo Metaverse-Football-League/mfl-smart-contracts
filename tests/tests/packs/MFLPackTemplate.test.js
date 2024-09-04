@@ -1,8 +1,7 @@
-import { emulator, getAccountAddress } from "flow-js-testing";
+import { emulator, getAccountAddress } from "@onflow/flow-js-testing";
 import { MFLPackTemplateTestsUtils } from "./_utils/MFLPackTemplateTests.utils";
 import { testsUtils } from "../_utils/tests.utils";
 import * as matchers from "jest-extended";
-import _ from "lodash";
 import { ERROR_UPDATE_PACK_TEMPLATE_SLOTS } from "./_transactions/error_update_pack_template_slots.tx";
 import { ERROR_ACCESS_PACK_TEMPLATES_DICTIONARY } from "./_transactions/error_access_pack_templates_dictionary.tx";
 
@@ -13,7 +12,7 @@ describe("MFLPackTemplate", () => {
   let addressMap = null;
 
   beforeEach(async () => {
-    await testsUtils.initEmulator(8082);
+    await testsUtils.initEmulator();
     addressMap = await MFLPackTemplateTestsUtils.deployMFLPackTemplateContract("AliceAdminAccount");
   });
 
@@ -25,10 +24,10 @@ describe("MFLPackTemplate", () => {
     const args = {
       name: "Base Pack",
       description: "This is a Base pack template",
-      maxSupply: 25000,
+      maxSupply: "25000",
       imageUrl: "http://img1-url",
       type: "BASE",
-      slotsNbr: 2,
+      slotsNbr: "2",
       slotsType: ["common", "uncommon"],
       slotsChances: [
         {
@@ -44,7 +43,7 @@ describe("MFLPackTemplate", () => {
           legendary: "0.5",
         },
       ],
-      slotsCount: [2, 1],
+      slotsCount: ["2", "1"],
     };
 
     const argsTx = [
@@ -78,23 +77,23 @@ describe("MFLPackTemplate", () => {
         expect(result.events[0]).toEqual(
           expect.objectContaining({
             type: `A.${testsUtils.sansPrefix(addressMap.MFLPackTemplate)}.MFLPackTemplate.Minted`,
-            data: { id: 1 },
+            data: { id: "1" },
           }),
         );
         const packTemplateData = await testsUtils.executeValidScript({
           name: "mfl/packs/get_pack_template.script",
-          args: [1],
+          args: ["1"],
         });
         expect(packTemplateData).toEqual({
-          id: 1,
+          id: "1",
           name: args.name,
           description: args.description,
           maxSupply: args.maxSupply,
-          currentSupply: 0,
+          currentSupply: "0",
           isOpenable: false,
           imageUrl: args.imageUrl,
           type: args.type,
-          slots: [...Array(args.slotsNbr)].map((_, i) => {
+          slots: new Array(parseInt(args.slotsNbr)).fill(0).map((_, i) => {
             return {
               type: args.slotsType[i],
               chances: args.slotsChances[i],
@@ -118,19 +117,19 @@ describe("MFLPackTemplate", () => {
         });
 
         // execute
-        const result = await testsUtils.shallPass({ name: "mfl/packs/set_allow_to_open_packs.tx", args: [1], signers });
+        const result = await testsUtils.shallPass({ name: "mfl/packs/set_allow_to_open_packs.tx", args: ["1"], signers });
 
         // assert
         expect(result.events).toHaveLength(1);
         expect(result.events[0]).toEqual(
           expect.objectContaining({
             type: `A.${testsUtils.sansPrefix(addressMap.MFLPackTemplate)}.MFLPackTemplate.AllowToOpenPacks`,
-            data: { id: 1 },
+            data: { id: "1" },
           }),
         );
         const packTemplate = await testsUtils.executeValidScript({
           name: "mfl/packs/get_pack_template.script",
-          args: [1],
+          args: ["1"],
         });
         expect(packTemplate.isOpenable).toBe(true);
       });
@@ -176,10 +175,10 @@ describe("MFLPackTemplate", () => {
     const args1 = {
       name: "Base Pack",
       description: "This is a Base pack template",
-      maxSupply: 25000,
+      maxSupply: "25000",
       imageUrl: "http://img1-url",
       type: "BASE",
-      slotsNbr: 2,
+      slotsNbr: "2",
       slotsType: ["common", "uncommon"],
       slotsChances: [
         {
@@ -195,16 +194,16 @@ describe("MFLPackTemplate", () => {
           legendary: "0.5",
         },
       ],
-      slotsCount: [2, 1],
+      slotsCount: ["2", "1"],
     };
 
     const args2 = {
       name: "Rare Pack",
       description: "This is a Rare pack template",
-      maxSupply: 11050,
+      maxSupply: "11050",
       imageUrl: "http://img2-url",
       type: "RARE",
-      slotsNbr: 3,
+      slotsNbr: "3",
       slotsType: ["common", "uncommon", "rare"],
       slotsChances: [
         {
@@ -226,7 +225,7 @@ describe("MFLPackTemplate", () => {
           legendary: "2",
         },
       ],
-      slotsCount: [3, 1, 1],
+      slotsCount: ["3", "1", "1"],
     };
 
     const args1Tx = [
@@ -277,7 +276,7 @@ describe("MFLPackTemplate", () => {
 
         // assert
         expect(packTemplateIds).toHaveLength(2);
-        expect(packTemplateIds).toEqual(expect.arrayContaining([1, 2]));
+        expect(packTemplateIds).toEqual(expect.arrayContaining(["1", "2"]));
       });
     });
 
@@ -309,15 +308,15 @@ describe("MFLPackTemplate", () => {
         expect(packTemplates).toEqual(
           expect.arrayContaining([
             {
-              id: 1,
+              id: "1",
               name: args1.name,
               description: args1.description,
               maxSupply: args1.maxSupply,
-              currentSupply: 0,
+              currentSupply: "0",
               isOpenable: false,
               imageUrl: args1.imageUrl,
               type: args1.type,
-              slots: [...Array(args1.slotsNbr)].map((_, i) => {
+              slots: [...Array(parseInt(args1.slotsNbr))].map((_, i) => {
                 return {
                   type: args1.slotsType[i],
                   chances: args1.slotsChances[i],
@@ -326,15 +325,15 @@ describe("MFLPackTemplate", () => {
               }),
             },
             {
-              id: 2,
+              id: "2",
               name: args2.name,
               description: args2.description,
               maxSupply: args2.maxSupply,
-              currentSupply: 0,
+              currentSupply: "0",
               isOpenable: false,
               imageUrl: args2.imageUrl,
               type: args2.type,
-              slots: [...Array(args2.slotsNbr)].map((_, i) => {
+              slots: [...Array(parseInt(args2.slotsNbr))].map((_, i) => {
                 return {
                   type: args2.slotsType[i],
                   chances: args2.slotsChances[i],
@@ -367,20 +366,20 @@ describe("MFLPackTemplate", () => {
         // execute
         const packTemplate = await testsUtils.executeValidScript({
           name: "mfl/packs/get_pack_template.script",
-          args: [2],
+          args: ["2"],
         });
 
         // assert
         expect(packTemplate).toEqual({
-          id: 2,
+          id: "2",
           name: args2.name,
           description: args2.description,
           maxSupply: args2.maxSupply,
-          currentSupply: 0,
+          currentSupply: "0",
           isOpenable: false,
           imageUrl: args2.imageUrl,
           type: args2.type,
-          slots: [...Array(args2.slotsNbr)].map((_, i) => {
+          slots: [...Array(parseInt(args2.slotsNbr))].map((_, i) => {
             return {
               type: args2.slotsType[i],
               chances: args2.slotsChances[i],
@@ -404,7 +403,7 @@ describe("MFLPackTemplate", () => {
         // execute
         const packTemplate = await testsUtils.executeValidScript({
           name: "mfl/packs/get_pack_template.script",
-          args: [2],
+          args: ["2"],
         });
 
         // assert
@@ -426,12 +425,12 @@ describe("MFLPackTemplate", () => {
       // execute
       const error = await testsUtils.shallRevert({
         code: ERROR_UPDATE_PACK_TEMPLATE_SLOTS,
-        args: [1],
+        args: ["1"],
         signers: [aliceAdminAccountAddress],
       });
 
       // assert
-      expect(error).toContain("cannot access `slots`: field has contract access");
+      expect(error).toContain("cannot access `slots`: field requires `contract` authorization");
     });
 
     test("should throw an error when get packTemplates dictionary in a tx", async () => {
@@ -448,12 +447,12 @@ describe("MFLPackTemplate", () => {
       // execute
       const error = await testsUtils.shallRevert({
         code: ERROR_ACCESS_PACK_TEMPLATES_DICTIONARY,
-        args: [1],
+        args: ["1"],
         signers: [aliceAdminAccountAddress],
       });
 
       // assert
-      expect(error).toContain("cannot access `packTemplates`: field has private access");
+      expect(error).toContain("cannot access `packTemplates`: field requires `self` authorization");
     });
   });
 });

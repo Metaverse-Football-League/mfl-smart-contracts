@@ -1,11 +1,12 @@
 export const ERROR_UPDATE_SQUAD_METADATA = `
-    import MFLClub from "../../../contracts/clubs/MFLClub.cdc"
+    import MFLClub from "../../../contracts/squads/MFLClub.cdc"
 
     /** 
         This tx tries to update a squad metadata.
     **/
 
-    pub fun transform(squad: MFLClub.SquadData ): MFLClub.SquadData {
+    access(all)
+    fun transform(squad: MFLClub.SquadData ): MFLClub.SquadData {
         squad.metadata = { "fakeMetadata": "" }
         return squad
     }
@@ -18,4 +19,4 @@ export const ERROR_UPDATE_SQUAD_METADATA = `
         }
         
     }
-`;
+`

@@ -1,7 +1,8 @@
 export const GET_ROYALTY_ADDRESS = `
   import MFLAdmin from "../../../contracts/players/MFLAdmin.cdc"
   
-  pub fun main(): Address {
+  access(all)
+  fun main(): Address {
       return MFLAdmin.royaltyAddress()
   }
 `

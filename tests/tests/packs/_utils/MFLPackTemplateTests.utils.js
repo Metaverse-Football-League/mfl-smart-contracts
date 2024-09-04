@@ -1,11 +1,10 @@
-import {getAccountAddress} from 'flow-js-testing';
+import {getAccountAddress} from '@onflow/flow-js-testing';
 import {testsUtils} from '../../_utils/tests.utils';
 
 export const MFLPackTemplateTestsUtils = {
 
   async deployMFLPackTemplateContract(toAccountName) {
     const to = await getAccountAddress(toAccountName);
-
     const addressMap = {};
     await testsUtils.deployContract('MFLAdmin', to, 'core/MFLAdmin', addressMap);
     await testsUtils.deployContract('MFLPackTemplate', to, 'packs/MFLPackTemplate', addressMap);
@@ -17,10 +16,9 @@ export const MFLPackTemplateTestsUtils = {
     const receiverAcctAddress = await getAccountAddress(receiverAccountName);
 
     await testsUtils.shallPass({name: 'mfl/core/create_admin_proxy.tx', signers: [receiverAcctAddress]});
-    const args = [receiverAcctAddress, `/private/${receiverAccountName}-packTemplateAdminClaim`];
     await testsUtils.shallPass({
       name: 'mfl/packs/give_pack_template_admin_claim.tx',
-      args,
+      args: [receiverAcctAddress],
       signers: [rootAdminAcctAddress],
     });
   },

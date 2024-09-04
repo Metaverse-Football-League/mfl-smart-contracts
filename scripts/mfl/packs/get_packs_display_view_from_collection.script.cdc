@@ -1,17 +1,27 @@
 import MetadataViews from "../../../contracts/_libs/MetadataViews.cdc"
 import MFLPack from "../../../contracts/packs/MFLPack.cdc"
 
-/** 
+/**
   This script returns a data representation array of packs
   given a collection address and following the Display view defined in the MedataViews contract.
 **/
 
-pub struct PackNFT {
-    pub let name: String
-    pub let description: String
-    pub let thumbnail: String
-    pub let owner: Address
-    pub let type: String
+access(all)
+struct PackNFT {
+    access(all)
+    let name: String
+
+    access(all)
+    let description: String
+
+    access(all)
+    let thumbnail: String
+
+    access(all)
+    let owner: Address
+
+    access(all)
+    let type: String
 
     init(
         name: String,
@@ -28,24 +38,24 @@ pub struct PackNFT {
     }
 }
 
-pub fun main(address: Address): [PackNFT] {
+access(all)
+fun main(address: Address): [PackNFT] {
 
     let collection = getAccount(address)
-        .getCapability(MFLPack.CollectionPublicPath)
-        .borrow<&{MetadataViews.ResolverCollection}>()
-        ?? panic("Could not borrow a reference to MFLPack collection")
+                             .capabilities.borrow<&MFLPack.Collection>(MFLPack.CollectionPublicPath)
+                             ?? panic("Could not borrow a reference to MFLPack collection")
 
     let packs: [PackNFT] = []
-    
+
     let ids = collection.getIDs()
 
     for id in ids {
         let nft = collection.borrowViewResolver(id: id)
         // Get the basic display information for this NFT
-        let view = nft.resolveView(Type<MetadataViews.Display>())!
-        let display = view as! MetadataViews.Display   
-        let owner: Address = nft.owner!.address
-        let nftType = nft.getType()
+        let view = nft!.resolveView(Type<MetadataViews.Display>())!
+        let display = view as! MetadataViews.Display
+        let owner: Address = nft!.owner!.address
+        let nftType = nft!.getType()
 
         packs.append(PackNFT(
             name: display.name,
@@ -56,6 +66,6 @@ pub fun main(address: Address): [PackNFT] {
             )
         )
     }
-   
+
     return packs
 }

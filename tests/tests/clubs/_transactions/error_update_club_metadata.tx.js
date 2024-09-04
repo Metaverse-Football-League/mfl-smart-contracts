@@ -5,7 +5,8 @@ export const ERROR_UPDATE_CLUB_METADATA = `
         This tx tries to update a club metadata.
     **/
 
-    pub fun transform(club: MFLClub.ClubData ): MFLClub.ClubData {
+    access(all)
+    fun transform(club: MFLClub.ClubData ): MFLClub.ClubData {
         club.metadata = { "fakeMetadata": "" }
         return club
     }
@@ -18,4 +19,4 @@ export const ERROR_UPDATE_CLUB_METADATA = `
         }
         
     }
-`;
+`

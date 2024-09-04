@@ -6,8 +6,10 @@ import MFLPack from "../../../contracts/packs/MFLPack.cdc"
   in a specific collection.
 **/
 
-pub fun main(address: Address): [UInt64] {
-    let packCollectionRef = getAccount(address).getCapability<&{NonFungibleToken.CollectionPublic}>(MFLPack.CollectionPublicPath).borrow()
-        ?? panic("Could not borrow a reference to MFLPack collection")
+access(all)
+fun main(address: Address): [UInt64] {
+    let packCollectionRef = getAccount(address).capabilities.borrow<&MFLPack.Collection>(
+                MFLPack.CollectionPublicPath
+            ) ?? panic("Could not get receiver reference to the NFT Collection")
     return packCollectionRef.getIDs()
 }

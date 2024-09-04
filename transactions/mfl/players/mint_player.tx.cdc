@@ -29,20 +29,21 @@ transaction(
     potential: String,
     longevity: String,
     resistance: UInt32,
-    receiverAddress: Address
+    receiverAddr: Address
 ) {
-    let playerAdminProxyRef: &MFLAdmin.AdminProxy
-    let receiverRef: &{NonFungibleToken.CollectionPublic}
+    let adminProxyRef: auth(MFLAdmin.AdminProxyAction) &MFLAdmin.AdminProxy
+    let receiverCollectionRef: &MFLPlayer.Collection
 
-    prepare(acct: AuthAccount) {
-        self.playerAdminProxyRef = acct.borrow<&MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
-        let playerCollectionCap = getAccount(receiverAddress).getCapability<&{NonFungibleToken.CollectionPublic}>(MFLPlayer.CollectionPublicPath)
-        self.receiverRef = playerCollectionCap.borrow() ?? panic("Could not borrow receiver reference")
+    prepare(acct: auth(BorrowValue) &Account) {
+        self.adminProxyRef = acct.storage.borrow<auth(MFLAdmin.AdminProxyAction) &MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
+        self.receiverCollectionRef = getAccount(receiverAddr).capabilities.borrow<&MFLPlayer.Collection>(
+                MFLPlayer.CollectionPublicPath
+            ) ?? panic("Could not get receiver reference to the NFT Collection")
     }
 
     execute {
-        let playerAdminClaimCap = self.playerAdminProxyRef.getClaimCapability(name: "PlayerAdminClaim") ?? panic("PlayerAdminClaim capability not found")
-        let playerAdminClaimRef = playerAdminClaimCap.borrow<&{MFLPlayer.PlayerAdminClaim}>() ?? panic("Could not borrow PlayerAdminClaim")
+        let playerAdminClaimCap = self.adminProxyRef.getClaimCapability(name: "PlayerAdminClaim") ?? panic("PlayerAdminClaim capability not found")
+        let playerAdminClaimRef = playerAdminClaimCap.borrow<auth(MFLPlayer.PlayerAdminAction) &MFLPlayer.PlayerAdmin>() ?? panic("Could not borrow PlayerAdmin")
 
         let metadata: {String: AnyStruct} = {}
         metadata.insert(key: "name", name)
@@ -70,11 +71,11 @@ transaction(
             season: season,
             image: image,
         )
-        self.receiverRef.deposit(token: <- playerNFT)
+        self.receiverCollectionRef.deposit(token: <- playerNFT)
     }
 
     post {
         MFLPlayer.getPlayerData(id: id) != nil: "Could not find player metadata in post"
-        self.receiverRef.getIDs().contains(id): "Could not find player in post"
+        self.receiverCollectionRef.getIDs().contains(id): "Could not find player in post"
     }
 }

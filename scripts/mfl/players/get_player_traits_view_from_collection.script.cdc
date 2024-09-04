@@ -7,12 +7,12 @@ import MFLPlayer from "../../../contracts/players/MFLPlayer.cdc"
   following the Traits View defined in the MedataViews contract.
 **/
 
-pub fun main(address: Address, id: UInt64): MetadataViews.Traits {
+access(all)
+fun main(address: Address, id: UInt64): MetadataViews.Traits {
 
-    let collection = getAccount(address)
-        .getCapability(MFLPlayer.CollectionPublicPath)
-        .borrow<&{MetadataViews.ResolverCollection}>()
-        ?? panic("Could not borrow a reference to MFLPlayer collection")
+    let collection = getAccount(address).capabilities.borrow<&MFLPlayer.Collection>(
+        MFLPlayer.CollectionPublicPath
+    ) ?? panic("Could not borrow the collection reference")
 
     let nft = collection.borrowViewResolver(id: id)!
 

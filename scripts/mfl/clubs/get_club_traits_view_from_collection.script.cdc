@@ -7,12 +7,12 @@ import MFLClub from "../../../contracts/clubs/MFLClub.cdc"
   following the Traits View defined in the MedataViews contract.
 **/
 
-pub fun main(address: Address, id: UInt64): MetadataViews.Traits {
+access(all)
+fun main(address: Address, id: UInt64): MetadataViews.Traits {
 
-    let collection = getAccount(address)
-        .getCapability(MFLClub.CollectionPublicPath)
-        .borrow<&{MetadataViews.ResolverCollection}>()
-        ?? panic("Could not borrow a reference to MFLClub collection")
+    let collection = getAccount(address).capabilities.borrow<&MFLClub.Collection>(
+           MFLClub.CollectionPublicPath
+       ) ?? panic("Could not borrow the collection reference")
 
     let nft = collection.borrowViewResolver(id: id)!
 
