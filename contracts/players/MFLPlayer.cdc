@@ -22,6 +22,12 @@ contract MFLPlayer: NonFungibleToken {
 	access(all)
 	event ContractInitialized()
 
+    access(all)
+    event Withdraw(id: UInt64, from: Address?)
+
+    access(all)
+    event Deposit(id: UInt64, to: Address?)
+
 	access(all)
 	event Minted(id: UInt64)
 
@@ -195,6 +201,9 @@ contract MFLPlayer: NonFungibleToken {
 		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT} {
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
+
+			emit Withdraw(id: token.id, from: self.owner?.address)
+
 			return <-token
 		}
 
@@ -219,6 +228,9 @@ contract MFLPlayer: NonFungibleToken {
 
 			// Add the new token to the dictionary which removes the old one
 			let oldToken <- self.ownedNFTs[id] <- token
+
+			emit Deposit(id: id, to: self.owner?.address)
+
 			destroy oldToken
 		}
 
