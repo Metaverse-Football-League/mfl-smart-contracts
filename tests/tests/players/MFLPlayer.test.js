@@ -877,21 +877,19 @@ describe('MFLPlayer', () => {
 
       test('should panic when updating a player metadata for an unknown player', async () => {
         // prepare
-        console.log('ooo');
         const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
           'AliceAdminAccount',
           'AliceAdminAccount',
         );
-        console.log('oazaz');
         const signers = [aliceAdminAccountAddress];
-        console.log('mma');
+
         // execute
         const error = await testsUtils.shallRevert({
           name: 'mfl/players/update_player_metadata.tx',
           args: ['1201', ...Object.values(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY)],
           signers,
         });
-        console.log('aazaz');
+
         // assert
         expect(error).toContain('Data not found');
       });

@@ -30,7 +30,6 @@ export const testsUtils = {
 
   async shallRevert(props) {
     const [a, error] = await sendTransaction(props);
-    console.log("iii", a);
     if (!error) {
       throw `Should have thrown an error for ${props.name}`;
     }
