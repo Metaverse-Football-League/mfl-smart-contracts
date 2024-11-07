@@ -275,6 +275,12 @@ contract MFLPlayer: NonFungibleToken {
 		fun createEmptyCollection(): @{NonFungibleToken.Collection} {
 			return <-MFLPlayer.createEmptyCollection(nftType: Type<@MFLPlayer.NFT>())
 		}
+
+		access(contract)
+		view fun emitNFTUpdated(id: UInt64) {
+            let authTokenRef = (&self.ownedNFTs[id] as auth(NonFungibleToken.Update) &{NonFungibleToken.NFT}?)!
+            MFLPlayer.emitNFTUpdated(authTokenRef)
+		}
 	}
 
 	// Public function that anyone can call to create a new empty collection
