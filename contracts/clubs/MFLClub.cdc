@@ -414,7 +414,7 @@ contract MFLClub: NonFungibleToken {
 						city = clubMetadata["foundationLicenseCity"] as! String?? ?? nil
 						country = clubMetadata["foundationLicenseCountry"] as! String?? ?? nil
 					}
-					var division: UInt32? = clubMetadata["division"] as! UInt32?
+					let division: UInt32? = clubMetadata["division"] as! UInt32?
 
 					traits.append(MetadataViews.Trait(name: "city", value: city, displayType: "String", rarity: nil))
 					traits.append(MetadataViews.Trait(name: "country", value: country, displayType: "String", rarity: nil))
