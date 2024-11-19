@@ -377,11 +377,6 @@ contract MFLPlayer: NonFungibleToken {
 			    collectionRef.emitNFTUpdated(id)
 			}
 		}
-
-		access(PlayerAdminAction)
-		fun createPlayerAdmin(): @PlayerAdmin {
-			return <-create PlayerAdmin()
-		}
 	}
 
 	init() {

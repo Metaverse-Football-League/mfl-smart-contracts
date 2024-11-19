@@ -721,11 +721,6 @@ contract MFLClub: NonFungibleToken {
 			}
 			(MFLClub.clubsDatas[id]!).setSquadsIDs(squadsIDs: squadsIDs)
 		}
-
-		access(ClubAdminAction)
-		fun createClubAdmin(): @ClubAdmin {
-			return <-create ClubAdmin()
-		}
 	}
 
 	// Deprecated: Only here for backward compatibility.
@@ -795,11 +790,6 @@ contract MFLClub: NonFungibleToken {
 					"Squad data not found"
 			}
 			(MFLClub.squadsDatas[id]!).removeCompetitionMembership(competitionID: competitionID)
-		}
-
-		access(SquadAdminAction)
-		fun createSquadAdmin(): @SquadAdmin {
-			return <-create SquadAdmin()
 		}
 	}
 

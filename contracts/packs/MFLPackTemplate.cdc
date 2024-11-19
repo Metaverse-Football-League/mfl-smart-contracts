@@ -250,11 +250,6 @@ contract MFLPackTemplate {
 			let oldPackTemplate <- MFLPackTemplate.packTemplates[newPackTemplate.id] <- newPackTemplate
 			destroy oldPackTemplate
 		}
-
-		access(PackTemplateAdminAction)
-		fun createPackTemplateAdmin(): @PackTemplateAdmin {
-			return <-create PackTemplateAdmin()
-		}
 	}
 
 	init() {
