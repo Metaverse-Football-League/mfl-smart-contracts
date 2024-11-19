@@ -24,11 +24,16 @@ transaction(
     potential: String,
     longevity: String,
     resistance: UInt32,
+    ownerAddr: Address
 ) {
     let adminProxyRef: auth(MFLAdmin.AdminProxyAction) &MFLAdmin.AdminProxy
+    let ownerCollectionRef: &MFLPlayer.Collection
 
     prepare(acct: auth(BorrowValue) &Account) {
         self.adminProxyRef = acct.storage.borrow<auth(MFLAdmin.AdminProxyAction) &MFLAdmin.AdminProxy>(from: MFLAdmin.AdminProxyStoragePath) ?? panic("Could not borrow admin proxy reference")
+        self.ownerCollectionRef = getAccount(ownerAddr).capabilities.borrow<&MFLPlayer.Collection>(
+                    MFLPlayer.CollectionPublicPath
+                ) ?? panic("Could not get receiver reference to the NFT Collection")
     }
 
     execute {
@@ -57,6 +62,7 @@ transaction(
         playerAdminClaimRef.updatePlayerMetadata(
             id: id,
             metadata: metadata,
+            collectionRefOptional: self.ownerCollectionRef
         )
     }
 }
