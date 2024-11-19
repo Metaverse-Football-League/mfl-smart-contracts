@@ -295,31 +295,12 @@ describe('MFLPack', () => {
         });
 
         // assert
-        expect(result.events).toHaveLength(2);
-        expect(result.events[0]).toEqual(
-          expect.objectContaining({
-            type: 'A.f8d6e0586b0a20c7.NonFungibleToken.Withdrawn',
-            data: {
-              id: '1',
-              from: bobAccountAddress,
-              providerUUID: expect.any(String),
-              type: 'A.179b6b1cb6755e31.MFLPack.NFT',
-              uuid: expect.any(String),
-            },
-          }),
-        );
-        expect(result.events[1]).toEqual(
-          expect.objectContaining({
-            type: `A.f8d6e0586b0a20c7.NonFungibleToken.Deposited`,
-            data: {
-              id: '1',
-              to: jackAccountAddress,
-              collectionUUID: expect.any(String),
-              type: 'A.179b6b1cb6755e31.MFLPack.NFT',
-              uuid: expect.any(String),
-            },
-          }),
-        );
+        const expectedEvents = [
+            ...testsUtils.createExpectedWithdrawEvent('MFLPack', '1', bobAccountAddress),
+            ...testsUtils.createExpectedDepositedEvent('MFLPack', '1', jackAccountAddress),
+        ]
+        expect(result.events).toHaveLength(expectedEvents.length);
+        expect(result.events).toEqual(expectedEvents);
         const bobPackIds = await testsUtils.executeValidScript({
           name: 'mfl/packs/get_ids_in_collection.script',
           args: [bobAccountAddress],
@@ -467,17 +448,17 @@ describe('MFLPack', () => {
         });
 
         // assert
-        expect(result.events).toHaveLength(8);
+        expect(result.events).toHaveLength(16);
         expect(result.events).toEqual(
           expect.arrayContaining([
-            testsUtils.createExpectedWithdrawEvent('MFLPack', '1', bobAccountAddress),
-            testsUtils.createExpectedDepositedEvent('MFLPack', '1', null),
-            testsUtils.createExpectedWithdrawEvent('MFLPack', '2', bobAccountAddress),
-            testsUtils.createExpectedDepositedEvent('MFLPack', '2', null),
-            testsUtils.createExpectedWithdrawEvent('MFLPack', '2', null),
-            testsUtils.createExpectedDepositedEvent('MFLPack', '2', jackAccountAddress),
-            testsUtils.createExpectedWithdrawEvent('MFLPack', '1', null),
-            testsUtils.createExpectedDepositedEvent('MFLPack', '1', jackAccountAddress),
+            ...testsUtils.createExpectedWithdrawEvent('MFLPack', '1', bobAccountAddress),
+            ...testsUtils.createExpectedDepositedEvent('MFLPack', '1', null),
+            ...testsUtils.createExpectedWithdrawEvent('MFLPack', '2', bobAccountAddress),
+            ...testsUtils.createExpectedDepositedEvent('MFLPack', '2', null),
+            ...testsUtils.createExpectedWithdrawEvent('MFLPack', '2', null),
+            ...testsUtils.createExpectedDepositedEvent('MFLPack', '2', jackAccountAddress),
+            ...testsUtils.createExpectedWithdrawEvent('MFLPack', '1', null),
+            ...testsUtils.createExpectedDepositedEvent('MFLPack', '1', jackAccountAddress),
           ]),
         );
         const bobPackIds = await testsUtils.executeValidScript({
@@ -590,6 +571,14 @@ describe('MFLPack', () => {
           signers: [bobAccountAddress],
         });
         await testsUtils.shallPass({
+          name: 'mfl/players/create_and_link_player_collection.tx',
+          signers: [bobAccountAddress],
+        });
+        await testsUtils.shallPass({
+          name: 'mfl/clubs/create_and_link_club_collection.tx',
+          signers: [bobAccountAddress],
+        });
+        await testsUtils.shallPass({
           name: 'mfl/packs/batch_mint_pack.tx',
           args: argsMint,
           signers: [aliceAdminAccountAddress],
@@ -614,9 +603,10 @@ describe('MFLPack', () => {
           args: [bobAccountAddress],
         });
         expect(packIds).toEqual(['1']);
-        expect(result.events).toHaveLength(3);
-        expect(result.events[0]).toEqual(testsUtils.createExpectedWithdrawEvent('MFLPack', '2', bobAccountAddress));
-        expect(result.events[1]).toEqual(
+        expect(result.events).toHaveLength(4);
+        expect(result.events[0]).toEqual(testsUtils.createExpectedWithdrawEvent('MFLPack', '2', bobAccountAddress)[0]);
+        expect(result.events[1]).toEqual(testsUtils.createExpectedWithdrawEvent('MFLPack', '2', bobAccountAddress)[1]);
+        expect(result.events[2]).toEqual(
           expect.objectContaining({
             type: `A.${testsUtils.sansPrefix(addressMap.MFLPack)}.MFLPack.Opened`,
             data: {
@@ -625,7 +615,7 @@ describe('MFLPack', () => {
             },
           }),
         );
-        expect(result.events[2]).toEqual(
+        expect(result.events[3]).toEqual(
           expect.objectContaining({
             type: `A.f8d6e0586b0a20c7.NonFungibleToken.NFT.ResourceDestroyed`,
             data: {id: '2', uuid: expect.toBeString()},

@@ -92,13 +92,15 @@ describe('MFLPlayer', () => {
         });
 
         // assert
-        expect(result.events).toHaveLength(2);
-        expect(result.events[0]).toEqual(
-          testsUtils.createExpectedWithdrawEvent('MFLPlayer', '1', aliceAdminAccountAddress),
-        );
-        expect(result.events[1]).toEqual(
-          testsUtils.createExpectedDepositedEvent('MFLPlayer', '1', bobAccountAddress),
-        );
+        const expectedEvents = [
+            ...testsUtils.createExpectedWithdrawEvent('MFLPlayer', '1', aliceAdminAccountAddress),
+            ...testsUtils.createExpectedDepositedEvent('MFLPlayer', '1', bobAccountAddress),
+        ]
+        expect(result.events).toHaveLength(expectedEvents.length);
+        expect(result.events[0]).toEqual(expectedEvents[0]);
+        expect(result.events[1]).toEqual(expectedEvents[1]);
+        expect(result.events[2]).toEqual(expectedEvents[2]);
+        expect(result.events[3]).toEqual(expectedEvents[3]);
         const alicePlayersIds = await testsUtils.executeValidScript({
           name: 'mfl/players/get_ids_in_collection.script',
           args: [aliceAdminAccountAddress],
@@ -212,17 +214,17 @@ describe('MFLPlayer', () => {
         });
 
         // assert
-        expect(result.events).toHaveLength(8);
+        expect(result.events).toHaveLength(16);
         expect(result.events).toEqual(
           expect.arrayContaining([
-            testsUtils.createExpectedWithdrawEvent('MFLPlayer', '1', aliceAdminAccountAddress),
-            testsUtils.createExpectedWithdrawEvent('MFLPlayer', '31', aliceAdminAccountAddress),
-            testsUtils.createExpectedDepositedEvent('MFLPlayer', '1', null),
-            testsUtils.createExpectedDepositedEvent('MFLPlayer', '31', null),
-            testsUtils.createExpectedWithdrawEvent('MFLPlayer', '1', null),
-            testsUtils.createExpectedDepositedEvent('MFLPlayer', '1', bobAccountAddress),
-            testsUtils.createExpectedWithdrawEvent('MFLPlayer', '31', null),
-            testsUtils.createExpectedDepositedEvent('MFLPlayer', '31', bobAccountAddress),
+            ...testsUtils.createExpectedWithdrawEvent('MFLPlayer', '1', aliceAdminAccountAddress),
+            ...testsUtils.createExpectedWithdrawEvent('MFLPlayer', '31', aliceAdminAccountAddress),
+            ...testsUtils.createExpectedDepositedEvent('MFLPlayer', '1', null),
+            ...testsUtils.createExpectedDepositedEvent('MFLPlayer', '31', null),
+            ...testsUtils.createExpectedWithdrawEvent('MFLPlayer', '1', null),
+            ...testsUtils.createExpectedDepositedEvent('MFLPlayer', '1', bobAccountAddress),
+            ...testsUtils.createExpectedWithdrawEvent('MFLPlayer', '31', null),
+            ...testsUtils.createExpectedDepositedEvent('MFLPlayer', '31', bobAccountAddress),
           ]),
         );
 
@@ -413,7 +415,7 @@ describe('MFLPlayer', () => {
         // assert
         expect(playerDisplayView).toEqual({
           name: 'some name',
-          description: 'MFL Player #100022',
+          description: 'Before purchasing this MFL Player, make sure to check the player\'s in-game profile for the latest information: https://app.playmfl.com/players/100022',
           thumbnail: 'ipfs://QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
           owner: aliceAdminAccountAddress,
           type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.NFT`,
@@ -503,7 +505,7 @@ describe('MFLPlayer', () => {
               displayType: 'Number',
               rarity: null,
             },
-            {name: 'height', value: '180', displayType: 'Number', rarity: null},
+            {name: 'height', value: '18', displayType: 'Number', rarity: null},
             {name: 'overall', value: '87', displayType: 'Number', rarity: null},
             {name: 'pace', value: '56', displayType: 'Number', rarity: null},
             {
@@ -574,14 +576,14 @@ describe('MFLPlayer', () => {
           expect.arrayContaining([
             {
               name: 'some name',
-              description: 'MFL Player #100022',
+              description: 'Before purchasing this MFL Player, make sure to check the player\'s in-game profile for the latest information: https://app.playmfl.com/players/100022',
               thumbnail: 'ipfs://QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
               owner: aliceAdminAccountAddress,
               type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.NFT`,
             },
             {
               name: 'some name',
-              description: 'MFL Player #100023',
+              description: 'Before purchasing this MFL Player, make sure to check the player\'s in-game profile for the latest information: https://app.playmfl.com/players/100023',
               thumbnail: 'ipfs://QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
               owner: aliceAdminAccountAddress,
               type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.NFT`,
@@ -764,7 +766,7 @@ describe('MFLPlayer', () => {
         const result = await testsUtils.shallPass({name: 'mfl/players/mint_player.tx', args, signers});
 
         // assert
-        expect(result.events).toHaveLength(2);
+        expect(result.events).toHaveLength(3);
         expect(result.events[0]).toEqual(
           expect.objectContaining({
             type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Minted`,
@@ -772,7 +774,10 @@ describe('MFLPlayer', () => {
           }),
         );
         expect(result.events[1]).toEqual(
-          testsUtils.createExpectedDepositedEvent('MFLPlayer', playerID, aliceAdminAccountAddress),
+          testsUtils.createExpectedDepositedEvent('MFLPlayer', playerID, aliceAdminAccountAddress)[0],
+        );
+        expect(result.events[2]).toEqual(
+          testsUtils.createExpectedDepositedEvent('MFLPlayer', playerID, aliceAdminAccountAddress)[1],
         );
         const playerData = await testsUtils.executeValidScript({
           name: 'mfl/players/get_player_data.script',
@@ -848,7 +853,7 @@ describe('MFLPlayer', () => {
         updatedMetadata.overall = '99';
         const result = await testsUtils.shallPass({
           name: 'mfl/players/update_player_metadata.tx',
-          args: [playerID, ...Object.values(updatedMetadata)],
+          args: [playerID, ...Object.values(updatedMetadata), aliceAdminAccountAddress],
           signers,
         });
 
@@ -866,11 +871,17 @@ describe('MFLPlayer', () => {
             path: null,
           },
         });
-        expect(result.events).toHaveLength(1);
+        expect(result.events).toHaveLength(2);
         expect(result.events[0]).toEqual(
           expect.objectContaining({
             type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.Updated`,
             data: {id: playerID},
+          }),
+        );
+        expect(result.events[1]).toEqual(
+          expect.objectContaining({
+            type: `A.${testsUtils.sansPrefix(addressMap.NonFungibleToken)}.NonFungibleToken.Updated`,
+            data: {id: playerID, owner: aliceAdminAccountAddress, type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.NFT`, uuid: expect.any(String)},
           }),
         );
       });
@@ -886,7 +897,7 @@ describe('MFLPlayer', () => {
         // execute
         const error = await testsUtils.shallRevert({
           name: 'mfl/players/update_player_metadata.tx',
-          args: ['1201', ...Object.values(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY)],
+          args: ['1201', ...Object.values(MFLPlayerTestsUtils.PLAYER_METADATA_DICTIONARY), aliceAdminAccountAddress],
           signers,
         });
 
