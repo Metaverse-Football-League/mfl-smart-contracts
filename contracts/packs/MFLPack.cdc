@@ -301,11 +301,6 @@ contract MFLPack: NonFungibleToken {
 			}
 			return <-newCollection
 		}
-
-		access(PackAdminAction)
-		fun createPackAdmin(): @PackAdmin {
-			return <-create PackAdmin()
-		}
 	}
 
 	init() {

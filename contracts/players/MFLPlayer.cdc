@@ -22,11 +22,11 @@ contract MFLPlayer: NonFungibleToken {
 	access(all)
 	event ContractInitialized()
 
-    access(all)
-    event Withdraw(id: UInt64, from: Address?)
+	access(all)
+	event Withdraw(id: UInt64, from: Address?)
 
-    access(all)
-    event Deposit(id: UInt64, to: Address?)
+	access(all)
+	event Deposit(id: UInt64, to: Address?)
 
 	access(all)
 	event Minted(id: UInt64)
@@ -121,7 +121,8 @@ contract MFLPlayer: NonFungibleToken {
 				case Type<MetadataViews.Display>():
 					return MetadataViews.Display(
 						name: playerData.metadata["name"] as! String? ?? "",
-						description: "MFL Player #".concat(playerData.id.toString()),
+						description: "Before purchasing this MFL Player, make sure to check the player's in-game profile for the latest information: https://app.playmfl.com/players/"
+							.concat(playerData.id.toString()),
 						thumbnail: playerData.image
 					)
 				case Type<MetadataViews.Royalties>():
@@ -130,9 +131,9 @@ contract MFLPlayer: NonFungibleToken {
 					royalties.append(MetadataViews.Royalty(receiver: royaltyReceiverCap!, cut: 0.05, description: "Creator Royalty"))
 					return MetadataViews.Royalties(royalties)
 				case Type<MetadataViews.NFTCollectionDisplay>():
-                     return MFLPlayer.resolveContractView(resourceType: Type<@MFLPlayer.NFT>(), viewType: Type<MetadataViews.NFTCollectionDisplay>())
+					return MFLPlayer.resolveContractView(resourceType: Type<@MFLPlayer.NFT>(), viewType: Type<MetadataViews.NFTCollectionDisplay>())
 				case Type<MetadataViews.NFTCollectionData>():
-                     return MFLPlayer.resolveContractView(resourceType: Type<@MFLPlayer.NFT>(), viewType: Type<MetadataViews.NFTCollectionData>())
+					return MFLPlayer.resolveContractView(resourceType: Type<@MFLPlayer.NFT>(), viewType: Type<MetadataViews.NFTCollectionData>())
 				case Type<MetadataViews.ExternalURL>():
 					return MetadataViews.ExternalURL("https://playmfl.com")
 				case Type<MetadataViews.Traits>():
@@ -275,6 +276,11 @@ contract MFLPlayer: NonFungibleToken {
 		fun createEmptyCollection(): @{NonFungibleToken.Collection} {
 			return <-MFLPlayer.createEmptyCollection(nftType: Type<@MFLPlayer.NFT>())
 		}
+
+		access(contract)
+		view fun emitNFTUpdated(_ id: UInt64) {
+            MFLPlayer.emitNFTUpdated((&self.ownedNFTs[id] as auth(NonFungibleToken.Update) &{NonFungibleToken.NFT}?)!)
+		}
 	}
 
 	// Public function that anyone can call to create a new empty collection
@@ -292,48 +298,48 @@ contract MFLPlayer: NonFungibleToken {
 	access(all)
 	view fun getContractViews(resourceType: Type?): [Type] {
 		return [
-            Type<MetadataViews.NFTCollectionData>(),
-            Type<MetadataViews.NFTCollectionDisplay>()
-        ]
+			Type<MetadataViews.NFTCollectionData>(),
+			Type<MetadataViews.NFTCollectionDisplay>()
+		]
 	}
 
 	access(all)
 	fun resolveContractView(resourceType: Type?, viewType: Type): AnyStruct? {
-        switch viewType {
-            case Type<MetadataViews.NFTCollectionData>():
-                let collectionData = MetadataViews.NFTCollectionData(
-                    storagePath: self.CollectionStoragePath,
-                    publicPath: self.CollectionPublicPath,
-                    publicCollection: Type<&MFLPlayer.Collection>(),
-                    publicLinkedType: Type<&MFLPlayer.Collection>(),
-                    createEmptyCollectionFunction: (fun(): @{NonFungibleToken.Collection} {
-                        return <-MFLPlayer.createEmptyCollection(nftType: Type<@MFLPlayer.NFT>())
-                    })
-                )
-                return collectionData
-            case Type<MetadataViews.NFTCollectionDisplay>():
-                return MetadataViews.NFTCollectionDisplay(
-                    name: "MFL Player Collection",
-                    description: "Build your own football club, make strategic decisions, and live the thrill of real competition. Join a universe where the stakes–and your rivals–are real.",
-                    externalURL: MetadataViews.ExternalURL("https://playmfl.com"),
-                    squareImage: MetadataViews.Media(
+		switch viewType {
+			case Type<MetadataViews.NFTCollectionData>():
+				let collectionData = MetadataViews.NFTCollectionData(
+					storagePath: self.CollectionStoragePath,
+					publicPath: self.CollectionPublicPath,
+					publicCollection: Type<&MFLPlayer.Collection>(),
+					publicLinkedType: Type<&MFLPlayer.Collection>(),
+					createEmptyCollectionFunction: (fun(): @{NonFungibleToken.Collection} {
+						return <-MFLPlayer.createEmptyCollection(nftType: Type<@MFLPlayer.NFT>())
+					})
+				)
+				return collectionData
+			case Type<MetadataViews.NFTCollectionDisplay>():
+				return MetadataViews.NFTCollectionDisplay(
+					name: "MFL Player Collection",
+					description: "Build your own football club, make strategic decisions, and live the thrill of real competition. Join a universe where the stakes–and your rivals–are real.",
+					externalURL: MetadataViews.ExternalURL("https://playmfl.com"),
+					squareImage: MetadataViews.Media(
 						file: MetadataViews.HTTPFile(url: "https://app.playmfl.com/img/mflAvatar.png"),
 						mediaType: "image/png"
 					),
-                    bannerImage: MetadataViews.Media(
+					bannerImage: MetadataViews.Media(
 						file: MetadataViews.HTTPFile(url: "https://app.playmfl.com/img/thumbnail.png"),
 						mediaType: "image/png"
 					),
-                    socials: {
+					socials: {
 						"twitter": MetadataViews.ExternalURL("https://twitter.com/playMFL"),
 						"discord": MetadataViews.ExternalURL("https://discord.gg/pEDTR4wSPr"),
 						"linkedin": MetadataViews.ExternalURL("https://www.linkedin.com/company/playmfl"),
 						"medium": MetadataViews.ExternalURL("https://medium.com/playmfl")
 					}
-                )
-        }
-        return nil
-    }
+				)
+		}
+		return nil
+	}
 
 	// Deprecated: Only here for backward compatibility.
 	access(all)
@@ -362,16 +368,14 @@ contract MFLPlayer: NonFungibleToken {
 
 		// Update Player Metadata
 		access(PlayerAdminAction)
-		fun updatePlayerMetadata(id: UInt64, metadata: {String: AnyStruct}) {
+		fun updatePlayerMetadata(id: UInt64, metadata: {String: AnyStruct}, collectionRefOptional: &MFLPlayer.Collection?) {
 			let playerData = MFLPlayer.playersDatas[id] ?? panic("Data not found")
 			let updatedPlayerData = MFLPlayer.PlayerData(id: playerData.id, metadata: metadata, season: playerData.season, image: playerData.image)
 			MFLPlayer.playersDatas[id] = updatedPlayerData
 			emit Updated(id: id)
-		}
-
-		access(PlayerAdminAction)
-		fun createPlayerAdmin(): @PlayerAdmin {
-			return <-create PlayerAdmin()
+			if let collectionRef = collectionRefOptional {
+			    collectionRef.emitNFTUpdated(id)
+			}
 		}
 	}
 

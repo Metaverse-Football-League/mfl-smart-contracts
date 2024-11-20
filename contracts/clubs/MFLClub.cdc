@@ -25,11 +25,11 @@ contract MFLClub: NonFungibleToken {
 	access(all)
 	event ContractInitialized()
 
-    access(all)
-    event Withdraw(id: UInt64, from: Address?)
+	access(all)
+	event Withdraw(id: UInt64, from: Address?)
 
-    access(all)
-    event Deposit(id: UInt64, to: Address?)
+	access(all)
+	event Deposit(id: UInt64, to: Address?)
 
 	access(all)
 	event ClubMinted(id: UInt64)
@@ -372,11 +372,19 @@ contract MFLClub: NonFungibleToken {
 							)
 						)
 					} else {
+						let clubMetadata = clubData.getMetadata()
+						let division: UInt32? = clubMetadata["division"] as! UInt32?
+						let clubDescription = clubMetadata["description"] as! String? ?? ""
 						return MetadataViews.Display(
-							name: clubData.getMetadata()["name"] as! String? ?? "",
-							description: clubData.getMetadata()["description"] as! String? ?? "",
+							name: clubMetadata["name"] as! String? ?? "",
+							description: "Before purchasing this MFL Club, make sure to check the club's in-game profile for the latest information: https://app.playmfl.com/clubs/"
+								.concat(clubData.id.toString())
+								.concat(clubDescription != "" ? "\n\n---\n\n".concat(clubDescription) : ""),
 							thumbnail: MetadataViews.HTTPFile(
-								url: "https://d13e14gtps4iwl.cloudfront.net/u/clubs/".concat(clubData.id.toString()).concat("/logo.png")
+								url: "https://d13e14gtps4iwl.cloudfront.net/u/clubs/"
+									.concat(clubData.id.toString())
+									.concat("/logo.png")
+									.concat(division != nil ? "?v=".concat(division!.toString()) : "")
 							)
 						)
 					}
@@ -406,26 +414,34 @@ contract MFLClub: NonFungibleToken {
 						city = clubMetadata["foundationLicenseCity"] as! String?? ?? nil
 						country = clubMetadata["foundationLicenseCountry"] as! String?? ?? nil
 					}
+					let division: UInt32? = clubMetadata["division"] as! UInt32?
+
 					traits.append(MetadataViews.Trait(name: "city", value: city, displayType: "String", rarity: nil))
 					traits.append(MetadataViews.Trait(name: "country", value: country, displayType: "String", rarity: nil))
-					let squadsIDs = clubData.getSquadIDs()
-					if squadsIDs.length > 0 {
-						let firstSquadID = squadsIDs[0]
-						if let squadData = MFLClub.getSquadData(id: firstSquadID) {
-							if let globalLeagueMembership = squadData.getCompetitionsMemberships()[1] {
-								if let globalLeagueMembershipDataOptional = globalLeagueMembership as? {String: AnyStruct}? {
-									if let globalLeagueMembershipData = globalLeagueMembershipDataOptional {
-										traits.append(MetadataViews.Trait(
-											name: "division",
-											value: globalLeagueMembershipData["division"] as! UInt32?,
-											displayType: "Number",
-											rarity: nil
-										))
+
+					if division != nil {
+						traits.append(MetadataViews.Trait(name: "division", value: division, displayType: "Number", rarity: nil))
+					} else {
+						let squadsIDs = clubData.getSquadIDs()
+						if squadsIDs.length > 0 {
+							let firstSquadID = squadsIDs[0]
+							if let squadData = MFLClub.getSquadData(id: firstSquadID) {
+								if let globalLeagueMembership = squadData.getCompetitionsMemberships()[1] {
+									if let globalLeagueMembershipDataOptional = globalLeagueMembership as? {String: AnyStruct}? {
+										if let globalLeagueMembershipData = globalLeagueMembershipDataOptional {
+											traits.append(MetadataViews.Trait(
+												name: "division",
+												value: globalLeagueMembershipData["division"] as! UInt32?,
+												displayType: "Number",
+												rarity: nil
+											))
+										}
 									}
 								}
 							}
 						}
 					}
+
 					return MetadataViews.Traits(traits)
 				case Type<MetadataViews.Serial>():
 					return MetadataViews.Serial(clubData.id)
@@ -583,6 +599,11 @@ contract MFLClub: NonFungibleToken {
 			return <-create Collection()
 		}
 
+		access(contract)
+		view fun emitNFTUpdated(_ id: UInt64) {
+			MFLClub.emitNFTUpdated((&self.ownedNFTs[id] as auth(NonFungibleToken.Update) &{NonFungibleToken.NFT}?)!)
+		}
+
 		init() {
 			self.ownedNFTs <-{}
 		}
@@ -609,48 +630,48 @@ contract MFLClub: NonFungibleToken {
 	access(all)
 	view fun getContractViews(resourceType: Type?): [Type] {
 		return [
-            Type<MetadataViews.NFTCollectionData>(),
-            Type<MetadataViews.NFTCollectionDisplay>()
-        ]
+			Type<MetadataViews.NFTCollectionData>(),
+			Type<MetadataViews.NFTCollectionDisplay>()
+		]
 	}
 
 	access(all)
 	fun resolveContractView(resourceType: Type?, viewType: Type): AnyStruct? {
-        switch viewType {
-            case Type<MetadataViews.NFTCollectionData>():
-                let collectionData = MetadataViews.NFTCollectionData(
-                    storagePath: self.CollectionStoragePath,
-                    publicPath: self.CollectionPublicPath,
-                    publicCollection: Type<&MFLClub.Collection>(),
-                    publicLinkedType: Type<&MFLClub.Collection>(),
-                    createEmptyCollectionFunction: (fun(): @{NonFungibleToken.Collection} {
-                        return <-MFLClub.createEmptyCollection(nftType: Type<@MFLClub.NFT>())
-                    })
-                )
-                return collectionData
-            case Type<MetadataViews.NFTCollectionDisplay>():
-                return MetadataViews.NFTCollectionDisplay(
-                    name: "MFL Club Collection",
-                    description: "Build your own football club, make strategic decisions, and live the thrill of real competition. Join a universe where the stakes–and your rivals–are real.",
-                    externalURL: MetadataViews.ExternalURL("https://playmfl.com"),
-                    squareImage: MetadataViews.Media(
+		switch viewType {
+			case Type<MetadataViews.NFTCollectionData>():
+				let collectionData = MetadataViews.NFTCollectionData(
+					storagePath: self.CollectionStoragePath,
+					publicPath: self.CollectionPublicPath,
+					publicCollection: Type<&MFLClub.Collection>(),
+					publicLinkedType: Type<&MFLClub.Collection>(),
+					createEmptyCollectionFunction: (fun(): @{NonFungibleToken.Collection} {
+						return <-MFLClub.createEmptyCollection(nftType: Type<@MFLClub.NFT>())
+					})
+				)
+				return collectionData
+			case Type<MetadataViews.NFTCollectionDisplay>():
+				return MetadataViews.NFTCollectionDisplay(
+					name: "MFL Club Collection",
+					description: "Build your own football club, make strategic decisions, and live the thrill of real competition. Join a universe where the stakes–and your rivals–are real.",
+					externalURL: MetadataViews.ExternalURL("https://playmfl.com"),
+					squareImage: MetadataViews.Media(
 						file: MetadataViews.HTTPFile(url: "https://app.playmfl.com/img/mflAvatar.png"),
 						mediaType: "image/png"
 					),
-                    bannerImage: MetadataViews.Media(
+					bannerImage: MetadataViews.Media(
 						file: MetadataViews.HTTPFile(url: "https://app.playmfl.com/img/thumbnail.png"),
 						mediaType: "image/png"
 					),
-                    socials: {
+					socials: {
 						"twitter": MetadataViews.ExternalURL("https://twitter.com/playMFL"),
 						"discord": MetadataViews.ExternalURL("https://discord.gg/pEDTR4wSPr"),
 						"linkedin": MetadataViews.ExternalURL("https://www.linkedin.com/company/playmfl"),
 						"medium": MetadataViews.ExternalURL("https://medium.com/playmfl")
 					}
-                )
-        }
-        return nil
-    }
+				)
+		}
+		return nil
+	}
 
 	// Deprecated: Only here for backward compatibility.
 	access(all)
@@ -681,12 +702,15 @@ contract MFLClub: NonFungibleToken {
 		}
 
 		access(ClubAdminAction)
-		fun updateClubMetadata(id: UInt64, metadata: {String: AnyStruct}) {
+		fun updateClubMetadata(id: UInt64, metadata: {String: AnyStruct}, collectionRefOptional: &MFLClub.Collection?) {
 			pre {
 				MFLClub.getClubData(id: id) != nil:
 					"Club data not found"
 			}
 			(MFLClub.clubsDatas[id]!).setMetadata(metadata: metadata)
+			if let collectionRef = collectionRefOptional {
+				collectionRef.emitNFTUpdated(id)
+			}
 		}
 
 		access(ClubAdminAction)
@@ -696,11 +720,6 @@ contract MFLClub: NonFungibleToken {
 					"Club data not found"
 			}
 			(MFLClub.clubsDatas[id]!).setSquadsIDs(squadsIDs: squadsIDs)
-		}
-
-		access(ClubAdminAction)
-		fun createClubAdmin(): @ClubAdmin {
-			return <-create ClubAdmin()
 		}
 	}
 
@@ -771,11 +790,6 @@ contract MFLClub: NonFungibleToken {
 					"Squad data not found"
 			}
 			(MFLClub.squadsDatas[id]!).removeCompetitionMembership(competitionID: competitionID)
-		}
-
-		access(SquadAdminAction)
-		fun createSquadAdmin(): @SquadAdmin {
-			return <-create SquadAdmin()
 		}
 	}
 
