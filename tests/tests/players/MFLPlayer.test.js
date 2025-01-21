@@ -20,6 +20,9 @@ import {
 import {
   WITHDRAW_PLAYER_FROM_GIVEN_ADDRESS_V3,
 } from './_transactions/withdraw_player_from_given_address_v3_malicious.tx';
+import {
+  WITHDRAW_PLAYER_FROM_GIVEN_ADDRESS_V4,
+} from './_transactions/withdraw_player_from_given_address_v4_malicious.tx';
 import {CREATE_PLAYER_LISTING} from './_transactions/create_player_listing.tx';
 import {GET_PLAYER_METADATA_FOR_LISTING} from './_transactions/get_player_metadata_for_listing.script';
 
@@ -991,6 +994,80 @@ describe('MFLPlayer', () => {
 
       // assert
       expect(output.amount).toEqual('100.00000000');
+    });
+
+    test('should list a player for sale v2', async () => {
+      // prepare
+      const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
+        'AliceAdminAccount',
+        'AliceAdminAccount',
+      );
+      await MFLPlayerTestsUtils.createPlayerNFT(1);
+      await MFLPlayerTestsUtils.createPlayerNFT(2);
+      const bobAccountAddress = await getAccountAddress('BobAccount');
+      await testsUtils.shallPass({
+        name: 'mfl/players/create_and_link_player_collection.tx',
+        signers: [bobAccountAddress],
+      });
+      await testsUtils.shallPass({
+        name: 'mfl/players/withdraw_player.tx',
+        signers: [aliceAdminAccountAddress],
+        args: [bobAccountAddress, '1'],
+      });
+      await testsUtils.shallPass({
+        name: 'mfl/players/withdraw_player.tx',
+        signers: [aliceAdminAccountAddress],
+        args: [bobAccountAddress, '2'],
+      });
+      await testsUtils.shallPass({
+        name: 'storefront/initialize_duc_receiver.tx',
+        signers: [bobAccountAddress],
+      });
+      await testsUtils.shallPass({
+        name: 'storefront/initialize_duc_receiver.tx',
+        signers: [aliceAdminAccountAddress],
+      });
+
+      // execute
+      const result = await testsUtils.shallPass({
+        name: 'mfl/players/create_player_listing_v2.tx',
+        args: ['1', '100', '0.2'],
+        signers: [aliceAdminAccountAddress, bobAccountAddress],
+      });
+      const err1 = await testsUtils.shallRevert({
+        code: WITHDRAW_PLAYER_FROM_GIVEN_ADDRESS,
+        signers: [aliceAdminAccountAddress],
+        args: [bobAccountAddress, aliceAdminAccountAddress, '2'],
+      });
+      const err2 = await testsUtils.shallRevert({
+        code: WITHDRAW_PLAYER_FROM_GIVEN_ADDRESS_V2,
+        signers: [aliceAdminAccountAddress],
+        args: [bobAccountAddress, aliceAdminAccountAddress, '2'],
+      });
+      const err3 = await testsUtils.shallRevert({
+        code: WITHDRAW_PLAYER_FROM_GIVEN_ADDRESS_V3,
+        signers: [aliceAdminAccountAddress],
+        args: [bobAccountAddress, aliceAdminAccountAddress, '2'],
+      });
+      const err4 = await testsUtils.shallRevert({
+        code: WITHDRAW_PLAYER_FROM_GIVEN_ADDRESS_V4,
+        signers: [aliceAdminAccountAddress],
+        args: [bobAccountAddress, aliceAdminAccountAddress, '2'],
+      });
+
+      const listingEvent = result.events.find((event) => event.type === 'A.f8d6e0586b0a20c7.NFTStorefront.ListingAvailable');
+      const listingResourceId = listingEvent.data.listingResourceID;
+      const output = await testsUtils.executeValidScript({
+        code: GET_PLAYER_METADATA_FOR_LISTING,
+        args: [bobAccountAddress, listingResourceId],
+      });
+
+      // assert
+      expect(output.amount).toEqual('100.00000000');
+      expect(err1).toContain("Could not borrow the collection reference")
+      expect(err2).toContain("requires `Withdraw` authorization")
+      expect(err3).toContain("requires `Storage | BorrowValue` authorization")
+      expect(err4).toContain("requires `Storage | CopyValue` authorization")
     });
   });
 });
