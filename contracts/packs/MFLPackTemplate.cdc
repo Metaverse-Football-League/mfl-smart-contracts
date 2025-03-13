@@ -115,7 +115,7 @@ contract MFLPackTemplate {
 		let description: String?
 
 		access(contract)
-		let maxSupply: UInt32
+		var maxSupply: UInt32
 
 		access(contract)
 		var currentSupply: UInt32
@@ -157,6 +157,14 @@ contract MFLPackTemplate {
 		access(contract)
 		fun allowToOpenPacks() {
 			self.isOpenable = true
+		}
+
+		// Change max supply
+		access(contract)
+		fun updateMaxSupply(maxSupply: UInt32) {
+			assert(maxSupply >= self.currentSupply, message: "Current supply is greater than new max supply")
+
+			self.maxSupply = maxSupply
 		}
 
 		// Increase current supply
@@ -241,6 +249,13 @@ contract MFLPackTemplate {
 			if let packTemplate = MFLPackTemplate.getPackTemplateRef(id: id) {
 				packTemplate.allowToOpenPacks()
 				emit AllowToOpenPacks(id: id)
+			}
+		}
+
+		access(PackTemplateAdminAction)
+		fun updateMaxSupply(id: UInt64, maxSupply: UInt32) {
+			if let packTemplate = MFLPackTemplate.getPackTemplateRef(id: id) {
+				packTemplate.updateMaxSupply(maxSupply: maxSupply)
 			}
 		}
 
