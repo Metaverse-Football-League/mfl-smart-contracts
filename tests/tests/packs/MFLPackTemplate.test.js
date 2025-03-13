@@ -4,6 +4,7 @@ import { testsUtils } from "../_utils/tests.utils";
 import * as matchers from "jest-extended";
 import { ERROR_UPDATE_PACK_TEMPLATE_SLOTS } from "./_transactions/error_update_pack_template_slots.tx";
 import { ERROR_ACCESS_PACK_TEMPLATES_DICTIONARY } from "./_transactions/error_access_pack_templates_dictionary.tx";
+import {MFLPackTestsUtils} from "./_utils/MFLPackTests.utils";
 
 expect.extend(matchers);
 jest.setTimeout(40000);
@@ -132,6 +133,55 @@ describe("MFLPackTemplate", () => {
           args: ["1"],
         });
         expect(packTemplate.isOpenable).toBe(true);
+      });
+    });
+
+    describe("updateMaxSupply()", () => {
+      test("should update the max supply", async () => {
+        // prepare
+        await MFLPackTemplateTestsUtils.createPackTemplateAdmin("AliceAdminAccount", "AliceAdminAccount");
+        const aliceAdminAccountAddress = await getAccountAddress("AliceAdminAccount");
+        const signers = [aliceAdminAccountAddress];
+        await testsUtils.shallPass({
+          name: "mfl/packs/create_pack_template.tx",
+          args: argsTx,
+          signers,
+        });
+
+        // execute
+        const result = await testsUtils.shallPass({ name: "mfl/packs/update_max_supply.tx", args: ["1", "25"], signers });
+
+        // assert
+        expect(result.events).toHaveLength(0);
+        const packTemplate = await testsUtils.executeValidScript({
+          name: "mfl/packs/get_pack_template.script",
+          args: ["1"],
+        });
+        expect(packTemplate.maxSupply).toBe("25");
+      });
+
+      test("should throw an error when the new max supply is below the current supply", async () => {
+        // prepare
+        await MFLPackTemplateTestsUtils.createPackTemplateAdmin("AliceAdminAccount", "AliceAdminAccount");
+        await MFLPackTestsUtils.createPackAdmin('AliceAdminAccount', 'AliceAdminAccount');
+        const aliceAdminAccountAddress = await getAccountAddress("AliceAdminAccount");
+        const signers = [aliceAdminAccountAddress];
+        await testsUtils.shallPass({
+          name: "mfl/packs/create_pack_template.tx",
+          args: argsTx,
+          signers,
+        });
+        await testsUtils.shallPass({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: ['1', aliceAdminAccountAddress, '3'],
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // execute
+        const error = await testsUtils.shallRevert({ name: "mfl/packs/update_max_supply.tx", args: ["1", "2"], signers });
+
+        // assert
+        expect(error).toContain("Current supply is greater than new max supply");
       });
     });
 

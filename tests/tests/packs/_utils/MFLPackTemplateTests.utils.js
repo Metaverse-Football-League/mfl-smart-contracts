@@ -8,6 +8,8 @@ export const MFLPackTemplateTestsUtils = {
     const addressMap = {};
     await testsUtils.deployContract('MFLAdmin', to, 'core/MFLAdmin', addressMap);
     await testsUtils.deployContract('MFLPackTemplate', to, 'packs/MFLPackTemplate', addressMap);
+    await testsUtils.deployContract('MFLViews', to, 'views/MFLViews', addressMap);
+    await testsUtils.deployContract('MFLPack', to, 'packs/MFLPack', addressMap);
     return addressMap;
   },
 
