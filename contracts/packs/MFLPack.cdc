@@ -258,11 +258,11 @@ contract MFLPack: NonFungibleToken {
                     description: "Build your own football club, make strategic decisions, and live the thrill of real competition. Join a universe where the stakes–and your rivals–are real.",
                     externalURL: MetadataViews.ExternalURL("https://playmfl.com"),
                     squareImage: MetadataViews.Media(
-						file: MetadataViews.HTTPFile(url: "https://app.playmfl.com/img/mflAvatar.png"),
+						file: MetadataViews.HTTPFile(url: "https://app.playmfl.com/img/collections/packs/thumbnail.png"),
 						mediaType: "image/png"
 					),
                     bannerImage: MetadataViews.Media(
-						file: MetadataViews.HTTPFile(url: "https://app.playmfl.com/img/thumbnail.png"),
+						file: MetadataViews.HTTPFile(url: "https://app.playmfl.com/img/collections/packs/banner.png"),
 						mediaType: "image/png"
 					),
                     socials: {
