@@ -187,22 +187,22 @@
 		"Resolver": {
 			"source": "./contracts/_libs/Resolver.cdc",
 			"aliases": {
-				"mainnet": "8a5f647e58dde1ee",
-				"testnet": "631e88ae7f1d7c20"
+				"mainnet": "b8ea91944fd51c43",
+				"testnet": "8a5f647e58dde1ee"
 			}
 		},
 		"OffersV2": {
 			"source": "./contracts/_libs/OffersV2.cdc",
 			"aliases": {
-				"mainnet": "8a5f647e58dde1ee",
-				"testnet": "631e88ae7f1d7c20"
+				"mainnet": "b8ea91944fd51c43",
+				"testnet": "8a5f647e58dde1ee"
 			}
 		},
 		"DapperOffersV2": {
 			"source": "./contracts/_libs/DapperOffersV2.cdc",
 			"aliases": {
-				"mainnet": "8a5f647e58dde1ee",
-				"testnet": "631e88ae7f1d7c20"
+				"mainnet": "b8ea91944fd51c43",
+				"testnet": "8a5f647e58dde1ee"
 			}
 		},
 		"TokenForwarding": {
