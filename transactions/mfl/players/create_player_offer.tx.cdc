@@ -96,7 +96,6 @@ transaction(
         } else {
             self.ducVaultRef = dapper.capabilities.storage.issue<auth(FungibleToken.Withdraw) &DapperUtilityCoin.Vault>(/storage/dapperUtilityCoinVault)
             dapper.storage.save(self.ducVaultRef, to: ducCapStoragePath)
-            let initalDucSupplyee = self.ducVaultRef.borrow()!.balance
         }
 
         assert(self.ducVaultRef.check() != nil, message: "Missing or mis-typed DapperUtilityCoin provider")
