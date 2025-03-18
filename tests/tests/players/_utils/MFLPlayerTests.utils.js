@@ -33,10 +33,16 @@ export const MFLPlayerTestsUtils = {
     await testsUtils.deployContract('NFTStorefront', serviceAddress, '_libs/NFTStorefront', addressMap);
     await testsUtils.deployContract('MetadataViews', serviceAddress, '_libs/MetadataViews', addressMap);
     await testsUtils.deployContract('FUSD', serviceAddress, '_libs/FUSD', addressMap);
+    await testsUtils.deployContract('Burner', serviceAddress, '_libs/Burner', addressMap);
+    await testsUtils.deployContract('Resolver', serviceAddress, '_libs/Resolver', addressMap);
+    await testsUtils.deployContract('OffersV2', serviceAddress, '_libs/OffersV2', addressMap);
+    await testsUtils.deployContract('DapperOffersV2', serviceAddress, '_libs/DapperOffersV2', addressMap);
+    await testsUtils.deployContract('MFLOffersResolver', to, 'offers/MFLOffersResolver', addressMap);
     await testsUtils.deployContract('MFLAdmin', to, 'core/MFLAdmin', addressMap);
     await testsUtils.deployContract('MFLPackTemplate', to, 'packs/MFLPackTemplate', addressMap);
     await testsUtils.deployContract('MFLViews', to, 'views/MFLViews', addressMap);
     await testsUtils.deployContract('MFLPlayer', to, 'players/MFLPlayer', addressMap);
+
     return addressMap;
   },
 

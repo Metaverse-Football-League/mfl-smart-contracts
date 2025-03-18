@@ -1070,4 +1070,120 @@ describe('MFLPlayer', () => {
       expect(err4).toContain("requires `Storage | CopyValue` authorization")
     });
   });
+
+  describe('Offers', () => {
+    test('should create an offer for a player', async () => {
+      // prepare
+      const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
+          'AliceAdminAccount',
+          'AliceAdminAccount',
+      );
+      await MFLPlayerTestsUtils.createPlayerNFT(1);
+      const bobAccountAddress = await getAccountAddress('BobAccount');
+      await testsUtils.shallPass({
+        name: 'mfl/players/create_and_link_player_collection.tx',
+        signers: [bobAccountAddress],
+      });
+      await testsUtils.shallPass({
+        name: 'mfl/players/withdraw_player.tx',
+        signers: [aliceAdminAccountAddress],
+        args: [bobAccountAddress, '1'],
+      });
+
+      const dapperAccountAddress = await getAccountAddress('DapperAccount');
+      const buyerAccountAddress = await getAccountAddress('BuyerAccount');
+
+      // execute
+      const expiry = (Math.ceil(Date.now() / 1000) + 180).toString();
+      const result = await testsUtils.shallPass({
+        name: 'mfl/players/create_player_offer.tx',
+        args: ['20', {}, '1', expiry],
+        signers: [buyerAccountAddress, dapperAccountAddress],
+      });
+
+      // assert
+      const offersAvailableEvent = result.events.find((event) => event.type === 'A.f8d6e0586b0a20c7.OffersV2.OfferAvailable');
+      expect(offersAvailableEvent).toBeDefined();
+      expect(offersAvailableEvent.data).toEqual({
+        offerAddress: buyerAccountAddress,
+        offerId: expect.any(String),
+        nftType: expect.objectContaining({"typeID": "A.179b6b1cb6755e31.MFLPlayer.NFT"}),
+        offerAmount: '20.00000000',
+        royalties: {},
+        offerType: 'NFT',
+        offerParamsString: {
+          "_type": "NFT",
+          "nftId": "1",
+          "typeId": "A.179b6b1cb6755e31.MFLPlayer.NFT",
+          "resolver": "NFT"
+        },
+        offerParamsUFix64: {},
+        offerParamsUInt64: {expiry},
+        paymentVaultType: expect.objectContaining({
+          type: expect.objectContaining({
+            type: expect.objectContaining({
+              typeID: "A.f8d6e0586b0a20c7.DapperUtilityCoin.Vault"})
+          })
+        }),
+        resolverType: 'A.179b6b1cb6755e31.MFLOffersResolver.OfferResolver',
+        paymentBorrowType: 'unknown'
+      });
+    })
+
+    test('should get an error when not enough balance for an offer', async () => {
+      // prepare
+      const aliceAdminAccountAddress = await MFLPlayerTestsUtils.createPlayerAdmin(
+          'AliceAdminAccount',
+          'AliceAdminAccount',
+      );
+      await MFLPlayerTestsUtils.createPlayerNFT(1);
+      const bobAccountAddress = await getAccountAddress('BobAccount');
+      await testsUtils.shallPass({
+        name: 'mfl/players/create_and_link_player_collection.tx',
+        signers: [bobAccountAddress],
+      });
+      await testsUtils.shallPass({
+        name: 'mfl/players/withdraw_player.tx',
+        signers: [aliceAdminAccountAddress],
+        args: [bobAccountAddress, '1'],
+      });
+
+      const dapperAccountAddress = await getAccountAddress('DapperAccount');
+      const buyerAccountAddress = await getAccountAddress('BuyerAccount');
+      await testsUtils.shallPass({
+        name: 'storefront/initialize_duc_receiver.tx',
+        signers: [bobAccountAddress],
+      });
+      await testsUtils.shallPass({
+        name: 'storefront/initialize_duc_receiver.tx',
+        signers: [aliceAdminAccountAddress],
+      });
+      await testsUtils.shallPass({
+        name: 'storefront/initialize_duc_receiver.tx',
+        signers: [buyerAccountAddress],
+      });
+      await testsUtils.shallPass({
+        name: 'storefront/initialize_duc_receiver.tx',
+        signers: [dapperAccountAddress],
+      });
+
+      const expiry = (Math.ceil(Date.now() / 1000) + 180).toString();
+      const offerCreationResult = await testsUtils.shallPass({
+        name: 'mfl/players/create_player_offer.tx',
+        args: ['20', {[aliceAdminAccountAddress]: "0.05"}, '1', expiry],
+        signers: [buyerAccountAddress, dapperAccountAddress],
+      });
+      const offersAvailableEvent = offerCreationResult.events.find((event) => event.type === 'A.f8d6e0586b0a20c7.OffersV2.OfferAvailable');
+
+      // execute
+      const error = await testsUtils.shallRevert({
+        name: 'mfl/players/accept_player_offer.tx',
+        args: ['1', offersAvailableEvent.data.offerId, buyerAccountAddress],
+        signers: [bobAccountAddress],
+      });
+
+      // assert
+      expect(error).toContain('Amount withdrawn must be less than or equal than the balance of the Vault');
+    });
+  });
 });
