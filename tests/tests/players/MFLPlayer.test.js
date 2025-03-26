@@ -455,7 +455,7 @@ describe('MFLPlayer', () => {
                     'initializers': [],
                   }],
                 }, 'kind': 'Reference', 'authorization': {'kind': 'Unauthorized', 'entitlements': null},
-              }, 'address': '0xa654669bd96b2014', 'id': '0',
+              }, 'address': '0x15e71a9f7fe7d53d', 'id': '0',
             }, 'cut': '0.05000000', 'description': 'Creator Royalty',
           }],
         });
