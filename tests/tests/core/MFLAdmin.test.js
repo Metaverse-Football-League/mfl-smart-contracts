@@ -414,7 +414,7 @@ describe('MFLAdmin', () => {
       });
 
       // assert
-      expect(royaltyAddress).toEqual('0xa654669bd96b2014');
+      expect(royaltyAddress).toEqual('0x15e71a9f7fe7d53d');
     });
   });
 });
