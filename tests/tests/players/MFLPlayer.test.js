@@ -1185,5 +1185,30 @@ describe('MFLPlayer', () => {
       // assert
       expect(error).toContain('Amount withdrawn must be less than or equal than the balance of the Vault');
     });
+
+    test('should get player data from offer', async () => {
+      // prepare
+      await MFLPlayerTestsUtils.createPlayerAdmin('AliceAdminAccount', 'AliceAdminAccount');
+      const playerID = '4';
+      await MFLPlayerTestsUtils.createPlayerNFT(playerID);
+
+      // execute
+      const playerData = await testsUtils.executeValidScript({
+        name: 'mfl/players/get_player_metadata_from_offer.script',
+        args: ["2", "{}", playerID],
+      });
+
+      // assert
+      expect(playerData).toEqual({
+        amount: "2",
+        royalties: {},
+        params: {
+          "assetName": "some name",
+          "assetImageUrl": "https://d25q37b6uc8p6e.cloudfront.net/players/4/card.png",
+          "assetDescription": 'Before purchasing this MFL Player, make sure to check the player\'s in-game profile for the latest information: https://app.playmfl.com/players/4',
+          "typeId": "Type<@MFLPlayer.NFT>()"
+        },
+      });
+    });
   });
 });
