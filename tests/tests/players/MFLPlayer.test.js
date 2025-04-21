@@ -419,7 +419,7 @@ describe('MFLPlayer', () => {
         expect(playerDisplayView).toEqual({
           name: 'some name',
           description: 'Before purchasing this MFL Player, make sure to check the player\'s in-game profile for the latest information: https://app.playmfl.com/players/100022',
-          thumbnail: 'ipfs://QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
+          thumbnail: 'https://d13e14gtps4iwl.cloudfront.net/players/100022/card.png?co=87',
           owner: aliceAdminAccountAddress,
           type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.NFT`,
         });
@@ -580,14 +580,14 @@ describe('MFLPlayer', () => {
             {
               name: 'some name',
               description: 'Before purchasing this MFL Player, make sure to check the player\'s in-game profile for the latest information: https://app.playmfl.com/players/100022',
-              thumbnail: 'ipfs://QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
+              thumbnail: 'https://d13e14gtps4iwl.cloudfront.net/players/100022/card.png?co=87',
               owner: aliceAdminAccountAddress,
               type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.NFT`,
             },
             {
               name: 'some name',
               description: 'Before purchasing this MFL Player, make sure to check the player\'s in-game profile for the latest information: https://app.playmfl.com/players/100023',
-              thumbnail: 'ipfs://QmbdfaUn6itAQbEgf8nLLZok6jX5BcqkZJR3dVrd3hLHKm',
+              thumbnail: 'https://d13e14gtps4iwl.cloudfront.net/players/100023/card.png?co=87',
               owner: aliceAdminAccountAddress,
               type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.NFT`,
             },
