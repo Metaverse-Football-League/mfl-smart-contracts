@@ -32,7 +32,7 @@ contract MFLAdmin {
 	// MFL Royalty Address
 	access(all)
 	view fun royaltyAddress(): Address {
-		return 0xa654669bd96b2014
+		return 0x15e71a9f7fe7d53d
 	}
 
 	access(all)
