@@ -150,6 +150,14 @@
 				"migrationnet": "683564e46977788a"
 			}
 		},
+		"MFLOffersResolver": {
+			"source": "./contracts/offers/MFLOffersResolver.cdc",
+			"aliases": {
+				"mainnet": "8ebcbfd516b1da27",
+				"testnet": "683564e46977788a",
+				"migrationnet": "683564e46977788a"
+			}
+		},
 		"MetadataViews": {
 			"source": "./contracts/_libs/MetadataViews.cdc",
 			"aliases": {
@@ -174,6 +182,27 @@
 				"testnet": "631e88ae7f1d7c20",
 				"migrationnet": "631e88ae7f1d7c20",
 				"emulator": "f8d6e0586b0a20c7"
+			}
+		},
+		"Resolver": {
+			"source": "./contracts/_libs/Resolver.cdc",
+			"aliases": {
+				"mainnet": "b8ea91944fd51c43",
+				"testnet": "8a5f647e58dde1ee"
+			}
+		},
+		"OffersV2": {
+			"source": "./contracts/_libs/OffersV2.cdc",
+			"aliases": {
+				"mainnet": "b8ea91944fd51c43",
+				"testnet": "8a5f647e58dde1ee"
+			}
+		},
+		"DapperOffersV2": {
+			"source": "./contracts/_libs/DapperOffersV2.cdc",
+			"aliases": {
+				"mainnet": "b8ea91944fd51c43",
+				"testnet": "8a5f647e58dde1ee"
 			}
 		},
 		"TokenForwarding": {
@@ -210,12 +239,16 @@
 				"DapperUtilityCoin",
 				"FlowUtilityToken",
 				"TokenForwarding",
+				"Resolver",
+				"OffersV2",
+				"DapperOffersV2",
 				"MFLAdmin",
 				"MFLViews",
 				"MFLPlayer",
 				"MFLPackTemplate",
 				"MFLPack",
-				"MFLClub"
+				"MFLClub",
+				"MFLOffersResolver"
 			]
 		},
 		"testnet": {
@@ -225,7 +258,8 @@
 				"MFLViews",
 				"MFLPlayer",
 				"MFLPack",
-				"MFLClub"
+				"MFLClub",
+				"MFLOffersResolver"
 			]
 		}
 	}

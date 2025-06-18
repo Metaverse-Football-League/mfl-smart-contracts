@@ -117,73 +117,83 @@ contract MFLPlayer: NonFungibleToken {
 		access(all)
 		fun resolveView(_ view: Type): AnyStruct? {
 			let playerData = MFLPlayer.getPlayerData(id: self.id)!
-			switch view {
-				case Type<MetadataViews.Display>():
-					return MetadataViews.Display(
-						name: playerData.metadata["name"] as! String? ?? "",
-						description: "Before purchasing this MFL Player, make sure to check the player's in-game profile for the latest information: https://app.playmfl.com/players/"
-							.concat(playerData.id.toString()),
-						thumbnail: playerData.image
-					)
-				case Type<MetadataViews.Royalties>():
-					let royalties: [MetadataViews.Royalty] = []
-					let royaltyReceiverCap = getAccount(MFLAdmin.royaltyAddress()).capabilities.get<&{FungibleToken.Receiver}>(/public/GenericFTReceiver)
-					royalties.append(MetadataViews.Royalty(receiver: royaltyReceiverCap!, cut: 0.05, description: "Creator Royalty"))
-					return MetadataViews.Royalties(royalties)
-				case Type<MetadataViews.NFTCollectionDisplay>():
-					return MFLPlayer.resolveContractView(resourceType: Type<@MFLPlayer.NFT>(), viewType: Type<MetadataViews.NFTCollectionDisplay>())
-				case Type<MetadataViews.NFTCollectionData>():
-					return MFLPlayer.resolveContractView(resourceType: Type<@MFLPlayer.NFT>(), viewType: Type<MetadataViews.NFTCollectionData>())
-				case Type<MetadataViews.ExternalURL>():
-					return MetadataViews.ExternalURL("https://playmfl.com")
-				case Type<MetadataViews.Traits>():
-					let traits: [MetadataViews.Trait] = []
-					traits.append(MetadataViews.Trait(name: "name", value: playerData.metadata["name"] as! String?, displayType: "String", rarity: nil))
-					let nationalitiesOptional = playerData.metadata["nationalities"] as! [String]?
-					var nationalitiesString: String = ""
-					if let nationalities = nationalitiesOptional {
-						for nationality in nationalities {
-							if nationalitiesString.length > 0 {
-								nationalitiesString = nationalitiesString.concat(", ")
-							}
-							nationalitiesString = nationalitiesString.concat(nationality)
-						}
-					}
-					traits.append(MetadataViews.Trait(name: "nationalities", value: nationalitiesString, displayType: "String", rarity: nil))
-					var positionsString: String = ""
-					if let positions = playerData.metadata["positions"] as! [String]? {
-						for position in positions {
-							if positionsString.length > 0 {
-								positionsString = positionsString.concat(", ")
-							}
-							positionsString = positionsString.concat(position)
-						}
-					}
-					traits.append(MetadataViews.Trait(name: "positions", value: positionsString, displayType: "String", rarity: nil))
-					traits.append(MetadataViews.Trait(name: "preferredFoot", value: playerData.metadata["preferredFoot"] as! String?, displayType: "String", rarity: nil))
-					traits.append(MetadataViews.Trait(name: "ageAtMint", value: playerData.metadata["ageAtMint"] as! UInt32?, displayType: "Number", rarity: nil))
-					traits.append(MetadataViews.Trait(name: "height", value: playerData.metadata["height"] as! UInt32?, displayType: "Number", rarity: nil))
-					traits.append(MetadataViews.Trait(name: "overall", value: playerData.metadata["overall"] as! UInt32?, displayType: "Number", rarity: nil))
-					traits.append(MetadataViews.Trait(name: "pace", value: playerData.metadata["pace"] as! UInt32?, displayType: "Number", rarity: nil))
-					traits.append(MetadataViews.Trait(name: "shooting", value: playerData.metadata["shooting"] as! UInt32?, displayType: "Number", rarity: nil))
-					traits.append(MetadataViews.Trait(name: "passing", value: playerData.metadata["passing"] as! UInt32?, displayType: "Number", rarity: nil))
-					traits.append(MetadataViews.Trait(name: "dribbling", value: playerData.metadata["dribbling"] as! UInt32?, displayType: "Number", rarity: nil))
-					traits.append(MetadataViews.Trait(name: "defense", value: playerData.metadata["defense"] as! UInt32?, displayType: "Number", rarity: nil))
-					traits.append(MetadataViews.Trait(name: "physical", value: playerData.metadata["physical"] as! UInt32?, displayType: "Number", rarity: nil))
-					traits.append(MetadataViews.Trait(name: "goalkeeping", value: playerData.metadata["goalkeeping"] as! UInt32?, displayType: "Number", rarity: nil))
-					return MetadataViews.Traits(traits)
-				case Type<MetadataViews.Serial>():
-					return MetadataViews.Serial(playerData.id)
-				case Type<MFLViews.PlayerDataViewV1>():
-					return MFLViews.PlayerDataViewV1(id: playerData.id, metadata: playerData.metadata, season: playerData.season, thumbnail: playerData.image)
-			}
-			return nil
+			return MFLPlayer.resolveViewFromData(view, playerData: playerData)
 		}
 
 		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection} {
 			return <-MFLPlayer.createEmptyCollection(nftType: Type<@MFLPlayer.Collection>())
 		}
+	}
+
+	access(all)
+	fun resolveViewFromData(_ view: Type, playerData: PlayerData): AnyStruct? {
+		let playerImageUrl = MFLAdmin.imageHostUrl()
+			.concat("/players/").concat(playerData.id.toString())
+			.concat("/card.png?co=").concat((playerData.metadata["overall"] as! UInt32?)!.toString())
+		let playerImage = MetadataViews.HTTPFile(url: playerImageUrl)
+
+		switch view {
+			case Type<MetadataViews.Display>():
+				return MetadataViews.Display(
+					name: playerData.metadata["name"] as! String? ?? "",
+					description: "Before purchasing this MFL Player, make sure to check the player's in-game profile for the latest information: https://app.playmfl.com/players/"
+						.concat(playerData.id.toString()),
+					thumbnail: playerImage
+				)
+			case Type<MetadataViews.Royalties>():
+				let royalties: [MetadataViews.Royalty] = []
+				let royaltyReceiverCap = getAccount(MFLAdmin.royaltyAddress()).capabilities.get<&{FungibleToken.Receiver}>(/public/GenericFTReceiver)
+				royalties.append(MetadataViews.Royalty(receiver: royaltyReceiverCap!, cut: 0.05, description: "Creator Royalty"))
+				return MetadataViews.Royalties(royalties)
+			case Type<MetadataViews.NFTCollectionDisplay>():
+				return MFLPlayer.resolveContractView(resourceType: Type<@MFLPlayer.NFT>(), viewType: Type<MetadataViews.NFTCollectionDisplay>())
+			case Type<MetadataViews.NFTCollectionData>():
+				return MFLPlayer.resolveContractView(resourceType: Type<@MFLPlayer.NFT>(), viewType: Type<MetadataViews.NFTCollectionData>())
+			case Type<MetadataViews.ExternalURL>():
+				return MetadataViews.ExternalURL("https://playmfl.com")
+			case Type<MetadataViews.Traits>():
+				let traits: [MetadataViews.Trait] = []
+				traits.append(MetadataViews.Trait(name: "name", value: playerData.metadata["name"] as! String?, displayType: "String", rarity: nil))
+				let nationalitiesOptional = playerData.metadata["nationalities"] as! [String]?
+				var nationalitiesString: String = ""
+				if let nationalities = nationalitiesOptional {
+					for nationality in nationalities {
+						if nationalitiesString.length > 0 {
+							nationalitiesString = nationalitiesString.concat(", ")
+						}
+						nationalitiesString = nationalitiesString.concat(nationality)
+					}
+				}
+				traits.append(MetadataViews.Trait(name: "nationalities", value: nationalitiesString, displayType: "String", rarity: nil))
+				var positionsString: String = ""
+				if let positions = playerData.metadata["positions"] as! [String]? {
+					for position in positions {
+						if positionsString.length > 0 {
+							positionsString = positionsString.concat(", ")
+						}
+						positionsString = positionsString.concat(position)
+					}
+				}
+				traits.append(MetadataViews.Trait(name: "positions", value: positionsString, displayType: "String", rarity: nil))
+				traits.append(MetadataViews.Trait(name: "preferredFoot", value: playerData.metadata["preferredFoot"] as! String?, displayType: "String", rarity: nil))
+				traits.append(MetadataViews.Trait(name: "ageAtMint", value: playerData.metadata["ageAtMint"] as! UInt32?, displayType: "Number", rarity: nil))
+				traits.append(MetadataViews.Trait(name: "height", value: playerData.metadata["height"] as! UInt32?, displayType: "Number", rarity: nil))
+				traits.append(MetadataViews.Trait(name: "overall", value: playerData.metadata["overall"] as! UInt32?, displayType: "Number", rarity: nil))
+				traits.append(MetadataViews.Trait(name: "pace", value: playerData.metadata["pace"] as! UInt32?, displayType: "Number", rarity: nil))
+				traits.append(MetadataViews.Trait(name: "shooting", value: playerData.metadata["shooting"] as! UInt32?, displayType: "Number", rarity: nil))
+				traits.append(MetadataViews.Trait(name: "passing", value: playerData.metadata["passing"] as! UInt32?, displayType: "Number", rarity: nil))
+				traits.append(MetadataViews.Trait(name: "dribbling", value: playerData.metadata["dribbling"] as! UInt32?, displayType: "Number", rarity: nil))
+				traits.append(MetadataViews.Trait(name: "defense", value: playerData.metadata["defense"] as! UInt32?, displayType: "Number", rarity: nil))
+				traits.append(MetadataViews.Trait(name: "physical", value: playerData.metadata["physical"] as! UInt32?, displayType: "Number", rarity: nil))
+				traits.append(MetadataViews.Trait(name: "goalkeeping", value: playerData.metadata["goalkeeping"] as! UInt32?, displayType: "Number", rarity: nil))
+				return MetadataViews.Traits(traits)
+			case Type<MetadataViews.Serial>():
+				return MetadataViews.Serial(playerData.id)
+			case Type<MFLViews.PlayerDataViewV1>():
+				return MFLViews.PlayerDataViewV1(id: playerData.id, metadata: playerData.metadata, season: playerData.season, thumbnail: playerImage)
+		}
+		return nil
 	}
 
 	// A collection of Player NFTs owned by an account

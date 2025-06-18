@@ -368,7 +368,7 @@ contract MFLClub: NonFungibleToken {
 							name: "Club License #".concat(clubData.id.toString()),
 							description: "MFL Club License #".concat(clubData.id.toString()),
 							thumbnail: MetadataViews.HTTPFile(
-								url: "https://d13e14gtps4iwl.cloudfront.net/clubs/".concat(clubData.id.toString()).concat("/licenses/foundation.png")
+								url: MFLAdmin.imageHostUrl().concat("/clubs/").concat(clubData.id.toString()).concat("/licenses/foundation.png")
 							)
 						)
 					} else {
@@ -381,7 +381,8 @@ contract MFLClub: NonFungibleToken {
 								.concat(clubData.id.toString())
 								.concat(clubDescription != "" ? "\n\n---\n\n".concat(clubDescription) : ""),
 							thumbnail: MetadataViews.HTTPFile(
-								url: "https://d13e14gtps4iwl.cloudfront.net/u/clubs/"
+								url: MFLAdmin.imageHostUrl()
+									.concat("/u/clubs/")
 									.concat(clubData.id.toString())
 									.concat("/logo.png")
 									.concat(division != nil ? "?v=".concat(division!.toString()) : "")

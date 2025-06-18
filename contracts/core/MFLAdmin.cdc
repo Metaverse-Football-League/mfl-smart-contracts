@@ -35,6 +35,11 @@ contract MFLAdmin {
 		return 0x15e71a9f7fe7d53d
 	}
 
+	access(all)
+	view fun imageHostUrl(): String {
+		return "https://d13e14gtps4iwl.cloudfront.net"
+	}
+
 	// Deprecated: Only here for backward compatibility.
 	access(all)
 	resource interface AdminProxyPublic {}
