@@ -30,7 +30,7 @@ access(all) contract MFLOffersResolver {
                     assert(item.getType().identifier == offerParamsString["nftType"], message: "item NFT does not have specified type")
                     return true
                 default:
-                    panic("Invalid eeResolver on Offer: ".concat(offerParamsString["resolver"] ?? "unknown"))
+                    panic("Invalid Resolver on Offer: ".concat(offerParamsString["resolver"] ?? "unknown"))
             }
         }
 
