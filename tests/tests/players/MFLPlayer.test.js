@@ -419,7 +419,7 @@ describe('MFLPlayer', () => {
                 expect(playerDisplayView).toEqual({
                     name: 'some name',
                     description: 'Before purchasing this MFL Player, make sure to check the player\'s in-game profile for the latest information: https://app.playmfl.com/players/100022',
-                    thumbnail: 'https://d13e14gtps4iwl.cloudfront.net/players/100022/card.png?co=87',
+                    thumbnail: 'https://d13e14gtps4iwl.cloudfront.net/players/v2/100022/card.png?co=87',
                     owner: aliceAdminAccountAddress,
                     type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.NFT`,
                 });
@@ -580,14 +580,14 @@ describe('MFLPlayer', () => {
                         {
                             name: 'some name',
                             description: 'Before purchasing this MFL Player, make sure to check the player\'s in-game profile for the latest information: https://app.playmfl.com/players/100022',
-                            thumbnail: 'https://d13e14gtps4iwl.cloudfront.net/players/100022/card.png?co=87',
+                            thumbnail: 'https://d13e14gtps4iwl.cloudfront.net/players/v2/100022/card.png?co=87',
                             owner: aliceAdminAccountAddress,
                             type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.NFT`,
                         },
                         {
                             name: 'some name',
                             description: 'Before purchasing this MFL Player, make sure to check the player\'s in-game profile for the latest information: https://app.playmfl.com/players/100023',
-                            thumbnail: 'https://d13e14gtps4iwl.cloudfront.net/players/100023/card.png?co=87',
+                            thumbnail: 'https://d13e14gtps4iwl.cloudfront.net/players/v2/100023/card.png?co=87',
                             owner: aliceAdminAccountAddress,
                             type: `A.${testsUtils.sansPrefix(addressMap.MFLPlayer)}.MFLPlayer.NFT`,
                         },
@@ -1210,7 +1210,7 @@ describe('MFLPlayer', () => {
                 royalties: {},
                 params: {
                     "assetName": "some name",
-                    "assetImageUrl": "https://d13e14gtps4iwl.cloudfront.net/players/4/card.png?co=87",
+                    "assetImageUrl": "https://d13e14gtps4iwl.cloudfront.net/players/v2/4/card.png?co=87",
                     "assetDescription": 'Before purchasing this MFL Player, make sure to check the player\'s in-game profile for the latest information: https://app.playmfl.com/players/4',
                     "typeId": "Type<@MFLPlayer.NFT>()",
                     "nftId": "4"

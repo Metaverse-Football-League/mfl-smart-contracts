@@ -1,11 +1,11 @@
-import NonFungibleToken from 0x631e88ae7f1d7c20
-import FungibleToken from 0x9a0766d93b6608b7
-import OffersV2 from 0x8a5f647e58dde1ee
-import DapperOffersV2 from 0x8a5f647e58dde1ee
-import DapperUtilityCoin from 0x82ec283f88a62e65
-import MFLPlayer from 0x683564e46977788a
-import MFLOffersResolver from 0x683564e46977788a
-import Resolver from 0x8a5f647e58dde1ee
+import NonFungibleToken from 0x1d7e57aa55817448
+import FungibleToken from 0xf233dcee88fe0abe
+import OffersV2 from 0xb8ea91944fd51c43
+import DapperOffersV2 from 0xb8ea91944fd51c43
+import DapperUtilityCoin from 0xead892083b3e2c6c
+import MFLPlayer from 0x8ebcbfd516b1da27
+import MFLOffersResolver from 0x8ebcbfd516b1da27
+import Resolver from 0xb8ea91944fd51c43
 
 transaction() {
     prepare(acct: auth(Storage, Capabilities) &Account) {

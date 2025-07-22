@@ -43,7 +43,7 @@ pub fun main(merchantAccountAddress: Address, listingResourceID: UInt64, storefr
         let display = view as! MetadataViews.Display
 
         // Change imageUrl for prod testing: https://d13e14gtps4iwl.cloudfront.net/players/
-        let imageUrl = "https://d11e2517uhbeau.cloudfront.net/players/"
+        let imageUrl = "https://d11e2517uhbeau.cloudfront.net/players/v2/"
 
         let purchaseData = PurchaseData(
             id: listingDetails.nftID,

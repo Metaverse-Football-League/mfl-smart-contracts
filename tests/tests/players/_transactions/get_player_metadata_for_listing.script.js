@@ -52,7 +52,7 @@ fun main(storefrontAddress: Address, listingResourceID: UInt64): PurchaseData {
 
     let display = view as! MetadataViews.Display
 
-    let imageUrl = "https://d13e14gtps4iwl.cloudfront.net/players/"
+    let imageUrl = "https://d13e14gtps4iwl.cloudfront.net/players/v2/"
 
     let purchaseData = PurchaseData(
       id: listingDetails.nftID,
