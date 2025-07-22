@@ -129,7 +129,7 @@ contract MFLPlayer: NonFungibleToken {
 	access(all)
 	fun resolveViewFromData(_ view: Type, playerData: PlayerData): AnyStruct? {
 		let playerImageUrl = MFLAdmin.imageHostUrl()
-			.concat("/players/").concat(playerData.id.toString())
+			.concat("/players/v2/").concat(playerData.id.toString())
 			.concat("/card.png?co=").concat((playerData.metadata["overall"] as! UInt32?)!.toString())
 		let playerImage = MetadataViews.HTTPFile(url: playerImageUrl)
 
