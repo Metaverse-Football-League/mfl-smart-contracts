@@ -7,20 +7,6 @@ import {BATCH_WITHDRAW_PACK} from './_transactions/batch_withdaw_pack.tx';
 import {BORROW_NFT} from './_scripts/borrow_nft.script';
 import {BORROW_VIEW_RESOLVER} from './_scripts/borrow_view_resolver.script';
 import {GET_PACK_ROYALTIES_VIEW} from './_scripts/get_pack_royalties_view.script';
-import {MFLClubTestsUtils} from '../clubs/_utils/MFLClubTests.utils';
-import {WITHDRAW_CLUB_FROM_GIVEN_ADDRESS} from '../clubs/_transactions/withdraw_club_from_given_address_malicious.tx';
-import {
-  WITHDRAW_CLUB_FROM_GIVEN_ADDRESS_V2
-} from '../clubs/_transactions/withdraw_club_from_given_address_v2_malicious.tx';
-import {
-  BATCH_WITHDRAW_CLUB_FROM_GIVEN_ADDRESS
-} from '../clubs/_transactions/batch_withdraw_club_from_given_address_malicious.tx';
-import {
-  BATCH_WITHDRAW_CLUB_FROM_GIVEN_ADDRESS_V2
-} from '../clubs/_transactions/batch_withdraw_club_from_given_address_malicious_v2.tx';
-import {
-  WITHDRAW_CLUB_FROM_GIVEN_ADDRESS_V3
-} from '../clubs/_transactions/withdraw_club_from_given_address_v3_malicious.tx';
 import {WITHDRAW_PACK_FROM_GIVEN_ADDRESS} from './_transactions/withdraw_pack_from_given_address_malicious.tx';
 import {WITHDRAW_PACK_FROM_GIVEN_ADDRESS_V2} from './_transactions/withdraw_pack_from_given_address_v2_malicious.tx';
 import {
@@ -1088,6 +1074,43 @@ describe('MFLPack', () => {
         });
         // Bob should have 0 pack
         expect(bobPackIds).toEqual([]);
+      });
+    });
+
+    describe('create listing', () => {
+      test('should list a pack with the storefront V2', async () => {
+        // prepare
+        const argsMint = ["1", bobAccountAddress, "1"];
+        await testsUtils.shallPass({
+          name: 'mfl/packs/create_and_link_pack_collection.tx',
+          signers: [bobAccountAddress],
+        });
+        await testsUtils.shallPass({
+          name: 'storefront/initialize_duc_receiver.tx',
+          signers: [bobAccountAddress],
+        });
+        await testsUtils.shallPass({
+          name: 'storefront/initialize_duc_receiver.tx',
+          signers: [aliceAdminAccountAddress],
+        });
+        await testsUtils.shallPass({
+          name: 'mfl/packs/batch_mint_pack.tx',
+          args: argsMint,
+          signers: [aliceAdminAccountAddress],
+        });
+
+        // execute
+        const result = await testsUtils.shallPass({
+          name: 'mfl/packs/create_pack_listing_v2.tx',
+          args: ["1", "10", "0.5", "1755696063598", aliceAdminAccountAddress],
+          signers: [bobAccountAddress],
+        });
+
+        // assert
+        expect(result.events).toPartiallyContain({
+          type: `A.f8d6e0586b0a20c7.NFTStorefrontV2.ListingAvailable`,
+          data: expect.objectContaining({ "nftID": "1", "salePrice": "10.00000000" }),
+        });
       });
     });
   });

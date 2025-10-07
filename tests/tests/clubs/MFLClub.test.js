@@ -743,7 +743,7 @@ describe('MFLClub', () => {
                     expect(clubDisplayView).toEqual({
                         name: "Some Club 2000",
                         description: "Before purchasing this MFL Club, make sure to check the club's in-game profile for the latest information: https://app.playmfl.com/clubs/1000\n\n---\n\nSome Description 2000",
-                        thumbnail: `https://d13e14gtps4iwl.cloudfront.net/u/clubs/${clubId}/logo.png?v=2`,
+                        thumbnail: `https://d13e14gtps4iwl.cloudfront.net/u/clubs/${clubId}/logo.webp?v=2`,
                         owner: aliceAdminAccountAddress,
                         type: `A.${testsUtils.sansPrefix(addressMap.MFLClub)}.MFLClub.NFT`,
                     });

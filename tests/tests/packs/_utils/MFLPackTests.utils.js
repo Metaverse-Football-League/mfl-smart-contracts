@@ -9,7 +9,11 @@ export const MFLPackTestsUtils = {
     const to = await getAccountAddress(toAccountName);
 
     const addressMap = {};
+    await testsUtils.deployContract('Burner', serviceAddress, '_libs/Burner', addressMap);
+    await testsUtils.deployContract('FungibleToken', serviceAddress, '_libs/FungibleToken', addressMap);
     await testsUtils.deployContract('NonFungibleToken', serviceAddress, '_libs/NonFungibleToken', addressMap);
+    await testsUtils.deployContract('NFTStorefrontV2', serviceAddress, '_libs/NFTStorefrontV2', addressMap);
+    await testsUtils.deployContract('DapperUtilityCoin', serviceAddress, '_libs/DapperUtilityCoin', addressMap);
     await testsUtils.deployContract('MetadataViews', serviceAddress, '_libs/MetadataViews', addressMap);
     await testsUtils.deployContract('MFLAdmin', to, 'core/MFLAdmin', addressMap);
     await testsUtils.deployContract('MFLPackTemplate', to, 'packs/MFLPackTemplate', addressMap);

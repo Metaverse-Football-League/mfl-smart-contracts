@@ -384,7 +384,7 @@ contract MFLClub: NonFungibleToken {
 								url: MFLAdmin.imageHostUrl()
 									.concat("/u/clubs/")
 									.concat(clubData.id.toString())
-									.concat("/logo.png")
+									.concat("/logo.webp")
 									.concat(division != nil ? "?v=".concat(division!.toString()) : "")
 							)
 						)
