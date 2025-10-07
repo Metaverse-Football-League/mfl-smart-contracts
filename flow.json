@@ -175,6 +175,14 @@
 				"migrationnet": "94b06cfca1d8a476"
 			}
 		},
+		"NFTStorefrontV2": {
+			"source": "./contracts/_libs/NFTStorefrontV2.cdc",
+			"aliases": {
+				"mainnet": "4eb8a10cb9f87357",
+				"testnet": "94b06cfca1d8a476",
+				"migrationnet": "94b06cfca1d8a476"
+			}
+		},
 		"NonFungibleToken": {
 			"source": "./contracts/_libs/NonFungibleToken.cdc",
 			"aliases": {
