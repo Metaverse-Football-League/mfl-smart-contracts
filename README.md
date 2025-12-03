@@ -88,3 +88,12 @@ As we plan to use the Dapper Wallet, we need to whitelist some transactions that
 
 These transactions are available here: 
 https://github.com/Metaverse-Football-League/mfl-dapper-transactions
+
+
+## Useful command
+
+Send a transaction:
+`flow transactions send transactions/mfl/something.tx.cdc someArguments -n testnet --signer testnet-deploy-account`
+
+Update contracts:
+`flow project deploy -n testnet --update --show-diff`
