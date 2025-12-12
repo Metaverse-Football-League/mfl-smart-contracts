@@ -361,93 +361,8 @@ contract MFLClub: NonFungibleToken {
 		access(all)
 		fun resolveView(_ view: Type): AnyStruct? {
 			let clubData = MFLClub.getClubData(id: self.id)!
-			switch view {
-				case Type<MetadataViews.Display>():
-					if clubData.getStatus() == ClubStatus.NOT_FOUNDED {
-						return MetadataViews.Display(
-							name: "Club License #".concat(clubData.id.toString()),
-							description: "MFL Club License #".concat(clubData.id.toString()),
-							thumbnail: MetadataViews.HTTPFile(
-								url: MFLAdmin.imageHostUrl().concat("/clubs/").concat(clubData.id.toString()).concat("/licenses/foundation.png")
-							)
-						)
-					} else {
-						let clubMetadata = clubData.getMetadata()
-						let division: UInt32? = clubMetadata["division"] as! UInt32?
-						let clubDescription = clubMetadata["description"] as! String? ?? ""
-						return MetadataViews.Display(
-							name: clubMetadata["name"] as! String? ?? "",
-							description: "Before purchasing this MFL Club, make sure to check the club's in-game profile for the latest information: https://app.playmfl.com/clubs/"
-								.concat(clubData.id.toString())
-								.concat(clubDescription != "" ? "\n\n---\n\n".concat(clubDescription) : ""),
-							thumbnail: MetadataViews.HTTPFile(
-								url: MFLAdmin.imageHostUrl()
-									.concat("/u/clubs/")
-									.concat(clubData.id.toString())
-									.concat("/logo.webp")
-									.concat(division != nil ? "?v=".concat(division!.toString()) : "")
-							)
-						)
-					}
-				case Type<MetadataViews.Royalties>():
-					let royalties: [MetadataViews.Royalty] = []
-					let royaltyReceiverCap = getAccount(MFLAdmin.royaltyAddress()).capabilities.get<&{FungibleToken.Receiver}>(/public/GenericFTReceiver)
-					royalties.append(MetadataViews.Royalty(receiver: royaltyReceiverCap!, cut: 0.05, description: "Creator Royalty"))
-					return MetadataViews.Royalties(royalties)
-				case Type<MetadataViews.NFTCollectionDisplay>():
-					 return MFLClub.resolveContractView(resourceType: Type<@MFLClub.NFT>(), viewType: Type<MetadataViews.NFTCollectionDisplay>())
-				case Type<MetadataViews.NFTCollectionData>():
-					 return MFLClub.resolveContractView(resourceType: Type<@MFLClub.NFT>(), viewType: Type<MetadataViews.NFTCollectionData>())
-				case Type<MetadataViews.ExternalURL>():
-					return MetadataViews.ExternalURL("https://playmfl.com")
-				case Type<MetadataViews.Traits>():
-					let traits: [MetadataViews.Trait] = []
+			return MFLClub.resolveViewFromData(view, clubData: clubData)
 
-					// TODO must be fixed correctly in the data rather than here.
-					// foundationLicenseCity and foundationLicenseCountry should always be of type String? in the metadata
-					let clubMetadata = clubData.getMetadata()
-					var city: String? = nil
-					var country: String? = nil
-					if clubData.getStatus() == ClubStatus.NOT_FOUNDED {
-						city = clubMetadata["foundationLicenseCity"] as! String?
-						country = clubMetadata["foundationLicenseCountry"] as! String?
-					} else {
-						city = clubMetadata["foundationLicenseCity"] as! String?? ?? nil
-						country = clubMetadata["foundationLicenseCountry"] as! String?? ?? nil
-					}
-					let division: UInt32? = clubMetadata["division"] as! UInt32?
-
-					traits.append(MetadataViews.Trait(name: "city", value: city, displayType: "String", rarity: nil))
-					traits.append(MetadataViews.Trait(name: "country", value: country, displayType: "String", rarity: nil))
-
-					if division != nil {
-						traits.append(MetadataViews.Trait(name: "division", value: division, displayType: "Number", rarity: nil))
-					} else {
-						let squadsIDs = clubData.getSquadIDs()
-						if squadsIDs.length > 0 {
-							let firstSquadID = squadsIDs[0]
-							if let squadData = MFLClub.getSquadData(id: firstSquadID) {
-								if let globalLeagueMembership = squadData.getCompetitionsMemberships()[1] {
-									if let globalLeagueMembershipDataOptional = globalLeagueMembership as? {String: AnyStruct}? {
-										if let globalLeagueMembershipData = globalLeagueMembershipDataOptional {
-											traits.append(MetadataViews.Trait(
-												name: "division",
-												value: globalLeagueMembershipData["division"] as! UInt32?,
-												displayType: "Number",
-												rarity: nil
-											))
-										}
-									}
-								}
-							}
-						}
-					}
-
-					return MetadataViews.Traits(traits)
-				case Type<MetadataViews.Serial>():
-					return MetadataViews.Serial(clubData.id)
-			}
-			return nil
 		}
 
 		// Getter for metadata
@@ -460,6 +375,97 @@ contract MFLClub: NonFungibleToken {
 		fun createEmptyCollection(): @{NonFungibleToken.Collection} {
 			return <-create Collection()
 		}
+	}
+
+	access(all)
+	fun resolveViewFromData(_ view: Type, clubData: ClubData): AnyStruct? {
+		switch view {
+			case Type<MetadataViews.Display>():
+				if clubData.getStatus() == ClubStatus.NOT_FOUNDED {
+					return MetadataViews.Display(
+						name: "Club License #".concat(clubData.id.toString()),
+						description: "MFL Club License #".concat(clubData.id.toString()),
+						thumbnail: MetadataViews.HTTPFile(
+							url: MFLAdmin.imageHostUrl().concat("/clubs/").concat(clubData.id.toString()).concat("/licenses/foundation.png")
+						)
+					)
+				} else {
+					let clubMetadata = clubData.getMetadata()
+					let division: UInt32? = clubMetadata["division"] as! UInt32?
+					let clubDescription = clubMetadata["description"] as! String? ?? ""
+					return MetadataViews.Display(
+						name: clubMetadata["name"] as! String? ?? "",
+						description: "Before purchasing this MFL Club, make sure to check the club's in-game profile for the latest information: https://app.playmfl.com/clubs/"
+							.concat(clubData.id.toString())
+							.concat(clubDescription != "" ? "\n\n---\n\n".concat(clubDescription) : ""),
+						thumbnail: MetadataViews.HTTPFile(
+							url: MFLAdmin.imageHostUrl()
+								.concat("/u/clubs/")
+								.concat(clubData.id.toString())
+								.concat("/logo.webp")
+								.concat(division != nil ? "?v=".concat(division!.toString()) : "")
+						)
+					)
+				}
+			case Type<MetadataViews.Royalties>():
+				let royalties: [MetadataViews.Royalty] = []
+				let royaltyReceiverCap = getAccount(MFLAdmin.royaltyAddress()).capabilities.get<&{FungibleToken.Receiver}>(/public/GenericFTReceiver)
+				royalties.append(MetadataViews.Royalty(receiver: royaltyReceiverCap!, cut: 0.05, description: "Creator Royalty"))
+				return MetadataViews.Royalties(royalties)
+			case Type<MetadataViews.NFTCollectionDisplay>():
+				 return MFLClub.resolveContractView(resourceType: Type<@MFLClub.NFT>(), viewType: Type<MetadataViews.NFTCollectionDisplay>())
+			case Type<MetadataViews.NFTCollectionData>():
+				 return MFLClub.resolveContractView(resourceType: Type<@MFLClub.NFT>(), viewType: Type<MetadataViews.NFTCollectionData>())
+			case Type<MetadataViews.ExternalURL>():
+				return MetadataViews.ExternalURL("https://playmfl.com")
+			case Type<MetadataViews.Traits>():
+				let traits: [MetadataViews.Trait] = []
+
+				// TODO must be fixed correctly in the data rather than here.
+				// foundationLicenseCity and foundationLicenseCountry should always be of type String? in the metadata
+				let clubMetadata = clubData.getMetadata()
+				var city: String? = nil
+				var country: String? = nil
+				if clubData.getStatus() == ClubStatus.NOT_FOUNDED {
+					city = clubMetadata["foundationLicenseCity"] as! String?
+					country = clubMetadata["foundationLicenseCountry"] as! String?
+				} else {
+					city = clubMetadata["foundationLicenseCity"] as! String?? ?? nil
+					country = clubMetadata["foundationLicenseCountry"] as! String?? ?? nil
+				}
+				let division: UInt32? = clubMetadata["division"] as! UInt32?
+
+				traits.append(MetadataViews.Trait(name: "city", value: city, displayType: "String", rarity: nil))
+				traits.append(MetadataViews.Trait(name: "country", value: country, displayType: "String", rarity: nil))
+
+				if division != nil {
+					traits.append(MetadataViews.Trait(name: "division", value: division, displayType: "Number", rarity: nil))
+				} else {
+					let squadsIDs = clubData.getSquadIDs()
+					if squadsIDs.length > 0 {
+						let firstSquadID = squadsIDs[0]
+						if let squadData = MFLClub.getSquadData(id: firstSquadID) {
+							if let globalLeagueMembership = squadData.getCompetitionsMemberships()[1] {
+								if let globalLeagueMembershipDataOptional = globalLeagueMembership as? {String: AnyStruct}? {
+									if let globalLeagueMembershipData = globalLeagueMembershipDataOptional {
+										traits.append(MetadataViews.Trait(
+											name: "division",
+											value: globalLeagueMembershipData["division"] as! UInt32?,
+											displayType: "Number",
+											rarity: nil
+										))
+									}
+								}
+							}
+						}
+					}
+				}
+
+				return MetadataViews.Traits(traits)
+			case Type<MetadataViews.Serial>():
+				return MetadataViews.Serial(clubData.id)
+		}
+		return nil
 	}
 
 	// A collection of Club NFTs owned by an account
