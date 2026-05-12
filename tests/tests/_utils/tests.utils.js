@@ -5,8 +5,8 @@ export const testsUtils = {
     async initEmulator() {
         const basePath = path.resolve(__dirname, '../../../');
         await init(basePath);
-        // await emulator.start({logging: true, grpcPort: 3569, restPort: 8888, adminPort: 8080, debuggerPort: 2345});
-        await emulator.start({logging: true});
+        // await emulator.start({logging: true, grpcPort: 3569, restPort: 8888, adminPort: 8080, debuggerPort: 2345, execName: "flow"});
+        await emulator.start({logging: true, execName: "flow"});
     },
 
     async deployContract(name, to, path, addressMap) {
