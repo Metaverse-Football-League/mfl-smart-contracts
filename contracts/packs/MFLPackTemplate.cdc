@@ -176,6 +176,11 @@ contract MFLPackTemplate {
 			}
 			self.currentSupply = self.currentSupply + nbToMint
 		}
+
+        access(contract)
+        fun getSlots(): [Slot] {
+        	return self.slots
+        }
 	}
 
 	// Get all packTemplates IDs
@@ -188,9 +193,6 @@ contract MFLPackTemplate {
 	access(all)
 	fun getPackTemplate(id: UInt64): PackTemplateData? {
 		if let packTemplate = self.getPackTemplateRef(id: id) {
-			let dereferenceSlot = fun (_ slot: Slot): Slot {
-				return slot
-			}
 			return PackTemplateData(
 				id: packTemplate.id,
 				name: packTemplate.name,
@@ -200,7 +202,7 @@ contract MFLPackTemplate {
 				isOpenable: packTemplate.isOpenable,
 				imageUrl: packTemplate.imageUrl,
 				type: packTemplate.type,
-				slots: packTemplate.slots.map(dereferenceSlot)
+				slots: packTemplate.getSlots()
 			)
 		}
 		return nil
