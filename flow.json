@@ -22,7 +22,7 @@
 				"location": "../keys/testnet-account.pkey"
 			}
 		}
-	},
+	},q
 	"contracts": {
 		"DapperUtilityCoin": {
 			"source": "./contracts/_libs/DapperUtilityCoin.cdc",
