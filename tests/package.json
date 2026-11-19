@@ -8,7 +8,7 @@
   "author": "Metaverse Football League",
   "license": "ISC",
   "dependencies": {
-    "@babel/core": "^7.24.5",
+    "@babel/core": "^7.29.6",
     "@babel/preset-env": "^7.24.5",
     "@onflow/flow-js-testing": "^0.6.0-stable-cadence.4",
     "@onflow/fcl": "^1.10.1",
